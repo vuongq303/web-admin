@@ -6,7 +6,7 @@ import "../pages/css/login.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function LoginPage() {
+export default function DangNhap() {
   const navigation = useNavigate();
   const username = useRef();
   const password = useRef();

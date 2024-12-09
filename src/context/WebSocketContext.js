@@ -4,7 +4,7 @@ import ip from "../config.json";
 export const webSocketContext = createContext(null);
 
 export default function WebSocketContext({ child }) {
-  const websocket = new WebSocket(`ws://${ip[0].ip}`);
+  const websocket = new WebSocket(`ws://${ip.ip}`);
 
   useEffect(() => {
     websocket.onopen = function () {
