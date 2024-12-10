@@ -1,21 +1,23 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Menu, Sidebar, MenuItem } from "react-pro-sidebar";
 import { faUserTie } from "@fortawesome/free-solid-svg-icons/faUserTie";
-import { faUser } from "@fortawesome/free-regular-svg-icons";
 import { myColor } from "../styles/color";
 import {
   faChevronLeft,
   faChevronRight,
-  faComputer,
   faSignOut,
-  faDog,
-  faMoneyBill,
-  faHand,
-  faProjectDiagram,
-  faStore,
+  faList,
+  faDirections,
+  faBuilding,
+  faClinicMedical,
 } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
+import {
+  faIntercom,
+  faRProject,
+  faTypo3,
+} from "@fortawesome/free-brands-svg-icons";
 
 export default function NavigationPage({ child }) {
   const location = useLocation();
@@ -31,7 +33,7 @@ function SizeBar() {
   const navigator = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  
+
   return (
     <Sidebar collapsed={collapsed}>
       <div
@@ -117,58 +119,58 @@ function SizeBar() {
         )}
       </div>
       <Menu>
-        {isAdmin === "true" && (
-          <MenuItem
-            style={{ textAlign: "start" }}
-            icon={<FontAwesomeIcon icon={faComputer} />}
-            onClick={() => navigator("/admin")}
-          >
-            Quản lý nhân viên
-          </MenuItem>
-        )}
         <MenuItem
           style={{ textAlign: "start" }}
-          icon={<FontAwesomeIcon icon={faUser} />}
-          onClick={() => navigator("/user")}
+          icon={<FontAwesomeIcon icon={faList} />}
+          onClick={() => navigator("/can-ho")}
         >
-          Quản lý tài khoản người dùng
+          Danh sách căn hộ
         </MenuItem>
-        {isAdmin === "true" && (
-          <MenuItem
-            style={{ textAlign: "start" }}
-            icon={<FontAwesomeIcon icon={faStore} />}
-            onClick={() => navigator("/revenue-tatistics")}
-          >
-            Thống kê doanh thu
-          </MenuItem>
-        )}
+
         <MenuItem
           style={{ textAlign: "start" }}
-          icon={<FontAwesomeIcon icon={faProjectDiagram} />}
-          onClick={() => navigator("/category")}
+          icon={<FontAwesomeIcon icon={faRProject} />}
+          onClick={() => navigator("/du-an")}
         >
-          Quản lý loại sản phẩm
+          Dự án
         </MenuItem>
+
         <MenuItem
           style={{ textAlign: "start" }}
-          icon={<FontAwesomeIcon icon={faDog} />}
-          onClick={() => navigator("/product")}
+          icon={<FontAwesomeIcon icon={faDirections} />}
+          onClick={() => navigator("/huong-can-ho")}
         >
-          Quản lý sản phẩm
+          Hướng căn hộ
+        </MenuItem>
+
+        <MenuItem
+          style={{ textAlign: "start" }}
+          icon={<FontAwesomeIcon icon={faTypo3} />}
+          onClick={() => navigator("/loai-can-ho")}
+        >
+          Loại căn hộ
         </MenuItem>
         <MenuItem
           style={{ textAlign: "start" }}
-          icon={<FontAwesomeIcon icon={faHand} />}
-          onClick={() => navigator("/confirm-product")}
+          icon={<FontAwesomeIcon icon={faIntercom} />}
+          onClick={() => navigator("/noi-that")}
         >
-          Dịch vụ đã đặt
+          Nội thất
+        </MenuItem>
+
+        <MenuItem
+          style={{ textAlign: "start" }}
+          icon={<FontAwesomeIcon icon={faBuilding} />}
+          onClick={() => navigator("/toa-nha")}
+        >
+          Tòa nhà
         </MenuItem>
         <MenuItem
           style={{ textAlign: "start" }}
-          icon={<FontAwesomeIcon icon={faMoneyBill} />}
-          onClick={() => navigator("/payment")}
+          icon={<FontAwesomeIcon icon={faClinicMedical} />}
+          onClick={() => navigator("/truc-can-ho")}
         >
-          Đơn hàng đã đặt
+          Trục căn hộ
         </MenuItem>
       </Menu>
       <div

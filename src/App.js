@@ -1,14 +1,15 @@
 import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import AdminManagement from "./pages/admin_page";
-import PetCare from "./pages/pet_care";
-import Payment from "./pages/payment";
-import RevenueStatistics from "./pages/revenue_statistics";
-import ProductCategories from "./pages/productCategories_management";
-import ChatItemPage from "./pages/chat_item_page";
+
 import NavigationPage from "./pages/navigation_page";
 import CanHo from "./pages/can_ho";
 import DangNhap from "./pages/dang_nhap";
+import DuAn from "./pages/du_an";
+import LoaiCanHo from "./pages/loai_can_ho";
+import HuongCanHo from "./pages/huong_can_ho";
+import NoiThat from "./pages/noi_that";
+import ToaNha from "./pages/toa_nha";
+import TrucCanHo from "./pages/truc_can_ho";
 
 function App() {
   return (
@@ -19,15 +20,12 @@ function App() {
             <Routes>
               <Route path="/dang-nhap" element={<DangNhap />} />
               <Route path="/can-ho" element={<CanHo />} />
-              <Route path="/admin" element={<AdminManagement />} />
-              <Route path="/confirm-product" element={<PetCare />} />
-              <Route path="/payment" element={<Payment />} />
-              <Route
-                path="/revenue-tatistics"
-                element={<RevenueStatistics />}
-              />
-              <Route path="/category" element={<ProductCategories />} />
-              <Route path="/chat-item/:email" element={<ChatItemPage />} />
+              <Route path="/du-an" element={<DuAn />} />
+              <Route path="/huong-can-ho" element={<HuongCanHo />} />
+              <Route path="/loai-can-ho" element={<LoaiCanHo />} />
+              <Route path="/noi-that" element={<NoiThat />} />
+              <Route path="/toa-nha" element={<ToaNha />} />
+              <Route path="/truc-can-ho" element={<TrucCanHo />} />
             </Routes>
           }
         />

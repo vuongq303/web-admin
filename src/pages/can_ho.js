@@ -43,7 +43,7 @@ export default function CanHo() {
       </thead>
       <tbody>
         {data.map((item) => (
-          <tr key={item._id}>
+          <tr key={item.id}>
             <td>{item.id}</td>
             <td>{item.ten_can_ho}</td>
             <td>{item.chu_can_ho}</td>
@@ -53,10 +53,9 @@ export default function CanHo() {
             <td>{item.thong_tin_can_ho}</td>
 
             <td>
-              <button className="btn btn-primary">Update</button>
-            </td>
-            <td>
-              <button className="btn btn-secondary">Delete</button>
+              <button type="button" className="btn btn-primary">
+                Cập nhật
+              </button>
             </td>
           </tr>
         ))}
