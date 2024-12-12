@@ -27,7 +27,6 @@ export default function NavigationPage({ child }) {
 function SizeBar() {
   const navigator = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   return (
     <Sidebar collapsed={collapsed}>
@@ -56,7 +55,7 @@ function SizeBar() {
             marginTop: 15,
           }}
         >
-          Welcome {isAdmin === "true" ? "Admin" : "Staff"}
+          Welcome Admin
         </p>
       </div>
       <div

@@ -12,17 +12,8 @@ import ToaNha from "./pages/toa_nha";
 import TrucCanHo from "./pages/truc_can_ho";
 import KhachHang from "./pages/khach_hang";
 import NguoiDung from "./pages/nguoi_dung";
-import { useEffect } from "react";
-import axios from "axios";
-import json_config from "./config.json";
 
 function App() {
-  useEffect(() => {
-    (async function () {
-      const { data } = await axios.get(json_config.url_connect + "/phan-quyen");
-      localStorage.setItem("phan-quyen", JSON.stringify(data));
-    })();
-  }, []);
 
   return (
     <div className="App">

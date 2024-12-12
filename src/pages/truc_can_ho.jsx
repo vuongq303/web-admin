@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import json_config from "../config.json";
 import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
@@ -9,13 +9,14 @@ export default function DuAn() {
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [id, setId] = useState(-1);
-  const noiThatRef = useRef(null);
-  const noiThatUpdateRef = useRef(null);
+
+  const trucCanHoRef = useRef(null);
+  const trucCanHoUpdateRef = useRef(null);
 
   async function getData() {
     try {
       const { data } = await axios.get(
-        json_config.url_connect + "/thong-tin-du-an/noi-that"
+        json_config.url_connect + "/thong-tin-du-an/truc-can-ho"
       );
       setData(data);
     } catch (error) {
@@ -27,36 +28,36 @@ export default function DuAn() {
     getData();
   }, []);
 
-  async function themnoiThat() {
+  async function themTrucCanHo() {
     try {
-      if (noiThatRef.current.value == "") {
+      if (trucCanHoRef.current.value === "") {
         toast.error("Dữ liệu trống");
         return;
       }
 
       const { status, data } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/them-noi-that`,
-        { noi_that: noiThatRef.current.value }
+        `${json_config.url_connect}/thong-tin-du-an/them-truc-can-ho`,
+        { truc_can: trucCanHoRef.current.value }
       );
 
-      if (status == 200) {
+      if (status === 200) {
         if (data.affectedRows > 0) {
-          toast.success("Thêm nội thất mới thành công");
+          toast.success("Thêm trục căn hộ mới thành công");
           setShowModal(false);
           await getData();
           return;
         }
-        toast.error("Thêm nội thất mới thất bại");
+        toast.error("Thêm trục căn hộ mới thất bại");
         return;
       }
-      toast.error("Thêm nội thất mới thất bại");
+      toast.error("Thêm trục căn hộ mới thất bại");
     } catch (error) {
       console.log(error);
     }
   }
-  async function capNhatnoiThat() {
+  async function capNhatTrucCanHo() {
     try {
-      if (noiThatUpdateRef.current.value === "") {
+      if (trucCanHoUpdateRef.current.value === "") {
         toast.error("Dữ liệu trống");
         return;
       }
@@ -66,21 +67,21 @@ export default function DuAn() {
       }
 
       const { status, data } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/cap-nhat-noi-that`,
-        { loai_noi_that: noiThatUpdateRef.current.value, id: id }
+        `${json_config.url_connect}/thong-tin-du-an/cap-nhat-truc-can-ho`,
+        { truc_can: trucCanHoUpdateRef.current.value, id: id }
       );
 
-      if (status == 200) {
+      if (status === 200) {
         if (data.affectedRows > 0) {
-          toast.success("Cập nhật nội thất mới thành công");
+          toast.success("Cập nhật trục căn hộ mới thành công");
           setShowModalUpdate(false);
           await getData();
           return;
         }
-        toast.error("Cập nhật nội thất mới thất bại");
+        toast.error("Cập nhật trục căn hộ mới thất bại");
         return;
       }
-      toast.error("Cập nhật nội thất mới thất bại");
+      toast.error("Cập nhật trục căn hộ mới thất bại");
     } catch (error) {
       console.log(error);
     }
@@ -104,7 +105,7 @@ export default function DuAn() {
         {/*  */}
         <Modal show={showModal} backdrop="static" keyboard={false}>
           <Modal.Header>
-            <Modal.Title>Thêm nội thất mới</Modal.Title>
+            <Modal.Title>Thêm trục căn hộ mới</Modal.Title>
             <Button
               variant="close"
               aria-label="Close"
@@ -114,8 +115,8 @@ export default function DuAn() {
           <Modal.Body>
             <div className="input-group mb-3">
               <input
-                ref={noiThatRef}
-                placeholder="Thêm nội thất..."
+                ref={trucCanHoRef}
+                placeholder="Thêm trục căn hộ..."
                 type="text"
                 className="form-control"
                 aria-label="Sizing example input"
@@ -127,7 +128,7 @@ export default function DuAn() {
             <Button variant="secondary" onClick={() => setShowModal(false)}>
               Close
             </Button>
-            <Button variant="primary" onClick={themnoiThat}>
+            <Button variant="primary" onClick={themTrucCanHo}>
               Thêm mới
             </Button>
           </Modal.Footer>
@@ -135,7 +136,7 @@ export default function DuAn() {
         {/*  */}
         <Modal show={showModalUpdate} backdrop="static" keyboard={false}>
           <Modal.Header>
-            <Modal.Title>Cập nhật nội thất</Modal.Title>
+            <Modal.Title>Cập nhật trục căn hộ</Modal.Title>
             <Button
               variant="close"
               aria-label="Close"
@@ -145,9 +146,9 @@ export default function DuAn() {
           <Modal.Body>
             <div className="input-group mb-3">
               <input
-                ref={noiThatUpdateRef}
-                placeholder="Cập nhật nội thất..."
-                defaultValue={noiThatUpdateRef.current}
+                ref={trucCanHoUpdateRef}
+                placeholder="Cập nhật trục căn hộ..."
+                defaultValue={trucCanHoUpdateRef.current}
                 type="text"
                 className="form-control"
                 aria-label="Sizing example input"
@@ -162,35 +163,35 @@ export default function DuAn() {
             >
               Close
             </Button>
-            <Button variant="primary" onClick={capNhatnoiThat}>
+            <Button variant="primary" onClick={capNhatTrucCanHo}>
               Cập nhật
             </Button>
           </Modal.Footer>
         </Modal>
+        {/*  */}
       </div>
-      {/*  */}
       <table className="table">
         <thead>
           <tr>
-            <th scope="col">Nội thất</th>
+            <th scope="col">Trục căn hộ</th>
             <th scope="col">Hành động</th>
           </tr>
         </thead>
         <tbody>
           {data.map((item) => (
             <tr key={item.id}>
-              <td>{item.loai_noi_that}</td>
+              <td>{item.truc_can}</td>
               <td>
                 <button
                   type="button"
+                  className="btn btn-primary"
                   onClick={() => {
-                    noiThatUpdateRef.current = item.loai_noi_that;
+                    trucCanHoUpdateRef.current = item.truc_can;
                     setId(item.id);
                     setShowModalUpdate(true);
                   }}
-                  className="btn btn-primary"
                 >
-                  Cập nhật
+                 Chi tiết
                 </button>
               </td>
             </tr>

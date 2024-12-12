@@ -4,7 +4,6 @@ var connect = require("../bin/connect");
 var multer = require("multer");
 const fs = require("fs");
 const { join } = require("path");
-const path = require("path");
 const ip = require("../config/ipconfig.json");
 
 const storage = multer.diskStorage({

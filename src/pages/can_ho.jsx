@@ -54,7 +54,7 @@ export default function CanHo() {
 
             <td>
               <button type="button" className="btn btn-primary">
-                Cập nhật
+                Chi tiết
               </button>
             </td>
           </tr>

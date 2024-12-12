@@ -5,9 +5,8 @@ import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import {
   dateToText,
-  getPhanQuyenLocalStorage,
   gioiTinhNguoiDung,
-  phan_quyen,
+  phanQuyenNguoiDung,
   trangThaiLamViec,
 } from "../services/utils";
 
@@ -297,9 +296,9 @@ export default function NguoiDung() {
                   aria-label="Default select example"
                   ref={viTriRef}
                 >
-                  {getPhanQuyenLocalStorage().map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.phan_quyen}
+                  {phanQuyenNguoiDung.map((item, index) => (
+                    <option key={index} value={item}>
+                      {item}
                     </option>
                   ))}
                 </select>
@@ -476,9 +475,9 @@ export default function NguoiDung() {
                   ref={viTriRef}
                   defaultValue={dataUpdate.phan_quyen}
                 >
-                  {getPhanQuyenLocalStorage().map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.phan_quyen}
+                  {phanQuyenNguoiDung.map((item, index) => (
+                    <option key={index} value={item}>
+                      {item}
                     </option>
                   ))}
                 </select>
@@ -561,7 +560,7 @@ export default function NguoiDung() {
               <td>{item.email}</td>
               <td>{dateToText(item.ngay_sinh)}</td>
               <td>{item.trang_thai}</td>
-              <td>{phan_quyen(item.phan_quyen)}</td>
+              <td>{item.phan_quyen}</td>
               <td>
                 <button
                   type="button"
@@ -572,7 +571,7 @@ export default function NguoiDung() {
                     setShowModalUpdate(true);
                   }}
                 >
-                  Cập nhật
+                  Chi tiết
                 </button>
               </td>
             </tr>

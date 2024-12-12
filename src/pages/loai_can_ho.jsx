@@ -1,21 +1,21 @@
 import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import json_config from "../config.json";
-import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
+import { Modal, Button } from "react-bootstrap";
 
-export default function HuongCanHo() {
+export default function LoaiCanHo() {
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [id, setId] = useState(-1);
-  const huongCanHoRef = useRef(null);
-  const huongCanHoUpdateRef = useRef(null);
+  const loaiCanHoRef = useRef(null);
+  const loaiCanHoUpdateRef = useRef(null);
 
   async function getData() {
     try {
       const { data } = await axios.get(
-        json_config.url_connect + "/thong-tin-du-an/huong-can-ho"
+        json_config.url_connect + "/thong-tin-du-an/loai-can-ho"
       );
       setData(data);
     } catch (error) {
@@ -27,16 +27,16 @@ export default function HuongCanHo() {
     getData();
   }, []);
 
-  async function themhuongCanHo() {
+  async function themloaiCanHo() {
     try {
-      if (huongCanHoRef.current.value == "") {
+      if (loaiCanHoRef.current.value == "") {
         toast.error("Dữ liệu trống");
         return;
       }
 
       const { status, data } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/them-huong-can-ho`,
-        { huong_can_ho: huongCanHoRef.current.value }
+        `${json_config.url_connect}/thong-tin-du-an/them-loai-can-ho`,
+        { loai_can_ho: loaiCanHoRef.current.value }
       );
 
       if (status == 200) {
@@ -55,9 +55,9 @@ export default function HuongCanHo() {
     }
   }
 
-  async function capNhathuongCanHo() {
+  async function capNhatloaiCanHo() {
     try {
-      if (huongCanHoUpdateRef.current.value === "") {
+      if (loaiCanHoUpdateRef.current.value === "") {
         toast.error("Dữ liệu trống");
         return;
       }
@@ -67,8 +67,8 @@ export default function HuongCanHo() {
       }
 
       const { status, data } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/cap-nhat-huong-can-ho`,
-        { huong_can_ho: huongCanHoUpdateRef.current.value, id: id }
+        `${json_config.url_connect}/thong-tin-du-an/cap-nhat-loai-can-ho`,
+        { loai_can_ho: loaiCanHoUpdateRef.current.value, id: id }
       );
 
       if (status == 200) {
@@ -105,7 +105,7 @@ export default function HuongCanHo() {
         {/*  */}
         <Modal show={showModal} backdrop="static" keyboard={false}>
           <Modal.Header>
-            <Modal.Title>Thêm hướng căn hộ mới</Modal.Title>
+            <Modal.Title>Thêm loại căn hộ mới</Modal.Title>
             <Button
               variant="close"
               aria-label="Close"
@@ -115,8 +115,8 @@ export default function HuongCanHo() {
           <Modal.Body>
             <div className="input-group mb-3">
               <input
-                ref={huongCanHoRef}
-                placeholder="Thêm hướng căn hộ..."
+                ref={loaiCanHoRef}
+                placeholder="Thêm loại căn hộ..."
                 type="text"
                 className="form-control"
                 aria-label="Sizing example input"
@@ -128,7 +128,7 @@ export default function HuongCanHo() {
             <Button variant="secondary" onClick={() => setShowModal(false)}>
               Close
             </Button>
-            <Button variant="primary" onClick={themhuongCanHo}>
+            <Button variant="primary" onClick={themloaiCanHo}>
               Thêm mới
             </Button>
           </Modal.Footer>
@@ -136,7 +136,7 @@ export default function HuongCanHo() {
         {/*  */}
         <Modal show={showModalUpdate} backdrop="static" keyboard={false}>
           <Modal.Header>
-            <Modal.Title>Cập nhật hướng căn hộ</Modal.Title>
+            <Modal.Title>Cập nhật loại căn hộ</Modal.Title>
             <Button
               variant="close"
               aria-label="Close"
@@ -146,9 +146,9 @@ export default function HuongCanHo() {
           <Modal.Body>
             <div className="input-group mb-3">
               <input
-                ref={huongCanHoUpdateRef}
-                placeholder="Cập nhật hướng căn hộ..."
-                defaultValue={huongCanHoUpdateRef.current}
+                ref={loaiCanHoUpdateRef}
+                placeholder="Cập nhật loại căn hộ..."
+                defaultValue={loaiCanHoUpdateRef.current}
                 type="text"
                 className="form-control"
                 aria-label="Sizing example input"
@@ -163,34 +163,36 @@ export default function HuongCanHo() {
             >
               Close
             </Button>
-            <Button variant="primary" onClick={capNhathuongCanHo}>
+            <Button variant="primary" onClick={capNhatloaiCanHo}>
               Cập nhật
             </Button>
           </Modal.Footer>
         </Modal>
       </div>
+      {/*  */}
       <table className="table">
         <thead>
           <tr>
-            <th scope="col">Hướng căn hộ</th>
+            <th scope="col">Loại căn hộ</th>
             <th scope="col">Hành động</th>
           </tr>
         </thead>
         <tbody>
           {data.map((item) => (
             <tr key={item.id}>
-              <td>{item.huong_can_ho}</td>
+              <td>{item.loai_can_ho}</td>
+
               <td>
                 <button
                   type="button"
                   className="btn btn-primary"
                   onClick={() => {
-                    huongCanHoUpdateRef.current = item.huong_can_ho;
+                    loaiCanHoUpdateRef.current = item.loai_can_ho;
                     setId(item.id);
                     setShowModalUpdate(true);
                   }}
                 >
-                  Cập nhật
+                 Chi tiết
                 </button>
               </td>
             </tr>

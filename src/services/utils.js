@@ -4,9 +4,7 @@ export const gioiTinhNguoiDung = ["Nam", "Nữ"];
 
 export const loaiGiaoDichKhachHang = ["Bán", "Thuê"];
 
-export function phan_quyen(id) {
-  return getPhanQuyenLocalStorage()[id - 1].phan_quyen ?? "";
-}
+export const phanQuyenNguoiDung = ["Admin", "Nhân viên", "Quản lý", "CSKH"];
 
 export function dateToText(isoString) {
   const date = new Date(isoString);
@@ -14,7 +12,3 @@ export function dateToText(isoString) {
   return formattedDate;
 }
 
-export function getPhanQuyenLocalStorage() {
-  const phanQuyen = JSON.parse(localStorage.getItem("phan-quyen"));
-  return phanQuyen;
-}
