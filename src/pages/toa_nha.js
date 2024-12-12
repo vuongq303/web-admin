@@ -189,7 +189,6 @@ export default function DuAn() {
                 className="form-select"
                 value={duAnUpdate}
                 onChange={changeDuAnUpdate}
-
                 aria-label="Default select example"
               >
                 {dataDuAn.map((du_an) => (

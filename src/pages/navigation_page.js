@@ -1,23 +1,18 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
-import { Menu, Sidebar, MenuItem } from "react-pro-sidebar";
+import { Menu, Sidebar, MenuItem, SubMenu } from "react-pro-sidebar";
 import { faUserTie } from "@fortawesome/free-solid-svg-icons/faUserTie";
 import { myColor } from "../styles/color";
 import {
   faChevronLeft,
   faChevronRight,
   faSignOut,
-  faList,
-  faDirections,
   faBuilding,
-  faClinicMedical,
+  faUser,
+  faProjectDiagram,
 } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  faIntercom,
-  faRProject,
-  faTypo3,
-} from "@fortawesome/free-brands-svg-icons";
+import "./css/navigator.css";
 
 export default function NavigationPage({ child }) {
   const location = useLocation();
@@ -119,59 +114,71 @@ function SizeBar() {
         )}
       </div>
       <Menu>
-        <MenuItem
-          style={{ textAlign: "start" }}
-          icon={<FontAwesomeIcon icon={faList} />}
-          onClick={() => navigator("/can-ho")}
+        <SubMenu
+          icon={<FontAwesomeIcon icon={faUser} />}
+          label="Người dùng"
+          className="item_menu"
         >
-          Danh sách căn hộ
-        </MenuItem>
+          <MenuItem
+            className="item_menu"
+            icon={<div></div>}
+            onClick={() => navigator("/nguoi-dung")}
+          >
+            Nhân viên
+          </MenuItem>
+          <MenuItem
+            icon={<div></div>}
+            className="item_menu"
+            onClick={() => navigator("/khach-hang")}
+          >
+            Khách hàng
+          </MenuItem>
+        </SubMenu>
 
-        <MenuItem
-          style={{ textAlign: "start" }}
-          icon={<FontAwesomeIcon icon={faRProject} />}
-          onClick={() => navigator("/du-an")}
-        >
-          Dự án
-        </MenuItem>
-
-        <MenuItem
-          style={{ textAlign: "start" }}
-          icon={<FontAwesomeIcon icon={faDirections} />}
-          onClick={() => navigator("/huong-can-ho")}
-        >
-          Hướng căn hộ
-        </MenuItem>
-
-        <MenuItem
-          style={{ textAlign: "start" }}
-          icon={<FontAwesomeIcon icon={faTypo3} />}
-          onClick={() => navigator("/loai-can-ho")}
-        >
-          Loại căn hộ
-        </MenuItem>
-        <MenuItem
-          style={{ textAlign: "start" }}
-          icon={<FontAwesomeIcon icon={faIntercom} />}
-          onClick={() => navigator("/noi-that")}
-        >
-          Nội thất
-        </MenuItem>
-
-        <MenuItem
-          style={{ textAlign: "start" }}
+        <SubMenu
           icon={<FontAwesomeIcon icon={faBuilding} />}
-          onClick={() => navigator("/toa-nha")}
+          label="Danh sách căn hộ"
+          className="item_menu"
         >
-          Tòa nhà
-        </MenuItem>
-        <MenuItem
-          style={{ textAlign: "start" }}
-          icon={<FontAwesomeIcon icon={faClinicMedical} />}
-          onClick={() => navigator("/truc-can-ho")}
+          <MenuItem   icon={<div></div>} className="item_menu" onClick={() => navigator("/can-ho")}>
+            Danh sách căn hộ
+          </MenuItem>
+        </SubMenu>
+        <SubMenu
+          label="Dự án"
+          className="item_menu"
+          icon={<FontAwesomeIcon icon={faProjectDiagram} />}
         >
-          Trục căn hộ
-        </MenuItem>
+          <MenuItem   icon={<div></div>} className="item_menu" onClick={() => navigator("/du-an")}>
+            Dự án
+          </MenuItem>
+          <MenuItem   icon={<div></div>} onClick={() => navigator("/huong-can-ho")}>
+            Hướng căn hộ
+          </MenuItem>
+
+          <MenuItem
+            className="item_menu"  icon={<div></div>}
+            onClick={() => navigator("/loai-can-ho")}
+          >
+            Loại căn hộ
+          </MenuItem>
+          <MenuItem  icon={<div></div>}
+            className="item_menu"
+            onClick={() => navigator("/noi-that")}
+          >
+            Nội thất
+          </MenuItem>
+
+          <MenuItem   icon={<div></div>} className="item_menu" onClick={() => navigator("/toa-nha")}>
+            Tòa nhà
+          </MenuItem>
+          <MenuItem   icon={<div></div>}
+            className="item_menu"
+            onClick={() => navigator("/truc-can-ho")}
+          >
+            Trục căn hộ
+          </MenuItem>
+        </SubMenu>
       </Menu>
       <div
         style={{
@@ -196,7 +203,7 @@ function SizeBar() {
       </div>
       <Menu>
         <MenuItem
-          style={{ textAlign: "start" }}
+          className="item_menu"
           icon={<FontAwesomeIcon icon={faSignOut} />}
         >
           Đăng xuất
