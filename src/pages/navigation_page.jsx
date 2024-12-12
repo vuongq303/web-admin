@@ -19,7 +19,9 @@ export default function NavigationPage({ child }) {
 
   return (
     <div style={{ display: "flex" }}>
-      {location.pathname !== "/dang-nhap" && <SizeBar />}
+      {location.pathname !== "/dang-nhap" && location.pathname !== "/" && (
+        <SizeBar />
+      )}
       <div style={{ flex: 1 }}>{child}</div>
     </div>
   );
@@ -139,7 +141,11 @@ function SizeBar() {
           label="Danh sách căn hộ"
           className="item_menu"
         >
-          <MenuItem   icon={<div></div>} className="item_menu" onClick={() => navigator("/can-ho")}>
+          <MenuItem
+            icon={<div></div>}
+            className="item_menu"
+            onClick={() => navigator("/can-ho")}
+          >
             Danh sách căn hộ
           </MenuItem>
         </SubMenu>
@@ -148,30 +154,44 @@ function SizeBar() {
           className="item_menu"
           icon={<FontAwesomeIcon icon={faProjectDiagram} />}
         >
-          <MenuItem   icon={<div></div>} className="item_menu" onClick={() => navigator("/du-an")}>
+          <MenuItem
+            icon={<div></div>}
+            className="item_menu"
+            onClick={() => navigator("/du-an")}
+          >
             Dự án
           </MenuItem>
-          <MenuItem   icon={<div></div>} onClick={() => navigator("/huong-can-ho")}>
-            Hướng căn hộ
+          <MenuItem
+            icon={<div></div>}
+            onClick={() => navigator("/huong-can-ho")}
+          >
+            Hướng ban công
           </MenuItem>
 
           <MenuItem
-            className="item_menu"  icon={<div></div>}
+            className="item_menu"
+            icon={<div></div>}
             onClick={() => navigator("/loai-can-ho")}
           >
             Loại căn hộ
           </MenuItem>
-          <MenuItem  icon={<div></div>}
+          <MenuItem
+            icon={<div></div>}
             className="item_menu"
             onClick={() => navigator("/noi-that")}
           >
             Nội thất
           </MenuItem>
 
-          <MenuItem   icon={<div></div>} className="item_menu" onClick={() => navigator("/toa-nha")}>
+          <MenuItem
+            icon={<div></div>}
+            className="item_menu"
+            onClick={() => navigator("/toa-nha")}
+          >
             Tòa nhà
           </MenuItem>
-          <MenuItem   icon={<div></div>}
+          <MenuItem
+            icon={<div></div>}
             className="item_menu"
             onClick={() => navigator("/truc-can-ho")}
           >

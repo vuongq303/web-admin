@@ -38,18 +38,18 @@ router.get("/du-an", async function (req, res, next) {
 });
 
 router.get("/toa-nha", async function (req, res, next) {
-  const data = {};
+  connect.query("SELECT * from toa_nha", function (err, result, fields) {
+    if (err) throw err;
+    res.status(200).json(result);
+  });
+});
+
+router.get("/toa-nha-du-an", async function (req, res, next) {
   connect.query(
     "SELECT t.id, t.ten_toa_nha, d.ten_du_an FROM toa_nha t INNER JOIN du_an d ON t.du_an = d.id;",
-    function (err, toaNha, fields) {
+    function (err, result, fields) {
       if (err) throw err;
-      data.toa_nha = toaNha;
-
-      connect.query("SELECT * FROM du_an", function (err, duAn, fields) {
-        if (err) throw err;
-        data.du_an = duAn;
-        res.status(200).json(data);
-      });
+      res.status(200).json(result);
     }
   );
 });
@@ -173,7 +173,7 @@ router.post("/them-toa-nha", function (req, res, next) {
 
 router.post("/cap-nhat-toa-nha", function (req, res, next) {
   const { toa_nha, du_an, id } = req.body;
-  
+
   const sql = "UPDATE toa_nha SET ten_toa_nha = ? , du_an = ? WHERE id = ?";
   connect.query(sql, [toa_nha, du_an, id], function (err, result, fields) {
     if (err) throw err;

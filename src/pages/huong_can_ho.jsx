@@ -172,7 +172,7 @@ export default function HuongCanHo() {
       <table className="table">
         <thead>
           <tr>
-            <th scope="col">Hướng căn hộ</th>
+            <th scope="col">Hướng ban công</th>
             <th scope="col">Hành động</th>
           </tr>
         </thead>

@@ -3,10 +3,10 @@ import React, { useEffect, useState, useRef } from "react";
 import json_config from "../config.json";
 import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
+import { dataDuAn } from "../services/utils";
 
 export default function DuAn() {
-  const [dataDuAn, setDataDuAn] = useState([]);
-  const [dataToaNha, setDataToaNha] = useState([]);
+  const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
 
@@ -18,17 +18,16 @@ export default function DuAn() {
   const toaNhatUpdateRef = useRef(null);
 
   function findIdByTenDuAn(tenDuAn) {
-    const result = dataDuAn.find((du_an) => du_an.ten_du_an === tenDuAn);
+    const result = dataDuAn().find((du_an) => du_an.ten_du_an === tenDuAn);
     return result ? result.id : 0;
   }
 
   async function getData() {
     try {
       const { data } = await axios.get(
-        json_config.url_connect + "/thong-tin-du-an/toa-nha"
+        json_config.url_connect + "/thong-tin-du-an/toa-nha-du-an"
       );
-      setDataToaNha(data.toa_nha);
-      setDataDuAn(data.du_an);
+      setData(data);
     } catch (error) {
       console.log(error);
     }
@@ -147,7 +146,7 @@ export default function DuAn() {
                 value={duAn}
                 onChange={changeDuAn}
               >
-                {dataDuAn.map((du_an) => (
+                {dataDuAn().map((du_an) => (
                   <option key={du_an.id} value={du_an.id}>
                     {du_an.ten_du_an}
                   </option>
@@ -191,7 +190,7 @@ export default function DuAn() {
                 onChange={changeDuAnUpdate}
                 aria-label="Default select example"
               >
-                {dataDuAn.map((du_an) => (
+                {dataDuAn().map((du_an) => (
                   <option key={du_an.id} value={du_an.id}>
                     {du_an.ten_du_an}
                   </option>
@@ -222,7 +221,7 @@ export default function DuAn() {
           </tr>
         </thead>
         <tbody>
-          {dataToaNha.map((item) => (
+          {data.map((item) => (
             <tr key={item.id}>
               <td>{item.ten_toa_nha}</td>
               <td>{item.ten_du_an}</td>

@@ -12,15 +12,16 @@ import ToaNha from "./pages/toa_nha";
 import TrucCanHo from "./pages/truc_can_ho";
 import KhachHang from "./pages/khach_hang";
 import NguoiDung from "./pages/nguoi_dung";
+import TrangChu from "./pages/trang_chu";
 
 function App() {
-
   return (
     <div className="App">
       <BrowserRouter basename="/">
         <NavigationPage
           child={
             <Routes>
+              <Route path="/" element={<TrangChu />} />
               <Route path="/dang-nhap" element={<DangNhap />} />
               <Route path="/can-ho" element={<CanHo />} />
               <Route path="/du-an" element={<DuAn />} />
