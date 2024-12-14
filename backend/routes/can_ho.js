@@ -3,18 +3,30 @@ var router = express.Router();
 const connect = require("../bin/connect");
 const upload = require("../middleware/upload_can_ho");
 const { join } = require("path");
+const jwt = require("jsonwebtoken");
 const fs = require("fs");
+const env = require("../env/get_env");
 
 router.get("/", async function (req, res) {
-  connect.query(
-    `select can_ho.*, khach_hang.ten_khach_hang, khach_hang.so_dien_thoai, khach_hang.loai_giao_dich
+  const jwt_token = req.headers["authorization"];
+
+  if (!jwt_token) {
+    return res.status(401).send("Not allowed");
+  }
+
+  const data = jwt.verify(jwt_token, env.JWT_KEY);
+  var sql =
+    "select id, gia_ban, gia_thue, trang_thai, du_an, dien_tich, so_phong_ngu,so_phong_tam,huong_can_ho, loai_can_ho, noi_that, ghi_chu ,nguoi_cap_nhat ,hinh_anh,ten_toa_nha,truc_can_ho from can_ho";
+  if (data.phan_quyen === "Admin") {
+    sql = `select can_ho.*, khach_hang.ten_khach_hang, khach_hang.so_dien_thoai, khach_hang.loai_giao_dich
     from can_ho
-    join khach_hang on can_ho.khach_hang =  khach_hang.id`,
-    function (err, result, fields) {
-      if (err) throw err;
-      res.status(200).send(result);
-    }
-  );
+    join khach_hang on can_ho.khach_hang =  khach_hang.id`;
+  }
+
+  connect.query(sql, function (err, result, fields) {
+    if (err) throw err;
+    res.status(200).send(result);
+  });
 });
 
 router.post(
@@ -119,6 +131,7 @@ router.post("/them-can-ho", upload.array("hinh_anh"), async (req, res) => {
       ten_khach_hang,
       so_dien_thoai,
       ma_can_ho,
+      ten_toa_nha,
       loai_giao_dich,
       ngay_ki_hop_dong,
       ten_du_an,
@@ -132,6 +145,7 @@ router.post("/them-can-ho", upload.array("hinh_anh"), async (req, res) => {
       nguoi_cap_nhat,
       gia_ban,
       gia_thue,
+      truc_can_ho,
       trang_thai,
     } = req.body;
 
@@ -146,15 +160,18 @@ router.post("/them-can-ho", upload.array("hinh_anh"), async (req, res) => {
         .status(400)
         .json({ response: "Dữ liệu không hợp lệ", type: false });
     }
-    const sql = "SELECT * FROM can_ho WHERE ma_can_ho = ?";
+    const sql =
+      "SELECT * FROM can_ho WHERE ma_can_ho = ? and ten_toa_nha = ? and truc_can_ho = ?";
     const checkMaCanHoExist = await executeQuery(sql, [
-      ma_can_ho.toLowerCase(),
+      ma_can_ho,
+      ten_toa_nha,
+      truc_can_ho,
     ]);
 
     if (checkMaCanHoExist.length > 0) {
       return res
         .status(200)
-        .json({ response: "Mã căn hộ đã tồn tại", type: false });
+        .json({ response: "Căn hộ đã tồn tại", type: false });
     }
 
     const filePath = files.map((file) => file.filename).join(",");
@@ -174,8 +191,8 @@ router.post("/them-can-ho", upload.array("hinh_anh"), async (req, res) => {
 
     const sqlCanHo = `
         INSERT INTO can_ho 
-        (ma_can_ho, khach_hang, gia_ban, gia_thue, du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, hinh_anh, trang_thai) 
-        VALUES (?, ? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?, ?, ?)`;
+        (ma_can_ho, khach_hang, gia_ban, gia_thue, du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, hinh_anh, trang_thai,ten_toa_nha,truc_can_ho) 
+        VALUES (?, ? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?, ?, ?, ?, ?)`;
     await executeQuery(sqlCanHo, [
       ma_can_ho,
       idKhachHang,
@@ -192,6 +209,8 @@ router.post("/them-can-ho", upload.array("hinh_anh"), async (req, res) => {
       nguoi_cap_nhat,
       filePath,
       trang_thai,
+      ten_toa_nha,
+      truc_can_ho,
     ]);
 
     return res

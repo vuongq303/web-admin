@@ -30,6 +30,11 @@ export default function TrangChu() {
           json_config.url_connect + "/thong-tin-du-an/toa-nha"
         );
         localStorage.setItem("toa-nha", JSON.stringify(toa_nha));
+
+        const { data: truc_can } = await axios.get(
+          json_config.url_connect + "/thong-tin-du-an/truc-can-ho"
+        );
+        localStorage.setItem("truc-can-ho", JSON.stringify(truc_can));
       } catch (error) {
         console.log(error);
       }
@@ -41,7 +46,7 @@ export default function TrangChu() {
       <button
         className="btn btn-primary"
         onClick={() => {
-          window.location.href = "/dang-nhap";
+          window.location.replace("/dang-nhap");
         }}
       >
         Login

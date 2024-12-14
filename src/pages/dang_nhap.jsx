@@ -13,31 +13,42 @@ export default function DangNhap() {
   const btnLogin = useRef();
 
   async function loginForm() {
-    navigation("/can-ho", { replace: true });
-    // try {
-    //   const {
-    //     status,
-    //     data: { response, type },
-    //   } = await axios.post(url_config.url_connect + "/user/login", {
-    //     username: username.current.value,
-    //     password: password.current.value,
-    //   });
-    //   if (status == 200) {
-    //     if (type) {
-    //       toast.success(response);
-    //       return;
-    //     }
-    //     toast.error(response);
-    //   }
-    // } catch (error) {
-    //   toast.error("Lỗi hệ thống");
-    // }
+    const user = {
+      username: username.current.value,
+      password: password.current.value,
+    };
+
+    if (user.username === "" || user.password === "") {
+      toast.error("Kiểm tra lại thông tin");
+      return;
+    }
+
+    try {
+      const {
+        status,
+        data: { response, type, data },
+      } = await axios.post(
+        url_config.url_connect + "/nguoi-dung/dang-nhap",
+        user
+      );
+      if (status == 200) {
+        if (type) {
+          localStorage.setItem("role", data);
+          localStorage.setItem("tai_khoan", user.username);
+          navigation("/can-ho");
+          return;
+        }
+        toast.error(response);
+      }
+    } catch (error) {
+      toast.error("Lỗi hệ thống");
+    }
   }
 
   return (
     <div className="login-container">
       <ToastContainer
-        position="top-center"
+        position="bottom-right"
         autoClose={200}
         hideProgressBar={false}
       />

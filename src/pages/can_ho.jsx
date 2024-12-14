@@ -9,6 +9,8 @@ import {
   dataLoaiCanHo,
   dataNoiThat,
   dataToaNha,
+  dataTrucCanHo,
+  getRoleNguoiDung,
   loaiGiaoDichKhachHang,
   trangThaiDuAn,
 } from "../services/utils";
@@ -42,9 +44,15 @@ export default function CanHo() {
   const ghiChuRef = useRef(null);
   const hinhAnhRef = useRef(null);
   const trangThaiDuAnRef = useRef(null);
+  const trucCanHoRef = useRef(null);
 
   async function getData() {
-    const { data } = await axios.get(`${json_config.url_connect}/can-ho`);
+    const { data } = await axios.get(`${json_config.url_connect}/can-ho`, {
+      headers: {
+        Authorization: getRoleNguoiDung(),
+        "Content-Type": "application/json",
+      },
+    });
     setData(data);
   }
 
@@ -171,6 +179,7 @@ export default function CanHo() {
         ghiChu: ghiChuRef.current.value,
         hinhAnh: hinhAnhRef.current.files,
         trangThaiDuAn: trangThaiDuAnRef.current.value,
+        trucCanHo: trucCanHoRef.current.value,
       };
 
       const isInvalidInput = (value, allowNegative = false) =>
@@ -195,7 +204,6 @@ export default function CanHo() {
       const formData = new FormData();
       formData.append("ten_khach_hang", data.hoTenChuCanHo);
       formData.append("so_dien_thoai", data.soDienThoai);
-      formData.append("ma_can_ho", `${data.tenToaNha}-${data.maCanHo}`);
       formData.append("loai_giao_dich", data.loaiGiaoDich);
       formData.append("ngay_ki_hop_dong", new Date().toISOString());
       formData.append("ten_du_an", data.tenDuAn);
@@ -210,7 +218,9 @@ export default function CanHo() {
       formData.append("gia_ban", data.giaBan);
       formData.append("gia_thue", data.giaThue);
       formData.append("trang_thai", data.trangThaiDuAn);
-
+      formData.append("ma_can_ho", data.maCanHo);
+      formData.append("ten_toa_nha", data.tenToaNha);
+      formData.append("truc_can_ho", data.trucCanHo);
       Array.from(data.hinhAnh).forEach((file) => {
         formData.append("hinh_anh", file);
       });
@@ -301,7 +311,21 @@ export default function CanHo() {
                   aria-label="Sizing example input"
                   aria-describedby="inputGroup-sizing-default"
                 />
-                <label htmlFor="floatingInputGrid">Mã căn hộ</label>
+                <label htmlFor="floatingInputGrid">Số phòng</label>
+              </div>
+              <div className="form-floating">
+                <select
+                  className="form-select"
+                  ref={trucCanHoRef}
+                  aria-label="Default select example"
+                >
+                  {dataTrucCanHo().map((item) => (
+                    <option key={item.id} value={item.truc_can}>
+                      {item.truc_can}
+                    </option>
+                  ))}
+                </select>
+                <label htmlFor="floatingInputGrid">Trục căn hộ</label>
               </div>
               <div className="form-floating">
                 <input
@@ -565,7 +589,22 @@ export default function CanHo() {
                   aria-label="Sizing example input"
                   aria-describedby="inputGroup-sizing-default"
                 />
-                <label htmlFor="floatingInputGrid">Mã căn hộ</label>
+                <label htmlFor="floatingInputGrid">Số phòng</label>
+              </div>
+              <div className="form-floating">
+                <select
+                  className="form-select"
+                  ref={trucCanHoRef}
+                  defaultValue={dataUpdate.truc_can_ho}
+                  aria-label="Default select example"
+                >
+                  {dataTrucCanHo().map((item) => (
+                    <option key={item.id} value={item.truc_can}>
+                      {item.truc_can}
+                    </option>
+                  ))}
+                </select>
+                <label htmlFor="floatingInputGrid">Trục căn hộ</label>
               </div>
               <div className="form-floating">
                 <input
@@ -805,9 +844,12 @@ export default function CanHo() {
           {data.map((item) => (
             <tr key={item.id}>
               <td className="align-middle">{item.id}</td>
-              <td className="align-middle">{item.ma_can_ho}</td>
-              <td className="align-middle">{item.ten_khach_hang}</td>
-              <td className="align-middle">{item.so_dien_thoai}</td>
+              <td className="align-middle">
+                {item.ten_toa_nha}-{item.ma_can_ho ?? "*"}
+                {item.truc_can_ho}
+              </td>
+              <td className="align-middle">{item.ten_khach_hang ?? "*"}</td>
+              <td className="align-middle">{item.so_dien_thoai ?? "*"}</td>
               <td className="align-middle">{item.gia_ban}</td>
               <td className="align-middle">{item.gia_thue}</td>
               <td className="w-25 text-start align-middle">

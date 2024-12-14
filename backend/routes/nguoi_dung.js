@@ -5,6 +5,9 @@ var multer = require("multer");
 const fs = require("fs");
 const { join } = require("path");
 const ip = require("../config/ipconfig.json");
+const jwt = require("jsonwebtoken");
+const JWT_KEY =
+  process.env.JWT_KEY || "8jjfafw8*&njlnfaJHf9*72nnklfooeujvOOJNyb)()?6%12";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -133,7 +136,36 @@ router.post(
           .json({ response: "Cập nhật người dùng thành công", type: true });
       }
     );
-   }
+  }
 );
+
+router.post("/dang-nhap", function (req, res) {
+  const { username, password } = req.body;
+  console.log(JWT_KEY);
+
+  const sql =
+    "select tai_khoan,phan_quyen from nguoi_dung where tai_khoan = ? and mat_khau = ?";
+  connect.query(sql, [username, password], (err, result) => {
+    if (err) {
+      return res.status(500).json({
+        response: err.message,
+        type: false,
+        data: "",
+      });
+    }
+
+    if (result.length > 0) {
+      return res.status(200).json({
+        response: "Đăng nhập thành công",
+        type: true,
+        data: jwt.sign(JSON.stringify(result[0]), JWT_KEY),
+      });
+    }
+
+    res
+      .status(200)
+      .json({ response: "Đăng nhập không thành công", type: false, data: {} });
+  });
+});
 
 module.exports = router;

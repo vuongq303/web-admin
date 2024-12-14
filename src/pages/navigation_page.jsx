@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Menu, Sidebar, MenuItem, SubMenu } from "react-pro-sidebar";
 import { faUserTie } from "@fortawesome/free-solid-svg-icons/faUserTie";
 import { myColor } from "../styles/color";
@@ -28,7 +28,15 @@ export default function NavigationPage({ child }) {
 }
 function SizeBar() {
   const navigator = useNavigate();
+  const [taiKhoan, setTaiKhoan] = useState("");
   const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    const tai_khoan = localStorage.getItem("tai_khoan");
+    if (tai_khoan) {
+      setTaiKhoan(tai_khoan);
+    }
+  }, []);
 
   return (
     <Sidebar collapsed={collapsed}>
@@ -57,7 +65,7 @@ function SizeBar() {
             marginTop: 15,
           }}
         >
-          Welcome Admin
+          Welcome {taiKhoan}
         </p>
       </div>
       <div
@@ -223,6 +231,7 @@ function SizeBar() {
       <Menu>
         <MenuItem
           className="item_menu"
+          onClick={() => navigator("/dang-nhap", { replace: true })}
           icon={<FontAwesomeIcon icon={faSignOut} />}
         >
           Đăng xuất
