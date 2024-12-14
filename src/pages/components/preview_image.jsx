@@ -17,24 +17,24 @@ export default function PreviewImage({ props, onRemoveImage }) {
 
   return (
     <div className="image-container" style={{ zIndex: 2 }}>
-      {props.map((src) => (
+      {props.map((src, index) => (
         <div
-          key={src.index}
+          key={index}
           style={{
             position: "relative",
             display: "inline-block",
           }}
         >
           <img
-            src={src.data}
-            onClick={() => openImageViewer(src.index)}
+            src={src}
+            onClick={() => openImageViewer(index)}
             width={240}
             height={200}
             style={{ margin: "2px", cursor: "pointer" }}
             alt="image"
           />
           <button
-            onClick={async () => await onRemoveImage(src.index)}
+            onClick={async () => await onRemoveImage(index)}
             style={{
               position: "absolute",
               top: "5px",
@@ -53,7 +53,7 @@ export default function PreviewImage({ props, onRemoveImage }) {
 
       {isViewerOpen && (
         <ImageViewer
-          src={props.map((src) => src.data)}
+          src={props}
           currentIndex={currentImage}
           onClose={closeImageViewer}
           disableScroll={false}

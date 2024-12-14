@@ -6,6 +6,8 @@ export const loaiGiaoDichKhachHang = ["Bán", "Thuê", "Bán và Thuê"];
 
 export const phanQuyenNguoiDung = ["Admin", "Nhân viên", "Quản lý", "CSKH"];
 
+export const trangThaiDuAn = ["Còn bán", "Ngừng bán"];
+
 export const dataDuAn = () => {
   const data = localStorage.getItem("du-an");
   if (!data) window.location.href = "/";
@@ -35,7 +37,6 @@ export const dataToaNha = () => {
   if (!data) window.location.href = "/";
   return JSON.parse(data);
 };
-
 
 export function dateToText(isoString) {
   const date = new Date(isoString);
