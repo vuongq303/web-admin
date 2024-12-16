@@ -16,7 +16,7 @@ router.get("/", async function (req, res) {
 
   const data = jwt.verify(jwt_token, env.JWT_KEY);
   var sql =
-    "select id, gia_ban, gia_thue, trang_thai, du_an, dien_tich, so_phong_ngu,so_phong_tam,huong_can_ho, loai_can_ho, noi_that, ghi_chu ,nguoi_cap_nhat ,hinh_anh,ten_toa_nha,truc_can_ho from can_ho";
+    "select id, khach_hang, gia_ban, gia_thue, trang_thai, du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho from can_ho";
   if (data.phan_quyen === "Admin") {
     sql = `select can_ho.*, khach_hang.ten_khach_hang, khach_hang.so_dien_thoai, khach_hang.loai_giao_dich
     from can_ho
@@ -25,7 +25,7 @@ router.get("/", async function (req, res) {
 
   connect.query(sql, function (err, result, fields) {
     if (err) throw err;
-    res.status(200).send(result);
+    res.status(200).send({ response: result, role: data.phan_quyen });
   });
 });
 
@@ -34,18 +34,29 @@ router.post(
   upload.array("hinh_anh"),
   async function (req, res) {
     const files = req.files;
-    const ma_can_ho = req.body.ma_can_ho;
+    const { id } = req.body;
+
     if (!files[0]) {
       return res
         .status(200)
         .json({ response: "Lỗi thêm ảnh", type: false, data: "" });
     }
+
     var filePath = files.map((file) => file.filename);
-    const sql =
-      "UPDATE can_ho SET hinh_anh = CONCAT(hinh_anh, ?) WHERE ma_can_ho = ?";
+    const sqlGetHinhAnh = "SELECT hinh_anh FROM can_ho WHERE id = ?";
+    const [resultGetHinhAnh] = await executeQuery(sqlGetHinhAnh, [id]);
+
+    var sql = "UPDATE can_ho SET hinh_anh = ? WHERE id = ?";
+    var path = filePath.join(",");
+
+    if (resultGetHinhAnh.hinh_anh) {
+      const listHinhAnh = resultGetHinhAnh.hinh_anh.split(",");
+      const resultHinhAnh = [...filePath, ...listHinhAnh];
+      path = resultHinhAnh.join(",");
+    }
 
     try {
-      await executeQuery(sql, [`,${filePath.join(",")}`, ma_can_ho]);
+      await executeQuery(sql, [path, id]);
       return res
         .status(200)
         .json({ response: "Thêm ảnh thành công", type: true, data: filePath });
@@ -59,8 +70,16 @@ router.post(
 );
 
 router.post("/xoa-anh-can-ho", async function (req, res) {
-  const { filename, ma_can_ho } = req.body;
-  const filePath = join(__dirname, "..", "uploads", ma_can_ho, filename);
+  const { id, filename } = req.body;
+
+  const filePath = join(
+    __dirname,
+    "..",
+    "uploads",
+    "can-ho",
+    `${id}`,
+    filename
+  );
 
   try {
     if (!fs.existsSync(filePath)) {
@@ -72,25 +91,18 @@ router.post("/xoa-anh-can-ho", async function (req, res) {
 
     await fs.promises.unlink(filePath);
 
-    const sqlGetHinhAnh = "SELECT hinh_anh FROM can_ho WHERE ma_can_ho = ?";
-    const [resultGetHinhAnh] = await executeQuery(sqlGetHinhAnh, [ma_can_ho]);
+    const sqlGetHinhAnh = "SELECT hinh_anh FROM can_ho WHERE id = ?";
+    const [resultGetHinhAnh] = await executeQuery(sqlGetHinhAnh, [id]);
 
-    if (resultGetHinhAnh && resultGetHinhAnh.hinh_anh) {
+    if (resultGetHinhAnh.hinh_anh) {
       const listHinhAnh = resultGetHinhAnh.hinh_anh.split(",");
       const updatedHinhAnh = listHinhAnh
         .filter((item) => item !== filename)
         .join(",");
 
-      if (updatedHinhAnh === resultGetHinhAnh.hinh_anh) {
-        return res.status(200).json({
-          response: "Image not found in the database",
-          type: false,
-        });
-      }
-
-      await executeQuery("UPDATE can_ho SET hinh_anh = ? WHERE ma_can_ho = ?", [
+      await executeQuery("UPDATE can_ho SET hinh_anh = ? WHERE id = ?", [
         updatedHinhAnh,
-        ma_can_ho,
+        id,
       ]);
 
       return res.status(200).json({
@@ -124,9 +136,8 @@ const executeQuery = (sql, params) => {
   });
 };
 
-router.post("/them-can-ho", upload.array("hinh_anh"), async (req, res) => {
+router.post("/them-can-ho", async (req, res) => {
   try {
-    const files = req.files || [];
     const {
       ten_khach_hang,
       so_dien_thoai,
@@ -149,17 +160,6 @@ router.post("/them-can-ho", upload.array("hinh_anh"), async (req, res) => {
       trang_thai,
     } = req.body;
 
-    if (
-      !ten_khach_hang ||
-      !so_dien_thoai ||
-      !ma_can_ho ||
-      !loai_giao_dich ||
-      !ngay_ki_hop_dong
-    ) {
-      return res
-        .status(400)
-        .json({ response: "Dữ liệu không hợp lệ", type: false });
-    }
     const sql =
       "SELECT * FROM can_ho WHERE ma_can_ho = ? and ten_toa_nha = ? and truc_can_ho = ?";
     const checkMaCanHoExist = await executeQuery(sql, [
@@ -173,8 +173,6 @@ router.post("/them-can-ho", upload.array("hinh_anh"), async (req, res) => {
         .status(200)
         .json({ response: "Căn hộ đã tồn tại", type: false });
     }
-
-    const filePath = files.map((file) => file.filename).join(",");
 
     const sqlKhachHang = `
         INSERT INTO khach_hang 
@@ -191,8 +189,8 @@ router.post("/them-can-ho", upload.array("hinh_anh"), async (req, res) => {
 
     const sqlCanHo = `
         INSERT INTO can_ho 
-        (ma_can_ho, khach_hang, gia_ban, gia_thue, du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, hinh_anh, trang_thai,ten_toa_nha,truc_can_ho) 
-        VALUES (?, ? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?, ?, ?, ?, ?)`;
+        (ma_can_ho, khach_hang, gia_ban, gia_thue, du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, trang_thai,ten_toa_nha,truc_can_ho) 
+        VALUES (?, ? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?, ?, ?, ?, ?)`;
     await executeQuery(sqlCanHo, [
       ma_can_ho,
       idKhachHang,
@@ -207,7 +205,6 @@ router.post("/them-can-ho", upload.array("hinh_anh"), async (req, res) => {
       noi_that,
       mo_ta,
       nguoi_cap_nhat,
-      filePath,
       trang_thai,
       ten_toa_nha,
       truc_can_ho,

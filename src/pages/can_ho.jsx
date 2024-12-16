@@ -12,6 +12,7 @@ import {
   dataTrucCanHo,
   getRoleNguoiDung,
   loaiGiaoDichKhachHang,
+  locGiaCanHo,
   trangThaiDuAn,
 } from "../services/utils";
 import PreviewImage from "./components/preview_image";
@@ -21,11 +22,12 @@ import { dataCanHoDefault } from "../data/default_data";
 
 export default function CanHo() {
   const [data, setData] = useState([]);
+  const [role, setRole] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
+  const [showModalHinhAnh, setShowModalHinhAnh] = useState(false);
   const [dataUpdate, setDataUpdate] = useState(dataCanHoDefault);
   const [showImageUpdate, setShowImageUpdate] = useState([]);
-  const [showImage, setShowImage] = useState([]);
 
   const tenToaNhaRef = useRef(null);
   const maCanHoRef = useRef(null);
@@ -45,15 +47,71 @@ export default function CanHo() {
   const hinhAnhRef = useRef(null);
   const trangThaiDuAnRef = useRef(null);
   const trucCanHoRef = useRef(null);
+  const locGiaCanHoRef = useRef(null);
+  const giaBanTuRef = useRef(null);
+  const giaBanDenRef = useRef(null);
+  const giaThueTuRef = useRef(null);
+  const giaThueDenRef = useRef(null);
 
   async function getData() {
-    const { data } = await axios.get(`${json_config.url_connect}/can-ho`, {
+    const {
+      data: { response, role },
+    } = await axios.get(`${json_config.url_connect}/can-ho`, {
       headers: {
         Authorization: getRoleNguoiDung(),
         "Content-Type": "application/json",
       },
     });
-    setData(data);
+    setRole(role);
+    setData(response);
+  }
+
+  async function timKiem() {
+    let dataTimKiem = {
+      ten_du_an: tenDuAnRef.current.value,
+      ten_toa_nha: tenToaNhaRef.current.value,
+      loai_noi_that: noiThatRef.current.value,
+      loai_can_ho: loaiCanHoRef.current.value,
+      huong_can_ho: huongBanCongRef.current.value,
+      so_phong_ngu: soPhongNguRef.current.value,
+      truc_can_ho: trucCanHoRef.current.value,
+      loc_gia: locGiaCanHoRef.current.value,
+      gia_ban_tu: giaBanTuRef.current.value,
+      gia_ban_den: giaBanDenRef.current.value,
+      gia_thue_tu: giaThueTuRef.current.value,
+      gia_thue_den: giaThueDenRef.current.value,
+    };
+
+    const { status, data } = await axios.get(
+      `${json_config.url_connect}/tim-kiem`,
+      {
+        params: dataTimKiem,
+        headers: {
+          Authorization: getRoleNguoiDung(),
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (status === 200) {
+      setData(data);
+    }
+  }
+  async function lamMoi() {
+    tenDuAnRef.current.value = "";
+    tenDuAnRef.current.value = "";
+    tenToaNhaRef.current.value = "";
+    noiThatRef.current.value = "";
+    loaiCanHoRef.current.value = "";
+    huongBanCongRef.current.value = "";
+    soPhongNguRef.current.value = "";
+    trucCanHoRef.current.value = "";
+    locGiaCanHoRef.current.value = "";
+    giaBanTuRef.current.value = "";
+    giaBanDenRef.current.value = "";
+    giaThueTuRef.current.value = "";
+    giaThueDenRef.current.value = "";
+    await getData();
   }
 
   async function capNhatAnhCanHo(event) {
@@ -62,8 +120,7 @@ export default function CanHo() {
       if (files.length === 0) return;
 
       const formData = new FormData();
-      formData.append("ma_can_ho", dataUpdate.ma_can_ho);
-
+      formData.append("id", dataUpdate.id);
       files.forEach((file) => {
         formData.append("hinh_anh", file);
       });
@@ -85,7 +142,7 @@ export default function CanHo() {
             ...pre,
             ...images.map(
               (img) =>
-                `${json_config.url_connect}/${dataUpdate.ma_can_ho}/${img}`
+                `${json_config.url_connect}/can-ho/${dataUpdate.id}/${img}`
             ),
           ]);
           setData((prevData) =>
@@ -103,33 +160,21 @@ export default function CanHo() {
     }
   }
 
-  const removeImageModalAdd = async (index) => {
-    const dataTransfer = new DataTransfer();
-    const newImages = showImage.filter((_, i) => i !== index);
-
-    await Promise.all(
-      newImages.map(async (src, index) => {
-        const response = await fetch(src);
-        const blob = await response.blob();
-        const file = new File([blob], `image${index}.png`, {
-          type: "image/png",
-        });
-        dataTransfer.items.add(file);
-      })
-    );
-
-    hinhAnhRef.current.files = dataTransfer.files;
-    setShowImage(newImages);
-  };
-
   const removeImageModalUpdate = async (index) => {
+    if (role !== "Admin") {
+      toast.error("Bạn không thể xóa ảnh");
+      return;
+    }
     const listImgPath = showImageUpdate[index].split("/");
     const imgPath = listImgPath[listImgPath.length - 1];
 
     try {
       const response = await axios.post(
         `${json_config.url_connect}/can-ho/xoa-anh-can-ho`,
-        { ma_can_ho: dataUpdate.ma_can_ho, filename: imgPath }
+        {
+          id: dataUpdate.id,
+          filename: imgPath,
+        }
       );
       const {
         status,
@@ -142,7 +187,7 @@ export default function CanHo() {
           setShowImageUpdate(
             images.map(
               (img) =>
-                `${json_config.url_connect}/${dataUpdate.ma_can_ho}/${img}`
+                `${json_config.url_connect}/can-ho/${dataUpdate.id}/${img}`
             )
           );
           setData((prevData) =>
@@ -162,72 +207,48 @@ export default function CanHo() {
   async function themCanHo() {
     try {
       const data = {
-        tenToaNha: tenToaNhaRef.current.value,
-        maCanHo: maCanHoRef.current.value,
-        hoTenChuCanHo: hoTenChuCanHoRef.current.value,
-        soDienThoai: soDienThoaiRef.current.value,
-        loaiGiaoDich: loaiGiaoDichRef.current.value,
-        tenDuAn: tenDuAnRef.current.value,
-        soPhongNgu: soPhongNguRef.current.value,
-        soPhongTam: soPhongTamRef.current.value,
-        loaiCanHo: loaiCanHoRef.current.value,
-        dienTich: dienTichRef.current.value,
-        huongBanCong: huongBanCongRef.current.value,
-        noiThat: noiThatRef.current.value,
-        giaBan: giaBanRef.current.value,
-        giaThue: giaThueRef.current.value,
-        ghiChu: ghiChuRef.current.value,
-        hinhAnh: hinhAnhRef.current.files,
-        trangThaiDuAn: trangThaiDuAnRef.current.value,
-        trucCanHo: trucCanHoRef.current.value,
+        ten_toa_nha: tenToaNhaRef.current.value,
+        ma_can_ho: maCanHoRef.current.value,
+        ten_khach_hang: hoTenChuCanHoRef.current.value,
+        so_dien_thoai: soDienThoaiRef.current.value,
+        loai_giao_dich: loaiGiaoDichRef.current.value,
+        ten_du_an: tenDuAnRef.current.value,
+        so_phong_ngu: soPhongNguRef.current.value,
+        so_phong_tam: soPhongTamRef.current.value,
+        loai_can_ho: loaiCanHoRef.current.value,
+        dien_tich: dienTichRef.current.value,
+        huong_can_ho: huongBanCongRef.current.value,
+        noi_that: noiThatRef.current.value,
+        gia_ban: giaBanRef.current.value,
+        gia_thue: giaThueRef.current.value,
+        mo_ta: ghiChuRef.current.value,
+        trang_thai: trangThaiDuAnRef.current.value,
+        truc_can_ho: trucCanHoRef.current.value,
+        ngay_ki_hop_dong: new Date().toISOString(),
       };
 
       const isInvalidInput = (value, allowNegative = false) =>
         value === "" || (!allowNegative && Number(value) < 0);
 
       if (
-        isInvalidInput(data.hoTenChuCanHo) ||
-        isInvalidInput(data.soDienThoai) ||
-        isInvalidInput(data.maCanHo) ||
-        isInvalidInput(data.tenDuAn) ||
-        isInvalidInput(data.soPhongNgu) ||
-        isInvalidInput(data.soPhongTam) ||
-        isInvalidInput(data.dienTich) ||
-        isInvalidInput(data.giaBan) ||
-        isInvalidInput(data.giaThue) ||
-        isInvalidInput(data.ghiChu)
+        isInvalidInput(data.ten_khach_hang) ||
+        isInvalidInput(data.so_dien_thoai) ||
+        isInvalidInput(data.ma_can_ho) ||
+        isInvalidInput(data.ten_du_an) ||
+        isInvalidInput(data.so_phong_ngu) ||
+        isInvalidInput(data.so_phong_tam) ||
+        isInvalidInput(data.dien_tich) ||
+        isInvalidInput(data.gia_ban) ||
+        isInvalidInput(data.gia_thue) ||
+        isInvalidInput(data.mo_ta)
       ) {
         toast.error("Kiểm tra lại dữ liệu");
         return;
       }
 
-      const formData = new FormData();
-      formData.append("ten_khach_hang", data.hoTenChuCanHo);
-      formData.append("so_dien_thoai", data.soDienThoai);
-      formData.append("loai_giao_dich", data.loaiGiaoDich);
-      formData.append("ngay_ki_hop_dong", new Date().toISOString());
-      formData.append("ten_du_an", data.tenDuAn);
-      formData.append("dien_tich", data.dienTich);
-      formData.append("so_phong_ngu", data.soPhongNgu);
-      formData.append("so_phong_tam", data.soPhongTam);
-      formData.append("huong_can_ho", data.huongBanCong);
-      formData.append("loai_can_ho", data.loaiCanHo);
-      formData.append("noi_that", data.noiThat);
-      formData.append("mo_ta", data.ghiChu);
-      formData.append("nguoi_cap_nhat", 1);
-      formData.append("gia_ban", data.giaBan);
-      formData.append("gia_thue", data.giaThue);
-      formData.append("trang_thai", data.trangThaiDuAn);
-      formData.append("ma_can_ho", data.maCanHo);
-      formData.append("ten_toa_nha", data.tenToaNha);
-      formData.append("truc_can_ho", data.trucCanHo);
-      Array.from(data.hinhAnh).forEach((file) => {
-        formData.append("hinh_anh", file);
-      });
-
       const response = await axios.post(
         `${json_config.url_connect}/can-ho/them-can-ho`,
-        formData
+        data
       );
 
       const {
@@ -260,16 +281,20 @@ export default function CanHo() {
         hideProgressBar={false}
       />
       <div className="d-flex justify-content-start m-2">
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={() => {
-            setShowImage([]);
-            setShowModal(true);
-          }}
-        >
-          Thêm mới
-        </button>
+        {role !== "Nhân viên" && (
+          <div>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setShowModal(true)}
+            >
+              Thêm mới
+            </button>
+            <button type="button" className="btn btn-outline-primary ms-2">
+              Nhập dữ liệu excel
+            </button>
+          </div>
+        )}
         {/*  */}
         <Modal
           className="modal-lg"
@@ -508,31 +533,6 @@ export default function CanHo() {
               />
               <label htmlFor="floatingInputGrid">Ghi chú</label>
             </div>
-            <div className="form-floating mb-3">
-              <input
-                aria-label="123"
-                className="form-control"
-                type="file"
-                multiple
-                id="fileInput"
-                ref={hinhAnhRef}
-                onChange={(event) => {
-                  setShowImage([]);
-                  const files = Array.from(event.target.files);
-                  files.forEach((file) => {
-                    const fileURL = URL.createObjectURL(file);
-                    setShowImage((pre) => [...pre, fileURL]);
-                  });
-                }}
-              />
-              <label htmlFor="fileInput">Thông tin ảnh</label>
-            </div>
-            <div className="form-floating image-container">
-              <PreviewImage
-                props={showImage}
-                onRemoveImage={removeImageModalAdd}
-              />
-            </div>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowModal(false)}>
@@ -565,10 +565,7 @@ export default function CanHo() {
               <div className="form-floating">
                 <select
                   ref={tenToaNhaRef}
-                  defaultValue={dataUpdate.ma_can_ho.substring(
-                    0,
-                    dataUpdate.ma_can_ho.indexOf("-")
-                  )}
+                  defaultValue={dataUpdate.ten_toa_nha}
                   className="form-select"
                   aria-label="Default select example"
                 >
@@ -584,7 +581,7 @@ export default function CanHo() {
                 <input
                   ref={maCanHoRef}
                   type="text"
-                  defaultValue={dataUpdate.ma_can_ho}
+                  defaultValue={dataUpdate.ma_can_ho ?? "*"}
                   className="form-control"
                   aria-label="Sizing example input"
                   aria-describedby="inputGroup-sizing-default"
@@ -609,7 +606,7 @@ export default function CanHo() {
               <div className="form-floating">
                 <input
                   ref={hoTenChuCanHoRef}
-                  defaultValue={dataUpdate.ten_khach_hang}
+                  defaultValue={dataUpdate.ten_khach_hang ?? "*"}
                   type="text"
                   className="form-control"
                   aria-label="Sizing example input"
@@ -622,7 +619,7 @@ export default function CanHo() {
               <div className="form-floating">
                 <input
                   ref={soDienThoaiRef}
-                  defaultValue={dataUpdate.so_dien_thoai}
+                  defaultValue={dataUpdate.so_dien_thoai ?? "*"}
                   type="text"
                   className="form-control"
                   aria-label="Sizing example input"
@@ -785,17 +782,34 @@ export default function CanHo() {
                 <label htmlFor="floatingInputGrid">Giá thuê</label>
               </div>
             </div>
-            <div className="form-floating mb-3">
-              <input
-                ref={ghiChuRef}
-                type="text"
-                defaultValue={dataUpdate.ghi_chu}
-                className="form-control"
-                aria-label="Sizing example input"
-                aria-describedby="inputGroup-sizing-default"
-              />
-              <label htmlFor="floatingInputGrid">Ghi chú</label>
-            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowModalUpdate(false)}
+            >
+              Close
+            </Button>
+            <Button variant="primary">Xác nhận</Button>
+          </Modal.Footer>
+        </Modal>
+        {/*  */}
+        <Modal
+          className="modal-lg"
+          show={showModalHinhAnh}
+          scrollable
+          backdrop="static"
+          keyboard={false}
+        >
+          <Modal.Header>
+            <Modal.Title>Thêm dự án mới</Modal.Title>
+            <Button
+              variant="close"
+              aria-label="Close"
+              onClick={() => setShowModalHinhAnh(false)}
+            ></Button>
+          </Modal.Header>
+          <Modal.Body>
             <div className="form-floating mb-3">
               <input
                 aria-label="123"
@@ -818,15 +832,146 @@ export default function CanHo() {
           <Modal.Footer>
             <Button
               variant="secondary"
-              onClick={() => setShowModalUpdate(false)}
+              onClick={() => setShowModalHinhAnh(false)}
             >
               Close
             </Button>
-            <Button variant="primary">Xác nhận</Button>
+            <Button variant="primary">Tải ảnh xuống</Button>
           </Modal.Footer>
         </Modal>
       </div>
-      {/*  */}
+      <div className="d-flex flex-wrap gap-4 my-5 mx-2">
+        <select
+          ref={tenDuAnRef}
+          className="form-select w-auto"
+          aria-label="Default select example"
+        >
+          <option value="">Chọn tên dự án</option>
+          {dataDuAn().map((item) => (
+            <option key={item.id} value={item.ten_du_an}>
+              {item.ten_du_an}
+            </option>
+          ))}
+        </select>
+        <select
+          ref={tenToaNhaRef}
+          className="form-select w-auto"
+          aria-label="Default select example"
+        >
+          <option value=""> Chọn tên tòa nhà</option>
+          {dataToaNha().map((item, index) => (
+            <option key={item.id} value={item.ten_toa_nha}>
+              {item.ten_toa_nha}
+            </option>
+          ))}
+        </select>
+        <select
+          ref={noiThatRef}
+          className="form-select w-auto"
+          aria-label="Default select example"
+        >
+          <option value="">Chọn nội thất</option>
+          {dataNoiThat().map((item) => (
+            <option key={item.id} value={item.loai_noi_that}>
+              {item.loai_noi_that}
+            </option>
+          ))}
+        </select>
+        <select
+          ref={loaiCanHoRef}
+          className="form-select w-auto"
+          aria-label="Default select example"
+        >
+          <option value=""> Chọn loại căn hộ</option>
+          {dataLoaiCanHo().map((item) => (
+            <option key={item.id} value={item.loai_can_selectho}>
+              {item.loai_can_ho}
+            </option>
+          ))}
+        </select>
+        <select
+          ref={huongBanCongRef}
+          className="form-select w-auto"
+          aria-label="Default select example"
+        >
+          <option value="">Chọn hướng ban công</option>
+          {dataHuongCanHo().map((item) => (
+            <option key={item.id} value={item.huong_can_ho}>
+              {item.huong_can_ho}
+            </option>
+          ))}
+        </select>
+        <input
+          ref={soPhongNguRef}
+          type="number"
+          placeholder="Số phòng ngủ"
+          className="form-control w-auto"
+          aria-label="Sizing example input"
+          aria-describedby="inputGroup-sizing-default"
+        />
+        <select
+          className="form-select w-auto"
+          ref={trucCanHoRef}
+          aria-label="Default select example"
+        >
+          <option value="">Chọn trục căn hộ</option>
+          {dataTrucCanHo().map((item) => (
+            <option key={item.id} value={item.truc_can}>
+              {item.truc_can}
+            </option>
+          ))}
+        </select>
+        <select
+          ref={locGiaCanHoRef}
+          className="form-select w-auto"
+          aria-label="Default select example"
+        >
+          <option value="">Lọc giá</option>
+          {locGiaCanHo.map((item, index) => (
+            <option key={index} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+        <input
+          ref={giaBanTuRef}
+          type="number"
+          placeholder="Giá bán từ"
+          className="form-control w-auto"
+          aria-label="Sizing example input"
+          aria-describedby="inputGroup-sizing-default"
+        />
+        <input
+          ref={giaBanDenRef}
+          type="number"
+          placeholder="Đến giá"
+          className="form-control w-auto"
+          aria-label="Sizing example input"
+          aria-describedby="inputGroup-sizing-default"
+        />
+        <input
+          ref={giaThueTuRef}
+          type="number"
+          placeholder="Giá thuê từ"
+          className="form-control w-auto"
+          aria-label="Sizing example input"
+          aria-describedby="inputGroup-sizing-default"
+        />
+        <input
+          ref={giaThueDenRef}
+          type="number"
+          placeholder="Đến giá"
+          className="form-control w-auto"
+          aria-label="Sizing example input"
+          aria-describedby="inputGroup-sizing-default"
+        />
+        <button className="btn btn-primary" onClick={timKiem}>
+          Tìm kiếm
+        </button>
+        <button className="btn btn-outline-primary" onClick={lamMoi}>
+          Làm mới
+        </button>
+      </div>
       <table className="table table-light table-sm">
         <thead>
           <tr>
@@ -864,23 +1009,39 @@ export default function CanHo() {
                 <button
                   type="button"
                   onClick={() => {
-                    let arrayHinhAnh = item.hinh_anh.split(",");
-                    setShowImageUpdate(
-                      arrayHinhAnh.map(
-                        (img) =>
-                          `${json_config.url_connect}/${item.ma_can_ho}/${img}`
-                      )
-                    );
                     setDataUpdate(item);
                     setShowModalUpdate(true);
                   }}
-                  className="btn btn-primary"
+                  className="btn btn-danger my-2"
                 >
                   Chi tiết
                 </button>
-                <div />
                 <br />
-                <button type="button" className="btn btn-primary">
+                <button
+                  onClick={() => {
+                    if (item.hinh_anh) {
+                      let arrayHinhAnh = item.hinh_anh.split(",");
+                      setShowImageUpdate(
+                        arrayHinhAnh.map(
+                          (img) =>
+                            `${json_config.url_connect}/can-ho/${item.id}/${img}`
+                        )
+                      );
+                    } else {
+                      setShowImageUpdate([]);
+                    }
+                    setDataUpdate(item);
+                    setShowModalHinhAnh(true);
+                  }}
+                  type="button"
+                  className={`btn ${
+                    item.hinh_anh ? "btn-primary" : "btn-info"
+                  }`}
+                >
+                  Hình ảnh
+                </button> 
+                <br />
+                <button type="button" className="btn btn-success my-2">
                   Yêu cầu
                 </button>
               </td>

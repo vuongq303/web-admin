@@ -141,7 +141,6 @@ router.post(
 
 router.post("/dang-nhap", function (req, res) {
   const { username, password } = req.body;
-  console.log(JWT_KEY);
 
   const sql =
     "select tai_khoan,phan_quyen from nguoi_dung where tai_khoan = ? and mat_khau = ?";

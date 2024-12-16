@@ -10,6 +10,7 @@ import {
   faBuilding,
   faUser,
   faProjectDiagram,
+  faPerson,
 } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./css/navigator.css";
@@ -123,30 +124,24 @@ function SizeBar() {
         )}
       </div>
       <Menu>
-        <SubMenu
-          icon={<FontAwesomeIcon icon={faUser} />}
-          label="Người dùng"
+        <MenuItem
           className="item_menu"
+          icon={<FontAwesomeIcon icon={faPerson} />}
+          onClick={() => navigator("/nguoi-dung")}
         >
-          <MenuItem
-            className="item_menu"
-            icon={<div></div>}
-            onClick={() => navigator("/nguoi-dung")}
-          >
-            Nhân viên
-          </MenuItem>
-          <MenuItem
-            icon={<div></div>}
-            className="item_menu"
-            onClick={() => navigator("/khach-hang")}
-          >
-            Khách hàng
-          </MenuItem>
-        </SubMenu>
+          Nhân viên
+        </MenuItem>
+        <MenuItem
+          icon={<FontAwesomeIcon icon={faUser} />}
+          className="item_menu"
+          onClick={() => navigator("/khach-hang")}
+        >
+          Khách hàng
+        </MenuItem>
 
         <SubMenu
           icon={<FontAwesomeIcon icon={faBuilding} />}
-          label="Danh sách căn hộ"
+          label="Data nguồn"
           className="item_menu"
         >
           <MenuItem
@@ -154,11 +149,11 @@ function SizeBar() {
             className="item_menu"
             onClick={() => navigator("/can-ho")}
           >
-            Danh sách căn hộ
+            Data nguồn
           </MenuItem>
         </SubMenu>
         <SubMenu
-          label="Dự án"
+          label="Trục căn"
           className="item_menu"
           icon={<FontAwesomeIcon icon={faProjectDiagram} />}
         >

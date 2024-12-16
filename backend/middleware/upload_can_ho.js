@@ -4,14 +4,9 @@ const { join } = require("path");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const { ten_toa_nha, ma_can_ho, truc_can_ho } = req.body;
+    const { id } = req.body;
 
-    const dir = join(
-      __dirname,
-      "..",
-      "uploads",
-      `${ten_toa_nha}-${ma_can_ho}${truc_can_ho}`
-    );
+    const dir = join(__dirname, "..", "uploads", "can-ho", `${id}`);
 
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });

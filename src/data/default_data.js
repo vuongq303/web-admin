@@ -18,5 +18,6 @@ export const dataCanHoDefault = {
   so_dien_thoai: "",
   loai_giao_dich: "",
   hinh_anh: "",
+  ten_toa_nha: "",
   truc_can_ho: "",
 };

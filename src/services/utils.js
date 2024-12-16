@@ -8,6 +8,13 @@ export const phanQuyenNguoiDung = ["Admin", "Nhân viên", "Quản lý", "CSKH"]
 
 export const trangThaiDuAn = ["Còn bán", "Ngừng bán"];
 
+export const locGiaCanHo = [
+  "Giá bán tăng dần",
+  "Giá bán giảm dần",
+  "Giá thuê tăng dần",
+  "Giá thuê giảm dần",
+];
+
 export const dataDuAn = () => {
   const data = localStorage.getItem("du-an");
   if (!data) window.location.replace("/");
