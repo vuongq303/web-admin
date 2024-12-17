@@ -8,9 +8,11 @@ import {
   faChevronRight,
   faSignOut,
   faBuilding,
-  faUser,
   faProjectDiagram,
   faPerson,
+  faPersonBooth,
+  faMoneyBill,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./css/navigator.css";
@@ -134,9 +136,16 @@ function SizeBar() {
         <MenuItem
           icon={<FontAwesomeIcon icon={faUser} />}
           className="item_menu"
-          onClick={() => navigator("/khach-hang")}
+          onClick={() => navigator("/khach-hang-nguon")}
         >
-          Khách hàng
+          Data khách hàng
+        </MenuItem>
+        <MenuItem
+          icon={<FontAwesomeIcon icon={faUserTie} />}
+          className="item_menu"
+          onClick={() => navigator("/cham-soc-khach-hang")}
+        >
+          Chăm sóc khách hàng
         </MenuItem>
 
         <SubMenu
@@ -150,6 +159,20 @@ function SizeBar() {
             onClick={() => navigator("/can-ho")}
           >
             Data nguồn
+          </MenuItem>
+          <MenuItem
+            icon={<div></div>}
+            className="item_menu"
+            onClick={() => navigator("/can-ho-da-gui")}
+          >
+            Căn hộ đã yêu cầu
+          </MenuItem>
+          <MenuItem
+            icon={<div></div>}
+            className="item_menu"
+            onClick={() => navigator("/can-ho-da-duyet")}
+          >
+           Căn hộ đã duyệt
           </MenuItem>
         </SubMenu>
         <SubMenu

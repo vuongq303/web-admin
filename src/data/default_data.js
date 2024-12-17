@@ -3,7 +3,7 @@ export const dataCanHoDefault = {
   gia_ban: 0,
   gia_thue: 0,
   trang_thai: "",
-  khach_hang: 0,
+  chu_can_ho: "",
   ma_can_ho: "",
   du_an: "",
   dien_tich: "",
@@ -20,4 +20,5 @@ export const dataCanHoDefault = {
   hinh_anh: "",
   ten_toa_nha: "",
   truc_can_ho: "",
+  danh_dau: "",
 };

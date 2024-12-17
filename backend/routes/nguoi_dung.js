@@ -143,7 +143,7 @@ router.post("/dang-nhap", function (req, res) {
   const { username, password } = req.body;
 
   const sql =
-    "select tai_khoan,phan_quyen from nguoi_dung where tai_khoan = ? and mat_khau = ?";
+    "select tai_khoan,ho_ten ,phan_quyen from nguoi_dung where tai_khoan = ? and mat_khau = ?";
   connect.query(sql, [username, password], (err, result) => {
     if (err) {
       return res.status(500).json({

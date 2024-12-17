@@ -4,6 +4,7 @@ import axios from "axios";
 import json_config from "../config.json";
 import { Button, Modal } from "react-bootstrap";
 import {
+  danhDauCanHo,
   dataDuAn,
   dataHuongCanHo,
   dataLoaiCanHo,
@@ -52,18 +53,23 @@ export default function CanHo() {
   const giaBanDenRef = useRef(null);
   const giaThueTuRef = useRef(null);
   const giaThueDenRef = useRef(null);
+  const danhDauCanHoRef = useRef(null);
 
   async function getData() {
-    const {
-      data: { response, role },
-    } = await axios.get(`${json_config.url_connect}/can-ho`, {
-      headers: {
-        Authorization: getRoleNguoiDung(),
-        "Content-Type": "application/json",
-      },
-    });
-    setRole(role);
-    setData(response);
+    try {
+      const {
+        data: { response, role },
+      } = await axios.get(`${json_config.url_connect}/can-ho`, {
+        headers: {
+          Authorization: getRoleNguoiDung(),
+          "Content-Type": "application/json",
+        },
+      });
+      setRole(role);
+      setData(response);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async function timKiem() {
@@ -97,6 +103,7 @@ export default function CanHo() {
       setData(data);
     }
   }
+
   async function lamMoi() {
     tenDuAnRef.current.value = "";
     tenDuAnRef.current.value = "";
@@ -209,7 +216,7 @@ export default function CanHo() {
       const data = {
         ten_toa_nha: tenToaNhaRef.current.value,
         ma_can_ho: maCanHoRef.current.value,
-        ten_khach_hang: hoTenChuCanHoRef.current.value,
+        chu_can_ho: hoTenChuCanHoRef.current.value,
         so_dien_thoai: soDienThoaiRef.current.value,
         loai_giao_dich: loaiGiaoDichRef.current.value,
         ten_du_an: tenDuAnRef.current.value,
@@ -225,6 +232,7 @@ export default function CanHo() {
         trang_thai: trangThaiDuAnRef.current.value,
         truc_can_ho: trucCanHoRef.current.value,
         ngay_ki_hop_dong: new Date().toISOString(),
+        danh_dau: danhDauCanHoRef.current.value,
       };
 
       const isInvalidInput = (value, allowNegative = false) =>
@@ -248,7 +256,13 @@ export default function CanHo() {
 
       const response = await axios.post(
         `${json_config.url_connect}/can-ho/them-can-ho`,
-        data
+        data,
+        {
+          headers: {
+            Authorization: getRoleNguoiDung(),
+            "Content-Type": "application/json",
+          },
+        }
       );
 
       const {
@@ -269,6 +283,79 @@ export default function CanHo() {
     }
   }
 
+  async function capNhatCanHo() {
+    try {
+      const data = {
+        ten_toa_nha: tenToaNhaRef.current.value,
+        ma_can_ho: maCanHoRef.current.value,
+        chu_can_ho: hoTenChuCanHoRef.current.value,
+        so_dien_thoai: soDienThoaiRef.current.value,
+        loai_giao_dich: loaiGiaoDichRef.current.value,
+        ten_du_an: tenDuAnRef.current.value,
+        so_phong_ngu: soPhongNguRef.current.value,
+        so_phong_tam: soPhongTamRef.current.value,
+        loai_can_ho: loaiCanHoRef.current.value,
+        dien_tich: dienTichRef.current.value,
+        huong_can_ho: huongBanCongRef.current.value,
+        noi_that: noiThatRef.current.value,
+        gia_ban: giaBanRef.current.value,
+        gia_thue: giaThueRef.current.value,
+        mo_ta: ghiChuRef.current.value,
+        trang_thai: trangThaiDuAnRef.current.value,
+        truc_can_ho: trucCanHoRef.current.value,
+        ngay_ki_hop_dong: new Date().toISOString(),
+        danh_dau: danhDauCanHoRef.current.value,
+        id: dataUpdate.id,
+      };
+
+      const isInvalidInput = (value, allowNegative = false) =>
+        value === "" || (!allowNegative && Number(value) < 0);
+
+      if (
+        isInvalidInput(data.ten_khach_hang) ||
+        isInvalidInput(data.so_dien_thoai) ||
+        isInvalidInput(data.ma_can_ho) ||
+        isInvalidInput(data.ten_du_an) ||
+        isInvalidInput(data.so_phong_ngu) ||
+        isInvalidInput(data.so_phong_tam) ||
+        isInvalidInput(data.dien_tich) ||
+        isInvalidInput(data.gia_ban) ||
+        isInvalidInput(data.gia_thue) ||
+        isInvalidInput(data.mo_ta)
+      ) {
+        toast.error("Kiểm tra lại dữ liệu");
+        return;
+      }
+
+      const response = await axios.post(
+        `${json_config.url_connect}/can-ho/cap-nhat-can-ho`,
+        data,
+        {
+          headers: {
+            Authorization: getRoleNguoiDung(),
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const {
+        data: { response: message, type },
+        status,
+      } = response;
+
+      if (status === 200) {
+        toast.success(message);
+        if (type) {
+          setShowModalUpdate(false);
+          await getData();
+        }
+      }
+    } catch (error) {
+      console.error("Lỗi khi cập nhật căn hộ:", error);
+      toast.error("Đã xảy ra lỗi. Vui lòng thử lại!");
+    }
+  }
+
   useEffect(() => {
     getData();
   }, []);
@@ -281,20 +368,31 @@ export default function CanHo() {
         hideProgressBar={false}
       />
       <div className="d-flex justify-content-start m-2">
-        {role !== "Nhân viên" && (
-          <div>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => setShowModal(true)}
-            >
-              Thêm mới
-            </button>
-            <button type="button" className="btn btn-outline-primary ms-2">
-              Nhập dữ liệu excel
-            </button>
+        <div className="d-flex justify-content-between align-items-center w-100">
+          {role !== "Nhân viên" ? (
+            <div>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => setShowModal(true)}
+              >
+                Thêm mới
+              </button>
+              <button type="button" className="btn btn-outline-primary ms-2">
+                Nhập dữ liệu excel
+              </button>
+            </div>
+          ) : (
+            <div></div>
+          )}
+          <div className="text-start">
+            <strong>Vàng: Căn giá rẻ</strong>
+            <br />
+            <strong>Đỏ: Căn ngoại giao (Không gọi trực tiếp chủ nhà)</strong>
+            <br />
+            <strong>Cam (Căn kết hợp)</strong>
           </div>
-        )}
+        </div>
         {/*  */}
         <Modal
           className="modal-lg"
@@ -401,6 +499,20 @@ export default function CanHo() {
                   ))}
                 </select>
                 <label htmlFor="floatingInputGrid">Trạng thái</label>
+              </div>
+              <div className="form-floating">
+                <select
+                  className="form-select"
+                  ref={danhDauCanHoRef}
+                  aria-label="Default select example"
+                >
+                  {danhDauCanHo.map((item, index) => (
+                    <option key={index} value={item.mau_sac}>
+                      {item.noi_dung}
+                    </option>
+                  ))}
+                </select>
+                <label htmlFor="floatingInputGrid">Đánh dấu</label>
               </div>
             </div>
             <label className="mb-3">Thông tin căn hộ</label>
@@ -606,7 +718,7 @@ export default function CanHo() {
               <div className="form-floating">
                 <input
                   ref={hoTenChuCanHoRef}
-                  defaultValue={dataUpdate.ten_khach_hang ?? "*"}
+                  defaultValue={dataUpdate.chu_can_ho ?? "*"}
                   type="text"
                   className="form-control"
                   aria-label="Sizing example input"
@@ -656,6 +768,21 @@ export default function CanHo() {
                   ))}
                 </select>
                 <label htmlFor="floatingInputGrid">Trạng thái</label>
+              </div>
+              <div className="form-floating">
+                <select
+                  className="form-select"
+                  ref={danhDauCanHoRef}
+                  defaultValue={dataUpdate.danh_dau}
+                  aria-label="Default select example"
+                >
+                  {danhDauCanHo.map((item, index) => (
+                    <option key={index} value={item.mau_sac}>
+                      {item.noi_dung}
+                    </option>
+                  ))}
+                </select>
+                <label htmlFor="floatingInputGrid">Đánh dấu</label>
               </div>
             </div>
             <label className="mb-3">Thông tin căn hộ</label>
@@ -782,6 +909,17 @@ export default function CanHo() {
                 <label htmlFor="floatingInputGrid">Giá thuê</label>
               </div>
             </div>
+            <div className="form-floating mb-3">
+              <input
+                ref={ghiChuRef}
+                type="text"
+                defaultValue={dataUpdate.ghi_chu}
+                className="form-control"
+                aria-label="Sizing example input"
+                aria-describedby="inputGroup-sizing-default"
+              />
+              <label htmlFor="floatingInputGrid">Ghi chú</label>
+            </div>
           </Modal.Body>
           <Modal.Footer>
             <Button
@@ -790,7 +928,9 @@ export default function CanHo() {
             >
               Close
             </Button>
-            <Button variant="primary">Xác nhận</Button>
+            <Button onClick={capNhatCanHo} variant="primary">
+              Xác nhận
+            </Button>
           </Modal.Footer>
         </Modal>
         {/*  */}
@@ -986,14 +1126,23 @@ export default function CanHo() {
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => (
+          {data.map((item, index) => (
             <tr key={item.id}>
-              <td className="align-middle">{item.id}</td>
+              <td className="align-middle">{index + 1}</td>
               <td className="align-middle">
-                {item.ten_toa_nha}-{item.ma_can_ho ?? "*"}
-                {item.truc_can_ho}
+                <div
+                  style={{
+                    display: "inline-block",
+                    backgroundColor: item.danh_dau,
+                    padding: "1px 5px",
+                    borderRadius: "5px",
+                  }}
+                >
+                  {item.ten_toa_nha}-{item.ma_can_ho ?? "*"}
+                  {item.truc_can_ho}
+                </div>
               </td>
-              <td className="align-middle">{item.ten_khach_hang ?? "*"}</td>
+              <td className="align-middle">{item.chu_can_ho ?? "*"}</td>
               <td className="align-middle">{item.so_dien_thoai ?? "*"}</td>
               <td className="align-middle">{item.gia_ban}</td>
               <td className="align-middle">{item.gia_thue}</td>
@@ -1006,16 +1155,18 @@ export default function CanHo() {
                 <br />- {item.nguoi_cap_nhat}
               </td>
               <td className="align-middle">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDataUpdate(item);
-                    setShowModalUpdate(true);
-                  }}
-                  className="btn btn-danger my-2"
-                >
-                  Chi tiết
-                </button>
+                {role === "Admin" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDataUpdate(item);
+                      setShowModalUpdate(true);
+                    }}
+                    className="btn btn-danger my-2"
+                  >
+                    Chi tiết
+                  </button>
+                )}
                 <br />
                 <button
                   onClick={() => {
@@ -1039,7 +1190,7 @@ export default function CanHo() {
                   }`}
                 >
                   Hình ảnh
-                </button> 
+                </button>
                 <br />
                 <button type="button" className="btn btn-success my-2">
                   Yêu cầu

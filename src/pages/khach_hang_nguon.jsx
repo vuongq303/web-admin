@@ -5,21 +5,22 @@ import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import { dateToText, loaiGiaoDichKhachHang } from "../services/utils";
 
-export default function KhachHang() {
+export default function KhachHangNguon() {
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState({});
 
   const hoTenRef = useRef(null);
-  const ngayKiHopDongRef = useRef(null);
+  const khachGoiTuRef = useRef(null);
   const soDienThoaiRef = useRef(null);
   const ghiChuRef = useRef(null);
-  const loaiGiaoDichRef = useRef(null);
 
   async function getData() {
     try {
-      const { data } = await axios.get(json_config.url_connect + "/khach-hang");
+      const { data } = await axios.get(
+        json_config.url_connect + "/khach-hang-nguon"
+      );
       setData(data);
     } catch (error) {
       console.log(error);
@@ -33,17 +34,15 @@ export default function KhachHang() {
   async function themNguoiDung() {
     try {
       const hoTen = hoTenRef.current.value;
-      const ngayKiHopDong = ngayKiHopDongRef.current.value;
+      const khachGoiTu = khachGoiTuRef.current.value;
       const soDienThoai = soDienThoaiRef.current.value;
       const ghiChu = ghiChuRef.current.value;
-      const loaiGiaoDich = loaiGiaoDichRef.current.value;
 
       if (
         hoTen === "" ||
-        ngayKiHopDong === "" ||
+        khachGoiTu === "" ||
         soDienThoai === "" ||
-        ghiChu === "" ||
-        loaiGiaoDich === ""
+        ghiChu === ""
       ) {
         toast.error("Không được để trống thông tin");
         return;
@@ -52,8 +51,7 @@ export default function KhachHang() {
       const dataKhachHang = {
         ten_khach_hang: hoTen,
         so_dien_thoai: soDienThoai,
-        loai_giao_dich: loaiGiaoDich,
-        ngay_ki_hop_dong: ngayKiHopDong,
+        khach_goi_tu: khachGoiTu,
         ghi_chu: ghiChu,
       };
 
@@ -61,7 +59,7 @@ export default function KhachHang() {
         status,
         data: { response, type },
       } = await axios.post(
-        `${json_config.url_connect}/khach-hang/them-khach-hang`,
+        `${json_config.url_connect}/khach-hang-nguon/them-khach-hang`,
         dataKhachHang
       );
 
@@ -81,14 +79,13 @@ export default function KhachHang() {
   async function capNhatNguoiDung() {
     try {
       const hoTen = hoTenRef.current.value;
-      const ngayKiHopDong = ngayKiHopDongRef.current.value;
       const soDienThoai = soDienThoaiRef.current.value;
       const ghiChu = ghiChuRef.current.value;
-      const loaiGiaoDich = loaiGiaoDichRef.current.value;
+      const khachGoiTu = khachGoiTuRef.current.value;
 
       if (
         hoTen === "" ||
-        ngayKiHopDong === "" ||
+        khachGoiTu === "" ||
         soDienThoai === "" ||
         ghiChu === ""
       ) {
@@ -99,8 +96,7 @@ export default function KhachHang() {
       const dataKhachHang = {
         ten_khach_hang: hoTen,
         so_dien_thoai: soDienThoai,
-        loai_giao_dich: loaiGiaoDich,
-        ngay_ki_hop_dong: ngayKiHopDong,
+        khach_goi_tu: khachGoiTu,
         ghi_chu: ghiChu,
         id: dataUpdate.id,
       };
@@ -109,7 +105,7 @@ export default function KhachHang() {
         status,
         data: { response, type },
       } = await axios.post(
-        `${json_config.url_connect}/khach-hang/cap-nhat-khach-hang`,
+        `${json_config.url_connect}/khach-hang-nguon/cap-nhat-khach-hang`,
         dataKhachHang
       );
       if (status === 200) {
@@ -163,19 +159,7 @@ export default function KhachHang() {
                 />
                 <label htmlFor="floatingInputGrid">Họ tên</label>
               </div>
-              <select
-                className="form-select"
-                aria-label="Default select example"
-                ref={loaiGiaoDichRef}
-              >
-                {loaiGiaoDichKhachHang.map((item, index) => (
-                  <option key={index} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
             </div>
-
             <div className="input-group mb-3">
               <div className="form-floating">
                 <input
@@ -189,13 +173,13 @@ export default function KhachHang() {
               </div>
               <div className="form-floating">
                 <input
-                  ref={ngayKiHopDongRef}
-                  type="date"
+                  ref={khachGoiTuRef}
+                  type="text"
                   className="form-control"
                   aria-label="Sizing example input"
                   aria-describedby="inputGroup-sizing-default"
                 />
-                <label htmlFor="floatingInputGrid">Ngày kí hợp đồng</label>
+                <label htmlFor="floatingInputGrid">Khách hàng từ</label>
               </div>
             </div>
 
@@ -250,19 +234,7 @@ export default function KhachHang() {
                 />
                 <label htmlFor="floatingInputGrid">Họ tên</label>
               </div>
-              <select
-                className="form-select"
-                aria-label="Default select example"
-                ref={loaiGiaoDichRef}
-              >
-                {loaiGiaoDichKhachHang.map((item, index) => (
-                  <option key={index} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
             </div>
-
             <div className="input-group mb-3">
               <div className="form-floating">
                 <input
@@ -277,17 +249,14 @@ export default function KhachHang() {
               </div>
               <div className="form-floating">
                 <input
-                  ref={ngayKiHopDongRef}
-                  type="date"
-                  defaultValue={
-                    dataUpdate.ngay_ki_hop_dong &&
-                    dateToText(dataUpdate.ngay_ki_hop_dong)
-                  }
+                  ref={khachGoiTuRef}
+                  type="text"
+                  defaultValue={dataUpdate.khach_goi_tu}
                   className="form-control"
                   aria-label="Sizing example input"
                   aria-describedby="inputGroup-sizing-default"
                 />
-                <label htmlFor="floatingInputGrid">Ngày kí hợp đồng</label>
+                <label htmlFor="floatingInputGrid">Khách hàng từ</label>
               </div>
             </div>
 
@@ -326,8 +295,7 @@ export default function KhachHang() {
             <th scope="col">STT</th>
             <th scope="col">Họ tên</th>
             <th scope="col">Số điện thoại</th>
-            <th scope="col">Loại giao dịch</th>
-            <th scope="col">Ngày kí hợp đồng</th>
+            <th scope="col">Khách hàng từ</th>
             <th scope="col">Ghi chú</th>
             <th scope="col">Hành động</th>
           </tr>
@@ -335,13 +303,12 @@ export default function KhachHang() {
         <tbody>
           {data.map((item) => (
             <tr key={item.id}>
-              <td>{item.id}</td>
-              <td>{item.ten_khach_hang}</td>
-              <td>{item.so_dien_thoai}</td>
-              <td>{item.loai_giao_dich}</td>
-              <td>{dateToText(item.ngay_ki_hop_dong)}</td>
-              <td>{item.ghi_chu.substring(0, 20)}...</td>
-              <td>
+              <td className="align-middle">{item.id}</td>
+              <td className="align-middle">{item.ten_khach_hang}</td>
+              <td className="align-middle"> {item.so_dien_thoai}</td>
+              <td className="align-middle">{item.khach_goi_tu}</td>
+              <td className="w-25 align-middle">{item.ghi_chu}</td>
+              <td className="align-middle">
                 <button
                   type="button"
                   className="btn btn-primary"

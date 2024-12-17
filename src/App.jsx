@@ -13,6 +13,9 @@ import TrucCanHo from "./pages/truc_can_ho";
 import KhachHang from "./pages/khach_hang";
 import NguoiDung from "./pages/nguoi_dung";
 import TrangChu from "./pages/trang_chu";
+import KhachHangNguon from "./pages/khach_hang_nguon";
+import CanHoDaGui from "./pages/can_ho_da_gui";
+import CanHoDaDuyet from "./pages/can_ho_da_duyet";
 
 function App() {
   return (
@@ -30,8 +33,11 @@ function App() {
               <Route path="/noi-that" element={<NoiThat />} />
               <Route path="/toa-nha" element={<ToaNha />} />
               <Route path="/truc-can-ho" element={<TrucCanHo />} />
-              <Route path="/khach-hang" element={<KhachHang />} />
+              <Route path="/cham-soc-khach-hang" element={<KhachHang />} />
               <Route path="/nguoi-dung" element={<NguoiDung />} />
+              <Route path="/khach-hang-nguon" element={<KhachHangNguon />} />
+              <Route path="/can-ho-da-gui" element={<CanHoDaGui />} />
+              <Route path="/can-ho-da-duyet" element={<CanHoDaDuyet />} />
             </Routes>
           }
         />

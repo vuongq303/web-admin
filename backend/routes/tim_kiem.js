@@ -14,11 +14,9 @@ router.get("/", function (req, res) {
   }
   const data = jwt.verify(jwt_token, env.JWT_KEY);
   var sql =
-    "select id, khach_hang, gia_ban, gia_thue, trang_thai, du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho from can_ho";
+    "select id, danh_dau, gia_ban, gia_thue, trang_thai, du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho from can_ho";
   if (data.phan_quyen === "Admin") {
-    sql = `select can_ho.*, khach_hang.ten_khach_hang, khach_hang.so_dien_thoai, khach_hang.loai_giao_dich
-      from can_ho
-      join khach_hang on can_ho.khach_hang = khach_hang.id`;
+    sql = `select * from can_ho`;
   }
 
   const {

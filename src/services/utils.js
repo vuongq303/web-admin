@@ -8,6 +8,13 @@ export const phanQuyenNguoiDung = ["Admin", "Nhân viên", "Quản lý", "CSKH"]
 
 export const trangThaiDuAn = ["Còn bán", "Ngừng bán"];
 
+export const danhDauCanHo = [
+  { mau_sac: "", noi_dung: "Mặc định" },
+  { mau_sac: "yellow", noi_dung: "Vàng (Căn giá rẻ)" },
+  { mau_sac: "red", noi_dung: "Đỏ (Căn ngoại giao, không gọi trực tiếp chủ nhà)" },
+  { mau_sac: "orange", noi_dung: "Cam (Căn kết hợp)" },
+];
+
 export const locGiaCanHo = [
   "Giá bán tăng dần",
   "Giá bán giảm dần",

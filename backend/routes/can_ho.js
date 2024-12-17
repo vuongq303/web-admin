@@ -6,27 +6,42 @@ const { join } = require("path");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const env = require("../env/get_env");
+const momnet = require("moment");
+const now = momnet();
 
 router.get("/", async function (req, res) {
-  const jwt_token = req.headers["authorization"];
+  try {
+    const jwt_token = req.headers["authorization"];
+    if (!jwt_token) {
+      return res.status(401).send("Not allowed");
+    }
+    const data = jwt.verify(jwt_token, env.JWT_KEY);
 
-  if (!jwt_token) {
-    return res.status(401).send("Not allowed");
+    var sql = `select id, danh_dau,
+    gia_ban, gia_thue,
+    trang_thai, du_an,
+    dien_tich, so_phong_ngu,
+    so_phong_tam, huong_can_ho,
+    loai_can_ho, noi_that,
+    ghi_chu, nguoi_cap_nhat,
+    hinh_anh, ten_toa_nha,
+    truc_can_ho from can_ho
+    WHERE trang_thai = "Còn bán"`;
+
+    if (data.phan_quyen === "Admin") {
+      sql = `select * from can_ho`;
+    }
+
+    connect.query(sql, function (err, result, fields) {
+      if (err) throw err;
+      res.status(200).send({ response: result, role: data.phan_quyen });
+    });
+  } catch (error) {
+    console.error("Lỗi khi lấy thông tin căn hộ:", error.message);
+    return res
+      .status(500)
+      .send({ response: "Lỗi máy chủ, vui lòng thử lại sau", type: false });
   }
-
-  const data = jwt.verify(jwt_token, env.JWT_KEY);
-  var sql =
-    "select id, khach_hang, gia_ban, gia_thue, trang_thai, du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho from can_ho";
-  if (data.phan_quyen === "Admin") {
-    sql = `select can_ho.*, khach_hang.ten_khach_hang, khach_hang.so_dien_thoai, khach_hang.loai_giao_dich
-    from can_ho
-    join khach_hang on can_ho.khach_hang =  khach_hang.id`;
-  }
-
-  connect.query(sql, function (err, result, fields) {
-    if (err) throw err;
-    res.status(200).send({ response: result, role: data.phan_quyen });
-  });
 });
 
 router.post(
@@ -138,13 +153,14 @@ const executeQuery = (sql, params) => {
 
 router.post("/them-can-ho", async (req, res) => {
   try {
+    const jwt_token = req.headers["authorization"];
+    const data = jwt.verify(jwt_token, env.JWT_KEY);
+
     const {
-      ten_khach_hang,
+      chu_can_ho,
       so_dien_thoai,
       ma_can_ho,
       ten_toa_nha,
-      loai_giao_dich,
-      ngay_ki_hop_dong,
       ten_du_an,
       dien_tich,
       so_phong_ngu,
@@ -153,11 +169,11 @@ router.post("/them-can-ho", async (req, res) => {
       loai_can_ho,
       noi_that,
       mo_ta,
-      nguoi_cap_nhat,
       gia_ban,
       gia_thue,
       truc_can_ho,
       trang_thai,
+      danh_dau,
     } = req.body;
 
     const sql =
@@ -174,26 +190,15 @@ router.post("/them-can-ho", async (req, res) => {
         .json({ response: "Căn hộ đã tồn tại", type: false });
     }
 
-    const sqlKhachHang = `
-        INSERT INTO khach_hang 
-        (ten_khach_hang, so_dien_thoai, loai_giao_dich, ngay_ki_hop_dong, ghi_chu) 
-        VALUES (?, ?, ?, ?, ?)`;
-    const khachHangResult = await executeQuery(sqlKhachHang, [
-      ten_khach_hang,
-      so_dien_thoai,
-      loai_giao_dich,
-      ngay_ki_hop_dong,
-      "Trống",
-    ]);
-    const idKhachHang = khachHangResult.insertId;
-
     const sqlCanHo = `
         INSERT INTO can_ho 
-        (ma_can_ho, khach_hang, gia_ban, gia_thue, du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, trang_thai,ten_toa_nha,truc_can_ho) 
-        VALUES (?, ? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?, ?, ?, ?, ?)`;
+        (ma_can_ho, chu_can_ho, so_dien_thoai, gia_ban, gia_thue, du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, trang_thai,ten_toa_nha,truc_can_ho, danh_dau) 
+        VALUES (?, ? ,? ,? ,? ,? , ?, ?, ? ,? ,? ,? , ?, ?, ?, ?, ?, ?)`;
+
     await executeQuery(sqlCanHo, [
       ma_can_ho,
-      idKhachHang,
+      chu_can_ho,
+      so_dien_thoai,
       gia_ban,
       gia_thue,
       ten_du_an,
@@ -204,10 +209,11 @@ router.post("/them-can-ho", async (req, res) => {
       loai_can_ho,
       noi_that,
       mo_ta,
-      nguoi_cap_nhat,
+      `${data.ho_ten} đã cập nhật ngày ${now.format("DD/MM/YYYY")}`,
       trang_thai,
       ten_toa_nha,
       truc_can_ho,
+      danh_dau,
     ]);
 
     return res
@@ -215,6 +221,95 @@ router.post("/them-can-ho", async (req, res) => {
       .json({ response: "Thêm căn hộ thành công", type: true });
   } catch (error) {
     console.error("Lỗi khi thêm căn hộ:", error.message);
+    return res
+      .status(500)
+      .json({ response: "Lỗi máy chủ, vui lòng thử lại sau", type: false });
+  }
+});
+
+router.post("/cap-nhat-can-ho", async (req, res) => {
+  try {
+    const jwt_token = req.headers["authorization"];
+    const data = jwt.verify(jwt_token, env.JWT_KEY);
+
+    var {
+      chu_can_ho,
+      so_dien_thoai,
+      ma_can_ho,
+      ten_toa_nha,
+      ten_du_an,
+      dien_tich,
+      so_phong_ngu,
+      so_phong_tam,
+      huong_can_ho,
+      loai_can_ho,
+      noi_that,
+      mo_ta,
+      gia_ban,
+      gia_thue,
+      truc_can_ho,
+      trang_thai,
+      danh_dau,
+      id,
+    } = req.body;
+
+    const sql =
+      "SELECT * FROM can_ho WHERE ma_can_ho = ? and ten_toa_nha = ? and truc_can_ho = ?";
+    const checkMaCanHoExist = await executeQuery(sql, [
+      ma_can_ho,
+      ten_toa_nha,
+      truc_can_ho,
+    ]);
+
+    if (checkMaCanHoExist.length === 0) {
+      return res
+        .status(200)
+        .json({ response: "Không tìm thấy căn hộ", type: false });
+    }
+
+    if (trang_thai === "Ngừng bán") {
+      danh_dau = "gray";
+    }
+
+    const sqlCanHo = `
+        UPDATE can_ho SET
+        ma_can_ho = ?, chu_can_ho = ?,
+        so_dien_thoai = ?, gia_ban = ?,
+        gia_thue = ?, du_an = ?,
+        dien_tich = ?, so_phong_ngu = ?,
+        so_phong_tam = ?, huong_can_ho = ?,
+        loai_can_ho = ?, noi_that = ?,
+        ghi_chu = ?, nguoi_cap_nhat = ?,
+        trang_thai = ?, ten_toa_nha = ?,
+        truc_can_ho =?, danh_dau = ? WHERE id = ?`;
+
+    await executeQuery(sqlCanHo, [
+      ma_can_ho,
+      chu_can_ho,
+      so_dien_thoai,
+      gia_ban,
+      gia_thue,
+      ten_du_an,
+      dien_tich,
+      so_phong_ngu,
+      so_phong_tam,
+      huong_can_ho,
+      loai_can_ho,
+      noi_that,
+      mo_ta,
+      `${data.ho_ten} đã cập nhật ngày ${now.format("DD/MM/YYYY")}`,
+      trang_thai,
+      ten_toa_nha,
+      truc_can_ho,
+      danh_dau,
+      id,
+    ]);
+
+    return res
+      .status(200)
+      .json({ response: "Cập nhật căn hộ thành công", type: true });
+  } catch (error) {
+    console.error("Lỗi khi Cập nhật căn hộ:", error.message);
     return res
       .status(500)
       .json({ response: "Lỗi máy chủ, vui lòng thử lại sau", type: false });
