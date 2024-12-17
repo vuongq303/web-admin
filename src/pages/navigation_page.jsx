@@ -131,7 +131,7 @@ function SizeBar() {
           icon={<FontAwesomeIcon icon={faPerson} />}
           onClick={() => navigator("/nguoi-dung")}
         >
-          Nhân viên
+          Nhân sự
         </MenuItem>
         <MenuItem
           icon={<FontAwesomeIcon icon={faUser} />}

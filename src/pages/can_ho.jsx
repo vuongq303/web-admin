@@ -55,6 +55,30 @@ export default function CanHo() {
   const giaThueDenRef = useRef(null);
   const danhDauCanHoRef = useRef(null);
 
+  async function guiYeuCau(id) {
+    const {
+      status,
+      data: { response, type },
+    } = await axios.post(
+      `${json_config.url_connect}/yeu-cau/gui-yeu-cau`,
+      { can_ho: id },
+      {
+        headers: {
+          Authorization: getRoleNguoiDung(),
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (status === 200) {
+      if (type) {
+        toast.success(response);
+        return;
+      }
+      toast.error(response);
+      return;
+    }
+  }
+
   async function getData() {
     try {
       const {
@@ -1152,7 +1176,7 @@ export default function CanHo() {
                 <br />- {item.loai_can_ho}
                 <br />- {item.noi_that}
                 <br />- {item.ghi_chu}
-                <br />- {item.nguoi_cap_nhat}
+                <br />- <strong>{item.nguoi_cap_nhat}</strong>
               </td>
               <td className="align-middle">
                 {role === "Admin" && (
@@ -1192,7 +1216,11 @@ export default function CanHo() {
                   Hình ảnh
                 </button>
                 <br />
-                <button type="button" className="btn btn-success my-2">
+                <button
+                  onClick={() => guiYeuCau(item.id)}
+                  type="button"
+                  className="btn btn-success my-2"
+                >
                   Yêu cầu
                 </button>
               </td>
