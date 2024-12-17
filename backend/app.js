@@ -11,6 +11,7 @@ const nguoiDungRouter = require("./routes/nguoi_dung");
 const khachHangRouter = require("./routes/khach_hang");
 const timKiemRouter = require("./routes/tim_kiem");
 const khachHangNguonRouter = require("./routes/khach_hang_nguon");
+const yeuCauRouter = require("./routes/yeu_cau");
 
 var app = express();
 app.use(logger("dev"));
@@ -27,5 +28,6 @@ app.use("/nguoi-dung", nguoiDungRouter);
 app.use("/khach-hang", khachHangRouter);
 app.use("/tim-kiem", timKiemRouter);
 app.use("/khach-hang-nguon", khachHangNguonRouter);
+app.use("/yeu-cau", yeuCauRouter);
 
 module.exports = app;

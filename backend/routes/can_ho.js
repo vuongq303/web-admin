@@ -26,7 +26,7 @@ router.get("/", async function (req, res) {
     ghi_chu, nguoi_cap_nhat,
     hinh_anh, ten_toa_nha,
     truc_can_ho from can_ho
-    WHERE trang_thai = "Còn bán"`;
+    WHERE trang_thai = 'Còn bán'`;
 
     if (data.phan_quyen === "Admin") {
       sql = `select * from can_ho`;
