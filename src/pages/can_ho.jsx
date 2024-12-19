@@ -1,16 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./css/css.css";
 import axios from "axios";
 import json_config from "../config.json";
 import { Button, Modal } from "react-bootstrap";
 import {
   danhDauCanHo,
-  dataDuAn,
-  dataHuongCanHo,
-  dataLoaiCanHo,
-  dataNoiThat,
-  dataToaNha,
-  dataTrucCanHo,
   getRoleNguoiDung,
   loaiGiaoDichKhachHang,
   locGiaCanHo,
@@ -18,7 +11,6 @@ import {
 } from "../services/utils";
 import PreviewImage from "./components/preview_image";
 import { toast, ToastContainer } from "react-toastify";
-import "./css/css.css";
 import { dataCanHoDefault } from "../data/default_data";
 
 export default function CanHo() {
@@ -29,6 +21,13 @@ export default function CanHo() {
   const [showModalHinhAnh, setShowModalHinhAnh] = useState(false);
   const [dataUpdate, setDataUpdate] = useState(dataCanHoDefault);
   const [showImageUpdate, setShowImageUpdate] = useState([]);
+
+  const [dataDuAn, setDataDuAn] = useState([]);
+  const [dataHuongCanHo, setDataHuongCanHo] = useState([]);
+  const [dataLoaiCanHo, setDataLoaiCanHo] = useState([]);
+  const [dataNoiThat, setDataNoiThat] = useState([]);
+  const [dataToaNha, setDataToaNha] = useState([]);
+  const [dataTrucCanHo, setDataTrucCanHo] = useState([]);
 
   const tenToaNhaRef = useRef(null);
   const maCanHoRef = useRef(null);
@@ -54,6 +53,52 @@ export default function CanHo() {
   const giaThueTuRef = useRef(null);
   const giaThueDenRef = useRef(null);
   const danhDauCanHoRef = useRef(null);
+
+  useEffect(() => {
+    (async function () {
+      try {
+        const { status, data: response } = await axios.get(
+          `${json_config.url_connect}/thong-tin-du-an`
+        );
+
+        if (status == 200) {
+          const {
+            du_an,
+            huong_can_ho,
+            loai_can_ho,
+            noi_that,
+            toa_nha,
+            truc_can_ho,
+          } = response;
+
+          setDataDuAn(du_an);
+          setDataHuongCanHo(huong_can_ho);
+          setDataLoaiCanHo(loai_can_ho);
+          setDataNoiThat(noi_that);
+          setDataToaNha(toa_nha);
+          setDataTrucCanHo(truc_can_ho);
+        }
+        await getData();
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  }, []);
+
+  function showImage(item) {
+    if (item.hinh_anh) {
+      let arrayHinhAnh = item.hinh_anh.split(",");
+      setShowImageUpdate(
+        arrayHinhAnh.map(
+          (img) => `${json_config.url_connect}/can-ho/${item.id}/${img}`
+        )
+      );
+    } else {
+      setShowImageUpdate([]);
+    }
+    setDataUpdate(item);
+    setShowModalHinhAnh(true);
+  }
 
   async function guiYeuCau(id) {
     const {
@@ -82,6 +127,7 @@ export default function CanHo() {
   async function getData() {
     try {
       const {
+        status,
         data: { response, role },
       } = await axios.get(`${json_config.url_connect}/can-ho`, {
         headers: {
@@ -89,8 +135,11 @@ export default function CanHo() {
           "Content-Type": "application/json",
         },
       });
-      setRole(role);
-      setData(response);
+
+      if (status === 200) {
+        setRole(role);
+        setData(response);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -169,17 +218,16 @@ export default function CanHo() {
       if (status === 200) {
         toast.success(message);
         if (type) {
-          setShowImageUpdate((pre) => [
-            ...pre,
-            ...images.map(
+          setShowImageUpdate(
+            images.map(
               (img) =>
                 `${json_config.url_connect}/can-ho/${dataUpdate.id}/${img}`
-            ),
-          ]);
+            )
+          );
           setData((prevData) =>
             prevData.map((item) =>
               item.ma_can_ho === dataUpdate.ma_can_ho
-                ? { ...item, hinh_anh: item.hinh_anh + "," + images.join(",") }
+                ? { ...item, hinh_anh: images.join(",") }
                 : item
             )
           );
@@ -310,8 +358,6 @@ export default function CanHo() {
   async function capNhatCanHo() {
     try {
       const data = {
-        ten_toa_nha: tenToaNhaRef.current.value,
-        ma_can_ho: maCanHoRef.current.value,
         chu_can_ho: hoTenChuCanHoRef.current.value,
         so_dien_thoai: soDienThoaiRef.current.value,
         loai_giao_dich: loaiGiaoDichRef.current.value,
@@ -326,7 +372,6 @@ export default function CanHo() {
         gia_thue: giaThueRef.current.value,
         mo_ta: ghiChuRef.current.value,
         trang_thai: trangThaiDuAnRef.current.value,
-        truc_can_ho: trucCanHoRef.current.value,
         ngay_ki_hop_dong: new Date().toISOString(),
         danh_dau: danhDauCanHoRef.current.value,
         id: dataUpdate.id,
@@ -338,7 +383,6 @@ export default function CanHo() {
       if (
         isInvalidInput(data.ten_khach_hang) ||
         isInvalidInput(data.so_dien_thoai) ||
-        isInvalidInput(data.ma_can_ho) ||
         isInvalidInput(data.ten_du_an) ||
         isInvalidInput(data.so_phong_ngu) ||
         isInvalidInput(data.so_phong_tam) ||
@@ -379,10 +423,6 @@ export default function CanHo() {
       toast.error("Đã xảy ra lỗi. Vui lòng thử lại!");
     }
   }
-
-  useEffect(() => {
-    getData();
-  }, []);
 
   return (
     <div>
@@ -442,8 +482,8 @@ export default function CanHo() {
                   className="form-select"
                   aria-label="Default select example"
                 >
-                  {dataToaNha().map((item, index) => (
-                    <option key={item.id} value={item.ten_toa_nha}>
+                  {dataToaNha.map((item, index) => (
+                    <option key={index} value={item.ten_toa_nha}>
                       {item.ten_toa_nha}
                     </option>
                   ))}
@@ -466,8 +506,8 @@ export default function CanHo() {
                   ref={trucCanHoRef}
                   aria-label="Default select example"
                 >
-                  {dataTrucCanHo().map((item) => (
-                    <option key={item.id} value={item.truc_can}>
+                  {dataTrucCanHo.map((item, index) => (
+                    <option key={index} value={item.truc_can}>
                       {item.truc_can}
                     </option>
                   ))}
@@ -547,8 +587,8 @@ export default function CanHo() {
                   className="form-select"
                   aria-label="Default select example"
                 >
-                  {dataDuAn().map((item) => (
-                    <option key={item.id} value={item.ten_du_an}>
+                  {dataDuAn.map((item, index) => (
+                    <option key={index} value={item.ten_du_an}>
                       {item.ten_du_an}
                     </option>
                   ))}
@@ -586,8 +626,8 @@ export default function CanHo() {
                   className="form-select"
                   aria-label="Default select example"
                 >
-                  {dataLoaiCanHo().map((item) => (
-                    <option key={item.id} value={item.loai_can_ho}>
+                  {dataLoaiCanHo.map((item, index) => (
+                    <option key={index} value={item.loai_can_ho}>
                       {item.loai_can_ho}
                     </option>
                   ))}
@@ -612,8 +652,8 @@ export default function CanHo() {
                   className="form-select"
                   aria-label="Default select example"
                 >
-                  {dataHuongCanHo().map((item) => (
-                    <option key={item.id} value={item.huong_can_ho}>
+                  {dataHuongCanHo.map((item, index) => (
+                    <option key={index} value={item.huong_can_ho}>
                       {item.huong_can_ho}
                     </option>
                   ))}
@@ -628,8 +668,8 @@ export default function CanHo() {
                   className="form-select"
                   aria-label="Default select example"
                 >
-                  {dataNoiThat().map((item) => (
-                    <option key={item.id} value={item.loai_noi_that}>
+                  {dataNoiThat.map((item, index) => (
+                    <option key={index} value={item.loai_noi_that}>
                       {item.loai_noi_that}
                     </option>
                   ))}
@@ -701,12 +741,13 @@ export default function CanHo() {
               <div className="form-floating">
                 <select
                   ref={tenToaNhaRef}
+                  disabled
                   defaultValue={dataUpdate.ten_toa_nha}
                   className="form-select"
                   aria-label="Default select example"
                 >
-                  {dataToaNha().map((item) => (
-                    <option key={item.id} value={item.ten_toa_nha}>
+                  {dataToaNha.map((item, index) => (
+                    <option key={index} value={item.ten_toa_nha}>
                       {item.ten_toa_nha}
                     </option>
                   ))}
@@ -716,6 +757,7 @@ export default function CanHo() {
               <div className="form-floating">
                 <input
                   ref={maCanHoRef}
+                  disabled
                   type="text"
                   defaultValue={dataUpdate.ma_can_ho ?? "*"}
                   className="form-control"
@@ -728,11 +770,12 @@ export default function CanHo() {
                 <select
                   className="form-select"
                   ref={trucCanHoRef}
+                  disabled
                   defaultValue={dataUpdate.truc_can_ho}
                   aria-label="Default select example"
                 >
-                  {dataTrucCanHo().map((item) => (
-                    <option key={item.id} value={item.truc_can}>
+                  {dataTrucCanHo.map((item, index) => (
+                    <option key={index} value={item.truc_can}>
                       {item.truc_can}
                     </option>
                   ))}
@@ -818,8 +861,8 @@ export default function CanHo() {
                   className="form-select"
                   aria-label="Default select example"
                 >
-                  {dataDuAn().map((item) => (
-                    <option key={item.id} value={item.ten_du_an}>
+                  {dataDuAn.map((item, index) => (
+                    <option key={index} value={item.ten_du_an}>
                       {item.ten_du_an}
                     </option>
                   ))}
@@ -858,8 +901,8 @@ export default function CanHo() {
                   className="form-select"
                   aria-label="Default select example"
                 >
-                  {dataLoaiCanHo().map((item) => (
-                    <option key={item.id} value={item.loai_can_ho}>
+                  {dataLoaiCanHo.map((item, index) => (
+                    <option key={index} value={item.loai_can_ho}>
                       {item.loai_can_ho}
                     </option>
                   ))}
@@ -885,8 +928,8 @@ export default function CanHo() {
                   className="form-select"
                   aria-label="Default select example"
                 >
-                  {dataHuongCanHo().map((item) => (
-                    <option key={item.id} value={item.huong_can_ho}>
+                  {dataHuongCanHo.map((item, index) => (
+                    <option key={index} value={item.huong_can_ho}>
                       {item.huong_can_ho}
                     </option>
                   ))}
@@ -902,8 +945,8 @@ export default function CanHo() {
                   className="form-select"
                   aria-label="Default select example"
                 >
-                  {dataNoiThat().map((item) => (
-                    <option key={item.id} value={item.loai_noi_that}>
+                  {dataNoiThat.map((item, index) => (
+                    <option key={index} value={item.loai_noi_that}>
                       {item.loai_noi_that}
                     </option>
                   ))}
@@ -1011,8 +1054,8 @@ export default function CanHo() {
           aria-label="Default select example"
         >
           <option value="">Chọn tên dự án</option>
-          {dataDuAn().map((item) => (
-            <option key={item.id} value={item.ten_du_an}>
+          {dataDuAn.map((item, index) => (
+            <option key={index} value={item.ten_du_an}>
               {item.ten_du_an}
             </option>
           ))}
@@ -1023,8 +1066,8 @@ export default function CanHo() {
           aria-label="Default select example"
         >
           <option value=""> Chọn tên tòa nhà</option>
-          {dataToaNha().map((item, index) => (
-            <option key={item.id} value={item.ten_toa_nha}>
+          {dataToaNha.map((item, index) => (
+            <option key={index} value={item.ten_toa_nha}>
               {item.ten_toa_nha}
             </option>
           ))}
@@ -1035,8 +1078,8 @@ export default function CanHo() {
           aria-label="Default select example"
         >
           <option value="">Chọn nội thất</option>
-          {dataNoiThat().map((item) => (
-            <option key={item.id} value={item.loai_noi_that}>
+          {dataNoiThat.map((item, index) => (
+            <option key={index} value={item.loai_noi_that}>
               {item.loai_noi_that}
             </option>
           ))}
@@ -1047,8 +1090,8 @@ export default function CanHo() {
           aria-label="Default select example"
         >
           <option value=""> Chọn loại căn hộ</option>
-          {dataLoaiCanHo().map((item) => (
-            <option key={item.id} value={item.loai_can_selectho}>
+          {dataLoaiCanHo.map((item, index) => (
+            <option key={index} value={item.loai_can_selectho}>
               {item.loai_can_ho}
             </option>
           ))}
@@ -1059,8 +1102,8 @@ export default function CanHo() {
           aria-label="Default select example"
         >
           <option value="">Chọn hướng ban công</option>
-          {dataHuongCanHo().map((item) => (
-            <option key={item.id} value={item.huong_can_ho}>
+          {dataHuongCanHo.map((item, index) => (
+            <option key={index} value={item.huong_can_ho}>
               {item.huong_can_ho}
             </option>
           ))}
@@ -1079,8 +1122,8 @@ export default function CanHo() {
           aria-label="Default select example"
         >
           <option value="">Chọn trục căn hộ</option>
-          {dataTrucCanHo().map((item) => (
-            <option key={item.id} value={item.truc_can}>
+          {dataTrucCanHo.map((item, index) => (
+            <option key={index} value={item.truc_can}>
               {item.truc_can}
             </option>
           ))}
@@ -1151,7 +1194,7 @@ export default function CanHo() {
         </thead>
         <tbody>
           {data.map((item, index) => (
-            <tr key={item.id}>
+            <tr key={index}>
               <td className="align-middle">{index + 1}</td>
               <td className="align-middle">
                 <div
@@ -1193,21 +1236,7 @@ export default function CanHo() {
                 )}
                 <br />
                 <button
-                  onClick={() => {
-                    if (item.hinh_anh) {
-                      let arrayHinhAnh = item.hinh_anh.split(",");
-                      setShowImageUpdate(
-                        arrayHinhAnh.map(
-                          (img) =>
-                            `${json_config.url_connect}/can-ho/${item.id}/${img}`
-                        )
-                      );
-                    } else {
-                      setShowImageUpdate([]);
-                    }
-                    setDataUpdate(item);
-                    setShowModalHinhAnh(true);
-                  }}
+                  onClick={() => showImage(item)}
                   type="button"
                   className={`btn ${
                     item.hinh_anh ? "btn-primary" : "btn-info"

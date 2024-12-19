@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./css/css.css";
 import axios from "axios";
 import json_config from "../config.json";
 import { getRoleNguoiDung } from "../services/utils";
-import "./css/css.css";
 import { toast, ToastContainer } from "react-toastify";
 
 export default function CanHoDaDuyet() {

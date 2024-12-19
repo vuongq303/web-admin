@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-const connect = require("../bin/connect");
+const connect = require("../sql/connect");
 const uuid = require("uuid");
 const env = require("../env/get_env");
 const jwt = require("jsonwebtoken");

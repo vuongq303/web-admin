@@ -1,7 +1,6 @@
 var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
-var logger = require("morgan");
 var cors = require("cors");
 
 var indexRouter = require("./routes/index");
@@ -14,7 +13,6 @@ const khachHangNguonRouter = require("./routes/khach_hang_nguon");
 const yeuCauRouter = require("./routes/yeu_cau");
 
 var app = express();
-app.use(logger("dev"));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

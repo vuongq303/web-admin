@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-var connect = require("../bin/connect");
+var connect = require("../sql/connect");
 
 router.get("/", function (req, res) {
   connect.query("SELECT * FROM khach_hang", function (err, result, fields) {

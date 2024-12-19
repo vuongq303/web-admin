@@ -1,10 +1,9 @@
 import axios from "axios";
+import "./css/css.css";
 import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import url_config from "../config.json";
-import "../pages/css/login.css";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 export default function DangNhap() {
   const navigation = useNavigate();

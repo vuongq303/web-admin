@@ -21,26 +21,24 @@ function App() {
   return (
     <div className="App">
       <BrowserRouter basename="/">
-        <NavigationPage
-          child={
-            <Routes>
-              <Route path="/" element={<TrangChu />} />
-              <Route path="/dang-nhap" element={<DangNhap />} />
-              <Route path="/can-ho" element={<CanHo />} />
-              <Route path="/du-an" element={<DuAn />} />
-              <Route path="/huong-can-ho" element={<HuongCanHo />} />
-              <Route path="/loai-can-ho" element={<LoaiCanHo />} />
-              <Route path="/noi-that" element={<NoiThat />} />
-              <Route path="/toa-nha" element={<ToaNha />} />
-              <Route path="/truc-can-ho" element={<TrucCanHo />} />
-              <Route path="/cham-soc-khach-hang" element={<KhachHang />} />
-              <Route path="/nguoi-dung" element={<NguoiDung />} />
-              <Route path="/khach-hang-nguon" element={<KhachHangNguon />} />
-              <Route path="/can-ho-da-gui" element={<CanHoDaGui />} />
-              <Route path="/can-ho-da-duyet" element={<CanHoDaDuyet />} />
-            </Routes>
-          }
-        />
+        <NavigationPage>
+          <Routes>
+            <Route path="/" element={<TrangChu />} />
+            <Route path="/dang-nhap" element={<DangNhap />} />
+            <Route path="/can-ho" element={<CanHo />} />
+            <Route path="/du-an" element={<DuAn />} />
+            <Route path="/huong-can-ho" element={<HuongCanHo />} />
+            <Route path="/loai-can-ho" element={<LoaiCanHo />} />
+            <Route path="/noi-that" element={<NoiThat />} />
+            <Route path="/toa-nha" element={<ToaNha />} />
+            <Route path="/truc-can-ho" element={<TrucCanHo />} />
+            <Route path="/cham-soc-khach-hang" element={<KhachHang />} />
+            <Route path="/nguoi-dung" element={<NguoiDung />} />
+            <Route path="/khach-hang-nguon" element={<KhachHangNguon />} />
+            <Route path="/can-ho-da-gui" element={<CanHoDaGui />} />
+            <Route path="/can-ho-da-duyet" element={<CanHoDaDuyet />} />
+          </Routes>
+        </NavigationPage>
       </BrowserRouter>
     </div>
   );

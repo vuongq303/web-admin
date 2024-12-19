@@ -3,7 +3,6 @@ import React, { useEffect, useState, useRef } from "react";
 import json_config from "../config.json";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
-import { dateToText, loaiGiaoDichKhachHang } from "../services/utils";
 
 export default function KhachHangNguon() {
   const [data, setData] = useState([]);

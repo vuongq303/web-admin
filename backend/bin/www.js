@@ -1,7 +1,7 @@
 var app = require("../app");
 var http = require("http");
 const { WebSocketServer } = require("ws");
-const mysql = require("../bin/connect");
+const mysql = require("../sql/connect");
 
 var port = process.env.PORT || "3000";
 
