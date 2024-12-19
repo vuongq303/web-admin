@@ -2,7 +2,7 @@ export const dataCanHoDefault = {
   id: 0,
   gia_ban: 0,
   gia_thue: 0,
-  trang_thai: "",
+  trang_thai: 0,
   chu_can_ho: "",
   ma_can_ho: "",
   du_an: "",

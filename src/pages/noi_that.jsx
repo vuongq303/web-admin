@@ -36,7 +36,7 @@ export default function DuAn() {
 
       const { status, data } = await axios.post(
         `${json_config.url_connect}/thong-tin-du-an/them-noi-that`,
-        { noi_that: noiThatRef.current.value }
+        { loai_noi_that: noiThatRef.current.value }
       );
 
       if (status === 200) {
@@ -54,6 +54,7 @@ export default function DuAn() {
       console.log(error);
     }
   }
+
   async function capNhatnoiThat() {
     try {
       if (noiThatUpdateRef.current.value === "") {
@@ -190,7 +191,7 @@ export default function DuAn() {
                   }}
                   className="btn btn-primary"
                 >
-                 Chi tiết
+                  Chi tiết
                 </button>
               </td>
             </tr>

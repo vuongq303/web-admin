@@ -10,29 +10,15 @@ router.get("/", async function (req, res) {
     var condition = [];
     const jwt_token = req.headers["authorization"];
 
-    if (!jwt_token) {
-      return res.status(401).send("Not allowed");
-    }
     const data = jwt.verify(jwt_token, env.JWT_KEY);
     var sql =
-      "select id, danh_dau, gia_ban, gia_thue, trang_thai, du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho from can_ho";
+      "SELECT id, danh_dau, gia_ban, gia_thue, trang_thai, du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho FROM can_ho";
     if (data.phan_quyen === "Admin") {
-      sql = `select * from can_ho`;
+      sql = `SELECT * FROM can_ho`;
     }
 
     const {
-      ten_du_an,
-      ten_toa_nha,
-      loai_noi_that,
-      loai_can_ho,
-      huong_can_ho,
-      so_phong_ngu,
-      truc_can_ho,
-      loc_gia,
-      gia_ban_tu,
-      gia_ban_den,
-      gia_thue_tu,
-      gia_thue_den,
+      ten_du_an, ten_toa_nha, loai_noi_that, loai_can_ho, huong_can_ho, so_phong_ngu, truc_can_ho, loc_gia, gia_tu, gia_den
     } = req.query;
 
     if (ten_du_an !== "") {
@@ -70,50 +56,48 @@ router.get("/", async function (req, res) {
       value.push(truc_can_ho);
     }
 
-    if (gia_ban_tu !== "" && gia_ban_den !== "") {
-      condition.push("gia_ban between ? and ?");
-      value.push(...[gia_ban_tu, gia_ban_den]);
-    }
-
-    if (gia_thue_tu !== "" && gia_thue_den !== "") {
-      condition.push("gia_thue between ? and ?");
-      value.push(...[gia_thue_tu, gia_thue_den]);
+    if (gia_tu !== "" && gia_den !== "") {
+      if (loc_gia === "Giá bán tăng dần" || loc_gia === "Giá bán giảm dần") {
+        condition.push("gia_ban between ? and ?");
+        value.push(...[gia_tu, gia_den]);
+      } else if (loc_gia === "Giá thuê tăng dần" || loc_gia === "Giá thuê giảm dần") {
+        condition.push("gia_thue between ? and ?");
+        value.push(...[gia_tu, gia_den]);
+      }
     }
 
     if (condition.length > 0) {
       const filter = condition.join(" and ");
       sql += ` where ${filter}`;
+
       if (loc_gia === "Giá bán tăng dần" || loc_gia === "Giá bán giảm dần") {
         sql += " and gia_ban > 0";
-      } else if (
-        loc_gia === "Giá thuê tăng dần" ||
-        loc_gia === "Giá thuê giảm dần"
+      } else if (loc_gia === "Giá thuê tăng dần" || loc_gia === "Giá thuê giảm dần"
       ) {
         sql += " and gia_thue > 0";
       }
     } else {
       if (loc_gia === "Giá bán tăng dần" || loc_gia === "Giá bán giảm dần") {
         sql += " where gia_ban > 0";
-      } else if (
-        loc_gia === "Giá thuê tăng dần" ||
-        loc_gia === "Giá thuê giảm dần"
+      } else if (loc_gia === "Giá thuê tăng dần" || loc_gia === "Giá thuê giảm dần"
       ) {
         sql += " where gia_thue > 0";
       }
     }
 
+    sql += " ORDER BY trang_thai ASC"
     switch (loc_gia) {
       case "Giá bán tăng dần":
-        sql += " order by gia_ban asc";
+        sql += ", gia_ban ASC";
         break;
       case "Giá bán giảm dần":
-        sql += " order by gia_ban desc";
+        sql += ", gia_ban DESC";
         break;
       case "Giá thuê tăng dần":
-        sql += " order by gia_thue asc";
+        sql += ", gia_thue ASC";
         break;
       case "Giá thuê giảm dần":
-        sql += " order by gia_thue desc";
+        sql += ", gia_thue DESC";
         break;
       default:
         break;
@@ -121,7 +105,7 @@ router.get("/", async function (req, res) {
     const result = await executeQuery(sql, value);
     res.status(200).send(result);
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
     res.status(500).send([]);
   }
 });

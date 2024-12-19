@@ -12,14 +12,9 @@ var router = express.Router();
 router.get("/", async function (req, res) {
   try {
     const jwt_token = req.headers["authorization"];
-
-    if (!jwt_token) {
-      return res.status(401).json({ response: "Not allowed", type: false });
-    }
-
     const data = jwt.verify(jwt_token, env.JWT_KEY);
 
-    var sql = `select id, danh_dau,
+    var sql = `SELECT id, danh_dau,
     gia_ban, gia_thue,
     trang_thai, du_an,
     dien_tich, so_phong_ngu,
@@ -27,11 +22,11 @@ router.get("/", async function (req, res) {
     loai_can_ho, noi_that,
     ghi_chu, nguoi_cap_nhat,
     hinh_anh, ten_toa_nha,
-    truc_can_ho from can_ho
-    WHERE trang_thai = 'Còn bán'`;
+    truc_can_ho FROM can_ho
+    WHERE trang_thai = 0`;
 
     if (data.phan_quyen === "Admin") {
-      sql = `select * from can_ho`;
+      sql = `SELECT * FROM can_ho ORDER BY trang_thai ASC`;
     }
 
     const result = await executeQuery(sql);
@@ -97,7 +92,7 @@ router.post("/them-can-ho", async (req, res) => {
     const jwt_token = req.headers["authorization"];
     const data = jwt.verify(jwt_token, env.JWT_KEY);
 
-    const {
+    var {
       chu_can_ho, so_dien_thoai, ma_can_ho, ten_toa_nha, ten_du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, mo_ta, gia_ban, gia_thue, truc_can_ho, trang_thai, danh_dau,
     } = req.body;
 
@@ -136,7 +131,7 @@ router.post("/cap-nhat-can-ho", async (req, res) => {
       chu_can_ho, so_dien_thoai, ten_du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, mo_ta, gia_ban, gia_thue, trang_thai, danh_dau, id
     } = req.body;
 
-    if (trang_thai === "Ngừng bán") {
+    if (trang_thai == 1) {
       danh_dau = "gray";
     }
 

@@ -74,14 +74,21 @@ router.get("/truc-can-ho", function (_, res) {
   });
 });
 
-router.get("/toa-nha-du-an", function (_, res) {
-  connect.query(
-    "SELECT t.id, t.ten_toa_nha, d.ten_du_an FROM toa_nha t INNER JOIN du_an d ON t.du_an = d.id;",
-    function (err, result, fields) {
-      if (err) throw err;
-      res.status(200).json(result);
-    }
-  );
+router.get("/toa-nha-du-an", async function (_, res) {
+  try {
+    const result = {};
+
+    const resultDuAn = await executeQuery("SELECT * FROM du_an");
+    result.du_an = resultDuAn;
+
+    const resultToaNhaDuAn = await executeQuery("SELECT t.id, t.ten_toa_nha, d.ten_du_an FROM toa_nha t INNER JOIN du_an d ON t.du_an = d.id");
+    result.toa_nha_du_an = resultToaNhaDuAn;
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error(error)
+    res.status(500).json([])
+  }
 });
 
 router.post("/them-truc-can-ho", function (req, res) {
@@ -104,14 +111,17 @@ router.post("/cap-nhat-truc-can-ho", function (req, res) {
   });
 });
 
-router.post("/them-noi-that", function (req, res) {
-  const { loai_noi_that } = req.body;
+router.post("/them-noi-that", async function (req, res) {
+  try {
+    const { loai_noi_that } = req.body;
 
-  const sql = "insert into noi_that(loai_noi_that) values(?)";
-  connect.query(sql, [loai_noi_that], function (err, result, fields) {
-    if (err) throw err;
+    const sql = "insert into noi_that(loai_noi_that) values(?)";
+    const result = await executeQuery(sql, [loai_noi_that])
     res.status(200).json(result);
-  });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json([])
+  }
 });
 
 router.post("/cap-nhat-noi-that", function (req, res) {

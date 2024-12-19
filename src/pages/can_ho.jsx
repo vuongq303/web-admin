@@ -2,10 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import json_config from "../config.json";
 import { Button, Modal } from "react-bootstrap";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+import * as xlsx from "xlsx";
 import {
   danhDauCanHo,
   getRoleNguoiDung,
-  loaiGiaoDichKhachHang,
   locGiaCanHo,
   trangThaiDuAn,
 } from "../services/utils";
@@ -33,7 +35,6 @@ export default function CanHo() {
   const maCanHoRef = useRef(null);
   const hoTenChuCanHoRef = useRef(null);
   const soDienThoaiRef = useRef(null);
-  const loaiGiaoDichRef = useRef(null);
   const tenDuAnRef = useRef(null);
   const soPhongNguRef = useRef(null);
   const soPhongTamRef = useRef(null);
@@ -47,12 +48,19 @@ export default function CanHo() {
   const hinhAnhRef = useRef(null);
   const trangThaiDuAnRef = useRef(null);
   const trucCanHoRef = useRef(null);
+
   const locGiaCanHoRef = useRef(null);
-  const giaBanTuRef = useRef(null);
-  const giaBanDenRef = useRef(null);
-  const giaThueTuRef = useRef(null);
-  const giaThueDenRef = useRef(null);
+  const giaTuRef = useRef(null);
+  const giaDenRef = useRef(null);
   const danhDauCanHoRef = useRef(null);
+  const tenDuAnTimKiemRef = useRef(null);
+  const tenToaNhaTimKiemRef = useRef(null);
+  const loaiNoiThatTimKiemRef = useRef(null);
+  const loaiCanHoTimKiemRef = useRef(null);
+  const huongCanHoTimKiemRef = useRef(null);
+  const soPhongNguTimKiemRef = useRef(null);
+  const trucCanHoTimKiemRef = useRef(null);
+  const uploadFileExcelRef = useRef(null);
 
   useEffect(() => {
     (async function () {
@@ -139,26 +147,44 @@ export default function CanHo() {
       if (status === 200) {
         setRole(role);
         setData(response);
+        console.log(response);
       }
     } catch (error) {
       console.log(error);
     }
   }
 
+  const downloadImages = async () => {
+    const zip = new JSZip();
+    const folder = zip.folder("images");
+
+    try {
+      for (let i = 0; i < showImageUpdate.length; i++) {
+        const response = await fetch(showImageUpdate[i]);
+        const blob = await response.blob();
+        const fileName = `image${i + 1}.jpg`;
+
+        folder.file(fileName, blob);
+      }
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      saveAs(zipBlob, "images.zip");
+    } catch (error) {
+      console.error("Lỗi khi tải ảnh:", error);
+    }
+  };
+
   async function timKiem() {
     let dataTimKiem = {
-      ten_du_an: tenDuAnRef.current.value,
-      ten_toa_nha: tenToaNhaRef.current.value,
-      loai_noi_that: noiThatRef.current.value,
-      loai_can_ho: loaiCanHoRef.current.value,
-      huong_can_ho: huongBanCongRef.current.value,
-      so_phong_ngu: soPhongNguRef.current.value,
-      truc_can_ho: trucCanHoRef.current.value,
+      ten_du_an: tenDuAnTimKiemRef.current.value,
+      ten_toa_nha: tenToaNhaTimKiemRef.current.value,
+      loai_noi_that: loaiNoiThatTimKiemRef.current.value,
+      loai_can_ho: loaiCanHoTimKiemRef.current.value,
+      huong_can_ho: huongCanHoTimKiemRef.current.value,
+      so_phong_ngu: soPhongNguTimKiemRef.current.value,
+      truc_can_ho: trucCanHoTimKiemRef.current.value,
       loc_gia: locGiaCanHoRef.current.value,
-      gia_ban_tu: giaBanTuRef.current.value,
-      gia_ban_den: giaBanDenRef.current.value,
-      gia_thue_tu: giaThueTuRef.current.value,
-      gia_thue_den: giaThueDenRef.current.value,
+      gia_tu: giaTuRef.current.value,
+      gia_den: giaDenRef.current.value,
     };
 
     const { status, data } = await axios.get(
@@ -178,19 +204,16 @@ export default function CanHo() {
   }
 
   async function lamMoi() {
-    tenDuAnRef.current.value = "";
-    tenDuAnRef.current.value = "";
-    tenToaNhaRef.current.value = "";
-    noiThatRef.current.value = "";
-    loaiCanHoRef.current.value = "";
-    huongBanCongRef.current.value = "";
-    soPhongNguRef.current.value = "";
-    trucCanHoRef.current.value = "";
+    tenDuAnTimKiemRef.current.value = "";
+    tenToaNhaTimKiemRef.current.value = "";
+    loaiNoiThatTimKiemRef.current.value = "";
+    loaiCanHoTimKiemRef.current.value = "";
+    huongCanHoTimKiemRef.current.value = "";
+    soPhongNguTimKiemRef.current.value = "";
+    trucCanHoTimKiemRef.current.value = "";
     locGiaCanHoRef.current.value = "";
-    giaBanTuRef.current.value = "";
-    giaBanDenRef.current.value = "";
-    giaThueTuRef.current.value = "";
-    giaThueDenRef.current.value = "";
+    giaTuRef.current.value = "";
+    giaDenRef.current.value = "";
     await getData();
   }
 
@@ -290,7 +313,6 @@ export default function CanHo() {
         ma_can_ho: maCanHoRef.current.value,
         chu_can_ho: hoTenChuCanHoRef.current.value,
         so_dien_thoai: soDienThoaiRef.current.value,
-        loai_giao_dich: loaiGiaoDichRef.current.value,
         ten_du_an: tenDuAnRef.current.value,
         so_phong_ngu: soPhongNguRef.current.value,
         so_phong_tam: soPhongTamRef.current.value,
@@ -360,7 +382,6 @@ export default function CanHo() {
       const data = {
         chu_can_ho: hoTenChuCanHoRef.current.value,
         so_dien_thoai: soDienThoaiRef.current.value,
-        loai_giao_dich: loaiGiaoDichRef.current.value,
         ten_du_an: tenDuAnRef.current.value,
         so_phong_ngu: soPhongNguRef.current.value,
         so_phong_tam: soPhongTamRef.current.value,
@@ -424,6 +445,30 @@ export default function CanHo() {
     }
   }
 
+  // const uploadFileExcel = () => {
+  //   try {
+  //     const fileExcel = uploadFileExcelRef.current.files[0];
+  //     if (!fileExcel) {
+  //       console.error("No file selected!");
+  //       return;
+  //     }
+
+  //     const reader = new FileReader();
+  //     reader.onload = (event) => {
+  //       const data = event.target.result;
+  //       const workbook = xlsx.read(data, { type: "array" });
+  //       const sheetName = workbook.SheetNames[0];
+  //       const worksheet = workbook.Sheets[sheetName];
+  //       const json = xlsx.utils.sheet_to_json(worksheet);
+  //       console.log(json);
+  //     };
+
+  //     reader.readAsArrayBuffer(fileExcel);
+  //   } catch (error) {
+  //     console.error("Error while uploading Excel file:", error);
+  //   }
+  // };
+
   return (
     <div>
       <ToastContainer
@@ -434,7 +479,7 @@ export default function CanHo() {
       <div className="d-flex justify-content-start m-2">
         <div className="d-flex justify-content-between align-items-center w-100">
           {role !== "Nhân viên" ? (
-            <div>
+            <div className="d-flex align-items-center">
               <button
                 type="button"
                 className="btn btn-primary"
@@ -442,19 +487,33 @@ export default function CanHo() {
               >
                 Thêm mới
               </button>
-              <button type="button" className="btn btn-outline-primary ms-2">
-                Nhập dữ liệu excel
+              <input ref={uploadFileExcelRef} type="file" hidden />
+              <button
+                type="button"
+                className="btn btn-outline-primary mx-1"
+                onClick={() => uploadFileExcelRef.current.click()}
+              >
+                Upload file excel
+              </button>
+              <button type="button" className="btn btn-secondary mx-1">
+                Export file excel
               </button>
             </div>
           ) : (
             <div></div>
           )}
           <div className="text-start">
-            <strong>Vàng: Căn giá rẻ</strong>
+            <strong style={{ backgroundColor: "yellow" }}>
+              Vàng: Căn giá rẻ
+            </strong>
             <br />
-            <strong>Đỏ: Căn ngoại giao (Không gọi trực tiếp chủ nhà)</strong>
+            <strong style={{ backgroundColor: "red" }}>
+              Đỏ: Căn ngoại giao (Không gọi trực tiếp chủ nhà)
+            </strong>
             <br />
-            <strong>Cam (Căn kết hợp)</strong>
+            <strong style={{ backgroundColor: "orange" }}>
+              Cam: (Căn kết hợp)
+            </strong>
           </div>
         </div>
         {/*  */}
@@ -539,25 +598,11 @@ export default function CanHo() {
               <div className="form-floating">
                 <select
                   className="form-select"
-                  ref={loaiGiaoDichRef}
-                  aria-label="Default select example"
-                >
-                  {loaiGiaoDichKhachHang.map((item, index) => (
-                    <option key={index} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-                <label htmlFor="floatingInputGrid">Loại giao dịch</label>
-              </div>
-              <div className="form-floating">
-                <select
-                  className="form-select"
                   ref={trangThaiDuAnRef}
                   aria-label="Default select example"
                 >
                   {trangThaiDuAn.map((item, index) => (
-                    <option key={index} value={item}>
+                    <option key={index} value={index}>
                       {item}
                     </option>
                   ))}
@@ -809,27 +854,12 @@ export default function CanHo() {
               <div className="form-floating">
                 <select
                   className="form-select"
-                  ref={loaiGiaoDichRef}
-                  defaultValue={dataUpdate.loai_giao_dich}
-                  aria-label="Default select example"
-                >
-                  {loaiGiaoDichKhachHang.map((item, index) => (
-                    <option key={index} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-                <label htmlFor="floatingInputGrid">Loại giao dịch</label>
-              </div>
-              <div className="form-floating">
-                <select
-                  className="form-select"
                   ref={trangThaiDuAnRef}
                   defaultValue={dataUpdate.trang_thai}
                   aria-label="Default select example"
                 >
                   {trangThaiDuAn.map((item, index) => (
-                    <option key={index} value={item}>
+                    <option key={index} value={index}>
                       {item}
                     </option>
                   ))}
@@ -1043,13 +1073,15 @@ export default function CanHo() {
             >
               Close
             </Button>
-            <Button variant="primary">Tải ảnh xuống</Button>
+            <Button variant="primary" onClick={downloadImages}>
+              Tải ảnh xuống
+            </Button>
           </Modal.Footer>
         </Modal>
       </div>
       <div className="d-flex flex-wrap gap-4 my-5 mx-2">
         <select
-          ref={tenDuAnRef}
+          ref={tenDuAnTimKiemRef}
           className="form-select w-auto"
           aria-label="Default select example"
         >
@@ -1061,7 +1093,7 @@ export default function CanHo() {
           ))}
         </select>
         <select
-          ref={tenToaNhaRef}
+          ref={tenToaNhaTimKiemRef}
           className="form-select w-auto"
           aria-label="Default select example"
         >
@@ -1073,7 +1105,7 @@ export default function CanHo() {
           ))}
         </select>
         <select
-          ref={noiThatRef}
+          ref={loaiNoiThatTimKiemRef}
           className="form-select w-auto"
           aria-label="Default select example"
         >
@@ -1085,7 +1117,7 @@ export default function CanHo() {
           ))}
         </select>
         <select
-          ref={loaiCanHoRef}
+          ref={loaiCanHoTimKiemRef}
           className="form-select w-auto"
           aria-label="Default select example"
         >
@@ -1097,7 +1129,7 @@ export default function CanHo() {
           ))}
         </select>
         <select
-          ref={huongBanCongRef}
+          ref={huongCanHoTimKiemRef}
           className="form-select w-auto"
           aria-label="Default select example"
         >
@@ -1109,7 +1141,7 @@ export default function CanHo() {
           ))}
         </select>
         <input
-          ref={soPhongNguRef}
+          ref={soPhongNguTimKiemRef}
           type="number"
           placeholder="Số phòng ngủ"
           className="form-control w-auto"
@@ -1118,7 +1150,7 @@ export default function CanHo() {
         />
         <select
           className="form-select w-auto"
-          ref={trucCanHoRef}
+          ref={trucCanHoTimKiemRef}
           aria-label="Default select example"
         >
           <option value="">Chọn trục căn hộ</option>
@@ -1141,45 +1173,31 @@ export default function CanHo() {
           ))}
         </select>
         <input
-          ref={giaBanTuRef}
+          ref={giaTuRef}
           type="number"
-          placeholder="Giá bán từ"
+          placeholder="Giá từ"
           className="form-control w-auto"
           aria-label="Sizing example input"
           aria-describedby="inputGroup-sizing-default"
         />
         <input
-          ref={giaBanDenRef}
+          ref={giaDenRef}
           type="number"
           placeholder="Đến giá"
           className="form-control w-auto"
           aria-label="Sizing example input"
           aria-describedby="inputGroup-sizing-default"
         />
-        <input
-          ref={giaThueTuRef}
-          type="number"
-          placeholder="Giá thuê từ"
-          className="form-control w-auto"
-          aria-label="Sizing example input"
-          aria-describedby="inputGroup-sizing-default"
-        />
-        <input
-          ref={giaThueDenRef}
-          type="number"
-          placeholder="Đến giá"
-          className="form-control w-auto"
-          aria-label="Sizing example input"
-          aria-describedby="inputGroup-sizing-default"
-        />
-        <button className="btn btn-primary" onClick={timKiem}>
-          Tìm kiếm
-        </button>
-        <button className="btn btn-outline-primary" onClick={lamMoi}>
-          Làm mới
-        </button>
+        <div>
+          <button className="btn btn-primary" onClick={timKiem}>
+            Tìm kiếm
+          </button>
+          <button className="btn btn-outline-primary mx-2" onClick={lamMoi}>
+            Làm mới
+          </button>
+        </div>
       </div>
-      <table className="table table-light table-sm">
+      <table border={1} className="table table table-striped">
         <thead>
           <tr>
             <th scope="col">STT</th>
@@ -1229,7 +1247,7 @@ export default function CanHo() {
                       setDataUpdate(item);
                       setShowModalUpdate(true);
                     }}
-                    className="btn btn-danger my-2"
+                    className="btn btn-danger my-2 w-75"
                   >
                     Chi tiết
                   </button>
@@ -1238,8 +1256,8 @@ export default function CanHo() {
                 <button
                   onClick={() => showImage(item)}
                   type="button"
-                  className={`btn ${
-                    item.hinh_anh ? "btn-primary" : "btn-info"
+                  className={`btn w-75 ${
+                    item.hinh_anh ? "btn-primary" : "btn-secondary"
                   }`}
                 >
                   Hình ảnh
@@ -1248,9 +1266,13 @@ export default function CanHo() {
                 <button
                   onClick={() => guiYeuCau(item.id)}
                   type="button"
-                  className="btn btn-success my-2"
+                  className="btn w-75 btn-success my-2"
                 >
                   Yêu cầu
+                </button>
+                <br />
+                <button type="button" className="btn w-75 btn-info mb-2">
+                  Xóa tạm thời
                 </button>
               </td>
             </tr>

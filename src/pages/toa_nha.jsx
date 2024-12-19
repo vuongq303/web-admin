@@ -3,22 +3,22 @@ import React, { useEffect, useState, useRef } from "react";
 import json_config from "../config.json";
 import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
-import { dataDuAn } from "../services/utils";
 
 export default function DuAn() {
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
+  const [dataDuAn, setDataDuAn] = useState([]);
 
   const [duAn, setDuAn] = useState(-1);
   const [id, setId] = useState(-1);
   const [duAnUpdate, setDuAnUpdate] = useState(-1);
 
-  const toaNhatRef = useRef(null);
-  const toaNhatUpdateRef = useRef(null);
+  const toaNhaRef = useRef(null);
+  const toaNhaUpdateRef = useRef(null);
 
   function findIdByTenDuAn(tenDuAn) {
-    const result = dataDuAn().find((du_an) => du_an.ten_du_an === tenDuAn);
+    const result = dataDuAn.find((du_an) => du_an.ten_du_an === tenDuAn);
     return result ? result.id : 0;
   }
 
@@ -27,7 +27,9 @@ export default function DuAn() {
       const { data } = await axios.get(
         json_config.url_connect + "/thong-tin-du-an/toa-nha-du-an"
       );
-      setData(data);
+      const { du_an, toa_nha_du_an } = data;
+      setDataDuAn(du_an);
+      setData(toa_nha_du_an);
     } catch (error) {
       console.log(error);
     }
@@ -47,14 +49,14 @@ export default function DuAn() {
 
   async function themtoaNha() {
     try {
-      if (toaNhatRef.current.value === "") {
+      if (toaNhaRef.current.value === "") {
         toast.error("Dữ liệu trống");
         return;
       }
 
       const { status, data } = await axios.post(
         `${json_config.url_connect}/thong-tin-du-an/them-toa-nha`,
-        { toa_nha: toaNhatRef.current.value, du_an: duAn }
+        { toa_nha: toaNhaRef.current.value, du_an: duAn }
       );
 
       if (status === 200) {
@@ -75,10 +77,11 @@ export default function DuAn() {
 
   async function capNhattoaNha() {
     try {
-      if (toaNhatUpdateRef.current.value === "") {
+      if (toaNhaUpdateRef.current.value === "") {
         toast.error("Dữ liệu trống");
         return;
       }
+      
       if (id === -1) {
         toast.error("Không xác định được vị trí");
         return;
@@ -86,7 +89,7 @@ export default function DuAn() {
 
       const { status, data } = await axios.post(
         `${json_config.url_connect}/thong-tin-du-an/cap-nhat-toa-nha`,
-        { toa_nha: toaNhatUpdateRef.current.value, id: id, du_an: duAnUpdate }
+        { toa_nha: toaNhaUpdateRef.current.value, id: id, du_an: duAnUpdate }
       );
 
       if (status === 200) {
@@ -133,7 +136,7 @@ export default function DuAn() {
           <Modal.Body>
             <div className="input-group mb-3">
               <input
-                ref={toaNhatRef}
+                ref={toaNhaRef}
                 placeholder="Thêm tòa nhà..."
                 type="text"
                 className="form-control"
@@ -146,7 +149,7 @@ export default function DuAn() {
                 value={duAn}
                 onChange={changeDuAn}
               >
-                {dataDuAn().map((du_an) => (
+                {dataDuAn.map((du_an) => (
                   <option key={du_an.id} value={du_an.id}>
                     {du_an.ten_du_an}
                   </option>
@@ -176,9 +179,9 @@ export default function DuAn() {
           <Modal.Body>
             <div className="input-group mb-3">
               <input
-                ref={toaNhatUpdateRef}
+                ref={toaNhaUpdateRef}
                 placeholder="Cập nhật tòa nhà..."
-                defaultValue={toaNhatUpdateRef.current}
+                defaultValue={toaNhaUpdateRef.current}
                 type="text"
                 className="form-control"
                 aria-label="Sizing example input"
@@ -190,7 +193,7 @@ export default function DuAn() {
                 onChange={changeDuAnUpdate}
                 aria-label="Default select example"
               >
-                {dataDuAn().map((du_an) => (
+                {dataDuAn.map((du_an) => (
                   <option key={du_an.id} value={du_an.id}>
                     {du_an.ten_du_an}
                   </option>
@@ -230,7 +233,7 @@ export default function DuAn() {
                   type="button"
                   className="btn btn-primary"
                   onClick={() => {
-                    toaNhatUpdateRef.current = item.ten_toa_nha;
+                    toaNhaUpdateRef.current = item.ten_toa_nha;
                     setDuAnUpdate(findIdByTenDuAn(item.ten_du_an));
                     setId(item.id);
                     setShowModalUpdate(true);

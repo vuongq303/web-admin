@@ -145,7 +145,7 @@ function SizeBar() {
 
         <SubMenu
           icon={<FontAwesomeIcon icon={faBuilding} />}
-          label="Data nguồn"
+          label="Sale"
           className="item-menu"
         >
           <MenuItem
