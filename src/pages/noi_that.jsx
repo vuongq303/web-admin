@@ -3,87 +3,93 @@ import React, { useEffect, useState, useRef } from "react";
 import json_config from "../config.json";
 import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
+import Loading from "./components/loading";
 
 export default function DuAn() {
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
-  const [id, setId] = useState(-1);
+  const [dataUpdate, setDataUpdate] = useState([]);
+  const [loading, setLoading] = useState(true);
   const noiThatRef = useRef(null);
-  const noiThatUpdateRef = useRef(null);
-
-  async function getData() {
-    try {
-      const { data } = await axios.get(
-        json_config.url_connect + "/thong-tin-du-an/noi-that"
-      );
-      setData(data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
 
   useEffect(() => {
-    getData();
+    (async function getData() {
+      try {
+        const { data } = await axios.get(
+          json_config.url_connect + "/thong-tin-du-an/noi-that"
+        );
+        setData(data);
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
   }, []);
 
-  async function themnoiThat() {
+  async function themNoiThat() {
+    setLoading(true);
+    const dataPost = { loai_noi_that: noiThatRef.current.value };
     try {
-      if (noiThatRef.current.value === "") {
+      if (dataPost.loai_noi_that === "") {
         toast.error("Dữ liệu trống");
         return;
       }
 
-      const { status, data } = await axios.post(
+      const {
+        status,
+        data: { response, type, id },
+      } = await axios.post(
         `${json_config.url_connect}/thong-tin-du-an/them-noi-that`,
-        { loai_noi_that: noiThatRef.current.value }
+        dataPost
       );
 
       if (status === 200) {
-        if (data.affectedRows > 0) {
-          toast.success("Thêm nội thất mới thành công");
+        toast.success(response);
+        if (type) {
+          setLoading(false);
           setShowModal(false);
-          await getData();
-          return;
+          setData((pre) => [...pre, { id, ...dataPost }]);
         }
-        toast.error("Thêm nội thất mới thất bại");
-        return;
       }
-      toast.error("Thêm nội thất mới thất bại");
     } catch (error) {
       console.log(error);
     }
   }
 
-  async function capNhatnoiThat() {
+  async function capNhatNoiThat() {
+    setLoading(true);
+    const dataPost = {
+      loai_noi_that: noiThatRef.current.value,
+      id: dataUpdate.id,
+    };
+
     try {
-      if (noiThatUpdateRef.current.value === "") {
+      if (dataPost.id === "") {
         toast.error("Dữ liệu trống");
         return;
       }
-      if (id === -1) {
-        toast.error("Không xác định được vị trí");
-        return;
-      }
 
-      const { status, data } = await axios.post(
+      const {
+        status,
+        data: { response, type },
+      } = await axios.post(
         `${json_config.url_connect}/thong-tin-du-an/cap-nhat-noi-that`,
-        { loai_noi_that: noiThatUpdateRef.current.value, id: id }
+        dataPost
       );
 
       if (status === 200) {
-        if (data.affectedRows > 0) {
-          toast.success("Cập nhật nội thất mới thành công");
+        toast.success(response);
+        if (type) {
+          setLoading(false);
           setShowModalUpdate(false);
-          await getData();
-          return;
+          setData((pre) =>
+            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+          );
         }
-        toast.error("Cập nhật nội thất mới thất bại");
-        return;
       }
-      toast.error("Cập nhật nội thất mới thất bại");
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -94,6 +100,7 @@ export default function DuAn() {
         autoClose={200}
         hideProgressBar={false}
       />
+      <Loading loading={loading} />
       <div className="d-flex justify-content-start m-2">
         <button
           type="button"
@@ -128,7 +135,7 @@ export default function DuAn() {
             <Button variant="secondary" onClick={() => setShowModal(false)}>
               Close
             </Button>
-            <Button variant="primary" onClick={themnoiThat}>
+            <Button variant="primary" onClick={themNoiThat}>
               Thêm mới
             </Button>
           </Modal.Footer>
@@ -146,9 +153,9 @@ export default function DuAn() {
           <Modal.Body>
             <div className="input-group mb-3">
               <input
-                ref={noiThatUpdateRef}
+                ref={noiThatRef}
                 placeholder="Cập nhật nội thất..."
-                defaultValue={noiThatUpdateRef.current}
+                defaultValue={dataUpdate.loai_noi_that}
                 type="text"
                 className="form-control"
                 aria-label="Sizing example input"
@@ -163,7 +170,7 @@ export default function DuAn() {
             >
               Close
             </Button>
-            <Button variant="primary" onClick={capNhatnoiThat}>
+            <Button variant="primary" onClick={capNhatNoiThat}>
               Cập nhật
             </Button>
           </Modal.Footer>
@@ -173,20 +180,21 @@ export default function DuAn() {
       <table className="table">
         <thead>
           <tr>
+            <th scope="col">STT</th>
             <th scope="col">Nội thất</th>
             <th scope="col">Hành động</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => (
-            <tr key={item.id}>
+          {data.map((item, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
               <td>{item.loai_noi_that}</td>
               <td>
                 <button
                   type="button"
                   onClick={() => {
-                    noiThatUpdateRef.current = item.loai_noi_that;
-                    setId(item.id);
+                    setDataUpdate(item);
                     setShowModalUpdate(true);
                   }}
                   className="btn btn-primary"

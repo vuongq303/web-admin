@@ -1,28 +1,25 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import json_config from "../config.json";
-import { Button, Modal } from "react-bootstrap";
+import { Button, Modal, Form } from "react-bootstrap";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import * as xlsx from "xlsx";
-import {
-  danhDauCanHo,
-  getRoleNguoiDung,
-  locGiaCanHo,
-  trangThaiDuAn,
-} from "../services/utils";
+import { danhDauCanHo, getRoleNguoiDung, locGiaCanHo } from "../services/utils";
 import PreviewImage from "./components/preview_image";
 import { toast, ToastContainer } from "react-toastify";
-import { dataCanHoDefault } from "../data/default_data";
+import { columnMapping, dataCanHoDefault } from "../data/default_data";
 
 export default function CanHo() {
   const [data, setData] = useState([]);
   const [role, setRole] = useState("");
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [showModalHinhAnh, setShowModalHinhAnh] = useState(false);
   const [dataUpdate, setDataUpdate] = useState(dataCanHoDefault);
   const [showImageUpdate, setShowImageUpdate] = useState([]);
+  const [dataToaNhaDuAn, setDataToaNhaDuAn] = useState([]);
 
   const [dataDuAn, setDataDuAn] = useState([]);
   const [dataHuongCanHo, setDataHuongCanHo] = useState([]);
@@ -30,6 +27,7 @@ export default function CanHo() {
   const [dataNoiThat, setDataNoiThat] = useState([]);
   const [dataToaNha, setDataToaNha] = useState([]);
   const [dataTrucCanHo, setDataTrucCanHo] = useState([]);
+  const [itemChecked, setItemChecked] = useState([]);
 
   const tenToaNhaRef = useRef(null);
   const maCanHoRef = useRef(null);
@@ -46,7 +44,6 @@ export default function CanHo() {
   const giaThueRef = useRef(null);
   const ghiChuRef = useRef(null);
   const hinhAnhRef = useRef(null);
-  const trangThaiDuAnRef = useRef(null);
   const trucCanHoRef = useRef(null);
 
   const locGiaCanHoRef = useRef(null);
@@ -70,23 +67,19 @@ export default function CanHo() {
         );
 
         if (status == 200) {
-          const {
-            du_an,
-            huong_can_ho,
-            loai_can_ho,
-            noi_that,
-            toa_nha,
-            truc_can_ho,
-          } = response;
+          const { du_an, huong_can_ho, loai_can_ho, noi_that, truc_can_ho } =
+            response;
+          const uniqueDuAn = [...new Set(du_an.map((item) => item.ten_du_an))];
 
-          setDataDuAn(du_an);
+          setDataDuAn(uniqueDuAn);
+          setDataToaNhaDuAn(du_an);
           setDataHuongCanHo(huong_can_ho);
           setDataLoaiCanHo(loai_can_ho);
           setDataNoiThat(noi_that);
-          setDataToaNha(toa_nha);
           setDataTrucCanHo(truc_can_ho);
         }
         await getData();
+        setLoading(false);
       } catch (error) {
         console.log(error);
       }
@@ -109,26 +102,32 @@ export default function CanHo() {
   }
 
   async function guiYeuCau(id) {
-    const {
-      status,
-      data: { response, type },
-    } = await axios.post(
-      `${json_config.url_connect}/yeu-cau/gui-yeu-cau`,
-      { can_ho: id },
-      {
-        headers: {
-          Authorization: getRoleNguoiDung(),
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    if (status === 200) {
-      if (type) {
+    try {
+      setLoading(true);
+      const {
+        status,
+        data: { response, type },
+      } = await axios.post(
+        `${json_config.url_connect}/yeu-cau/gui-yeu-cau`,
+        { can_ho: id },
+        {
+          headers: {
+            Authorization: getRoleNguoiDung(),
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (status === 200) {
+        setLoading(false);
+        if (type) {
+          toast.success(response);
+          return;
+        }
         toast.success(response);
-        return;
       }
-      toast.error(response);
-      return;
+    } catch (error) {
+      console.error(error.message);
+      toast.error(error.message);
     }
   }
 
@@ -147,7 +146,6 @@ export default function CanHo() {
       if (status === 200) {
         setRole(role);
         setData(response);
-        console.log(response);
       }
     } catch (error) {
       console.log(error);
@@ -322,11 +320,10 @@ export default function CanHo() {
         noi_that: noiThatRef.current.value,
         gia_ban: giaBanRef.current.value,
         gia_thue: giaThueRef.current.value,
-        mo_ta: ghiChuRef.current.value,
-        trang_thai: trangThaiDuAnRef.current.value,
+        ghi_chu: ghiChuRef.current.value,
         truc_can_ho: trucCanHoRef.current.value,
-        ngay_ki_hop_dong: new Date().toISOString(),
         danh_dau: danhDauCanHoRef.current.value,
+        trang_thai: 0,
       };
 
       const isInvalidInput = (value, allowNegative = false) =>
@@ -348,7 +345,10 @@ export default function CanHo() {
         return;
       }
 
-      const response = await axios.post(
+      const {
+        data: { response: message, type, id },
+        status,
+      } = await axios.post(
         `${json_config.url_connect}/can-ho/them-can-ho`,
         data,
         {
@@ -359,16 +359,11 @@ export default function CanHo() {
         }
       );
 
-      const {
-        data: { response: message, type },
-        status,
-      } = response;
-
       if (status === 200) {
         toast.success(message);
         if (type) {
           setShowModal(false);
-          await getData();
+          setData((pre) => [...pre, { id, ...data }]);
         }
       }
     } catch (error) {
@@ -392,9 +387,12 @@ export default function CanHo() {
         gia_ban: giaBanRef.current.value,
         gia_thue: giaThueRef.current.value,
         mo_ta: ghiChuRef.current.value,
-        trang_thai: trangThaiDuAnRef.current.value,
         ngay_ki_hop_dong: new Date().toISOString(),
         danh_dau: danhDauCanHoRef.current.value,
+      };
+
+      const dataPost = {
+        ...data,
         id: dataUpdate.id,
       };
 
@@ -416,9 +414,12 @@ export default function CanHo() {
         return;
       }
 
-      const response = await axios.post(
+      const {
+        data: { response: message, type },
+        status,
+      } = await axios.post(
         `${json_config.url_connect}/can-ho/cap-nhat-can-ho`,
-        data,
+        dataPost,
         {
           headers: {
             Authorization: getRoleNguoiDung(),
@@ -427,16 +428,15 @@ export default function CanHo() {
         }
       );
 
-      const {
-        data: { response: message, type },
-        status,
-      } = response;
-
       if (status === 200) {
         toast.success(message);
         if (type) {
           setShowModalUpdate(false);
-          await getData();
+          setData((prev) =>
+            prev.map((item) =>
+              item.id === dataPost.id ? { ...item, ...data } : item
+            )
+          );
         }
       }
     } catch (error) {
@@ -445,29 +445,85 @@ export default function CanHo() {
     }
   }
 
-  // const uploadFileExcel = () => {
-  //   try {
-  //     const fileExcel = uploadFileExcelRef.current.files[0];
-  //     if (!fileExcel) {
-  //       console.error("No file selected!");
-  //       return;
-  //     }
+  const uploadFileExcel = () => {
+    try {
+      const fileExcel = uploadFileExcelRef.current.files[0];
+      if (!fileExcel) {
+        console.error("No file selected!");
+        return;
+      }
 
-  //     const reader = new FileReader();
-  //     reader.onload = (event) => {
-  //       const data = event.target.result;
-  //       const workbook = xlsx.read(data, { type: "array" });
-  //       const sheetName = workbook.SheetNames[0];
-  //       const worksheet = workbook.Sheets[sheetName];
-  //       const json = xlsx.utils.sheet_to_json(worksheet);
-  //       console.log(json);
-  //     };
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const data = event.target.result;
+        const workbook = xlsx.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const json = xlsx.utils.sheet_to_json(worksheet);
+        console.log(json);
+      };
 
-  //     reader.readAsArrayBuffer(fileExcel);
-  //   } catch (error) {
-  //     console.error("Error while uploading Excel file:", error);
-  //   }
-  // };
+      reader.readAsArrayBuffer(fileExcel);
+    } catch (error) {
+      console.error("Error while uploading Excel file:", error);
+    }
+  };
+
+  function exportFileExcel() {
+    if (itemChecked.length === 0) {
+      toast.error("No data");
+      return;
+    }
+    const transformedData = itemChecked.map((row) => {
+      const transformedRow = {};
+      Object.keys(row).forEach((key) => {
+        transformedRow[columnMapping[key] || key] = row[key];
+      });
+      return transformedRow;
+    });
+
+    const worksheet = xlsx.utils.json_to_sheet(transformedData);
+    const workbook = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+    const excelBuffer = xlsx.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const file = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+    saveAs(file, "data.xlsx");
+  }
+
+  async function capNhatTrangThai(id, e) {
+    const checked = e.target.checked;
+    const data = {
+      trang_thai: checked ? 0 : 1,
+      danh_dau: checked ? "" : "gray",
+    };
+    const dataPost = { ...data, id };
+
+    try {
+      const {
+        status,
+        data: { response, type },
+      } = await axios.post(
+        `${json_config.url_connect}/can-ho/cap-nhat-trang-thai`,
+        dataPost
+      );
+      if (status === 200) {
+        toast.success(response);
+        if (type) {
+          setData((prev) =>
+            prev.map((item) => (item.id === id ? { ...item, ...data } : item))
+          );
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <div>
@@ -478,44 +534,72 @@ export default function CanHo() {
       />
       <div className="d-flex justify-content-start m-2">
         <div className="d-flex justify-content-between align-items-center w-100">
-          {role !== "Nhân viên" ? (
-            <div className="d-flex align-items-center">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => setShowModal(true)}
-              >
-                Thêm mới
-              </button>
-              <input ref={uploadFileExcelRef} type="file" hidden />
-              <button
-                type="button"
-                className="btn btn-outline-primary mx-1"
-                onClick={() => uploadFileExcelRef.current.click()}
-              >
-                Upload file excel
-              </button>
-              <button type="button" className="btn btn-secondary mx-1">
-                Export file excel
-              </button>
-            </div>
-          ) : (
-            <div></div>
-          )}
+          <div className="d-flex align-items-center">
+            {role === "Admin" && (
+              <div>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => setShowModal(true)}
+                >
+                  Thêm mới
+                </button>
+                <input
+                  ref={uploadFileExcelRef}
+                  onChange={uploadFileExcel}
+                  type="file"
+                  hidden
+                />
+                <button
+                  type="button"
+                  className="btn btn-outline-primary mx-1"
+                  onClick={() => uploadFileExcelRef.current.click()}
+                >
+                  Upload file excel
+                </button>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={exportFileExcel}
+              className="btn btn-secondary mx-1"
+            >
+              Export file excel
+            </button>
+          </div>
+
           <div className="text-start">
-            <strong style={{ backgroundColor: "yellow" }}>
-              Vàng: Căn giá rẻ
-            </strong>
+            <strong style={{ backgroundColor: "yellow", padding: 2 }}>
+              Vàng
+            </strong>{" "}
+            Căn giá rẻ
             <br />
-            <strong style={{ backgroundColor: "red" }}>
-              Đỏ: Căn ngoại giao (Không gọi trực tiếp chủ nhà)
-            </strong>
+            <strong style={{ backgroundColor: "red", padding: 2 }}>
+              Đỏ
+            </strong>{" "}
+            Căn ngoại giao (Không gọi trực tiếp chủ nhà)
             <br />
-            <strong style={{ backgroundColor: "orange" }}>
-              Cam: (Căn kết hợp)
-            </strong>
+            <strong style={{ backgroundColor: "orange", padding: 2 }}>
+              Cam
+            </strong>{" "}
+            (Căn kết hợp)
           </div>
         </div>
+        <Modal className="modal-sm" show={loading} backdrop="static">
+          <Modal.Body>
+            <div className="d-flex flex-row justify-content-around align-items-center">
+              <img
+                src={require("../imgs/connect_home.png")}
+                height={50}
+                width={50}
+                alt="Logo"
+              />
+              <div className="text-center">
+                <strong>Connect Home Loading...</strong>
+              </div>
+            </div>
+          </Modal.Body>
+        </Modal>
         {/*  */}
         <Modal
           className="modal-lg"
@@ -542,8 +626,8 @@ export default function CanHo() {
                   aria-label="Default select example"
                 >
                   {dataToaNha.map((item, index) => (
-                    <option key={index} value={item.ten_toa_nha}>
-                      {item.ten_toa_nha}
+                    <option key={index} value={item.ten_du_an}>
+                      {item.ten_du_an}
                     </option>
                   ))}
                 </select>
@@ -573,6 +657,8 @@ export default function CanHo() {
                 </select>
                 <label htmlFor="floatingInputGrid">Trục căn hộ</label>
               </div>
+            </div>
+            <div className="input-group mb-3">
               <div className="form-floating">
                 <input
                   ref={hoTenChuCanHoRef}
@@ -583,8 +669,6 @@ export default function CanHo() {
                 />
                 <label htmlFor="floatingInputGrid">Họ tên chủ căn hộ</label>
               </div>
-            </div>
-            <div className="input-group mb-3">
               <div className="form-floating">
                 <input
                   ref={soDienThoaiRef}
@@ -594,20 +678,6 @@ export default function CanHo() {
                   aria-describedby="inputGroup-sizing-default"
                 />
                 <label htmlFor="floatingInputGrid">Số điện thoại</label>
-              </div>
-              <div className="form-floating">
-                <select
-                  className="form-select"
-                  ref={trangThaiDuAnRef}
-                  aria-label="Default select example"
-                >
-                  {trangThaiDuAn.map((item, index) => (
-                    <option key={index} value={index}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-                <label htmlFor="floatingInputGrid">Trạng thái</label>
               </div>
               <div className="form-floating">
                 <select
@@ -633,8 +703,8 @@ export default function CanHo() {
                   aria-label="Default select example"
                 >
                   {dataDuAn.map((item, index) => (
-                    <option key={index} value={item.ten_du_an}>
-                      {item.ten_du_an}
+                    <option key={index} value={item}>
+                      {item}
                     </option>
                   ))}
                 </select>
@@ -792,8 +862,8 @@ export default function CanHo() {
                   aria-label="Default select example"
                 >
                   {dataToaNha.map((item, index) => (
-                    <option key={index} value={item.ten_toa_nha}>
-                      {item.ten_toa_nha}
+                    <option key={index} value={item}>
+                      {item}
                     </option>
                   ))}
                 </select>
@@ -827,6 +897,8 @@ export default function CanHo() {
                 </select>
                 <label htmlFor="floatingInputGrid">Trục căn hộ</label>
               </div>
+            </div>
+            <div className="input-group mb-3">
               <div className="form-floating">
                 <input
                   ref={hoTenChuCanHoRef}
@@ -838,8 +910,6 @@ export default function CanHo() {
                 />
                 <label htmlFor="floatingInputGrid">Họ tên chủ căn hộ</label>
               </div>
-            </div>
-            <div className="input-group mb-3">
               <div className="form-floating">
                 <input
                   ref={soDienThoaiRef}
@@ -850,21 +920,6 @@ export default function CanHo() {
                   aria-describedby="inputGroup-sizing-default"
                 />
                 <label htmlFor="floatingInputGrid">Số điện thoại</label>
-              </div>
-              <div className="form-floating">
-                <select
-                  className="form-select"
-                  ref={trangThaiDuAnRef}
-                  defaultValue={dataUpdate.trang_thai}
-                  aria-label="Default select example"
-                >
-                  {trangThaiDuAn.map((item, index) => (
-                    <option key={index} value={index}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-                <label htmlFor="floatingInputGrid">Trạng thái</label>
               </div>
               <div className="form-floating">
                 <select
@@ -892,8 +947,8 @@ export default function CanHo() {
                   aria-label="Default select example"
                 >
                   {dataDuAn.map((item, index) => (
-                    <option key={index} value={item.ten_du_an}>
-                      {item.ten_du_an}
+                    <option key={index} value={item}>
+                      {item}
                     </option>
                   ))}
                 </select>
@@ -1084,11 +1139,17 @@ export default function CanHo() {
           ref={tenDuAnTimKiemRef}
           className="form-select w-auto"
           aria-label="Default select example"
+          onChange={(e) => {
+            let value = e.target.value;
+            setDataToaNha(
+              dataToaNhaDuAn.filter((item) => item.ten_du_an === value)
+            );
+          }}
         >
           <option value="">Chọn tên dự án</option>
           {dataDuAn.map((item, index) => (
-            <option key={index} value={item.ten_du_an}>
-              {item.ten_du_an}
+            <option key={index} value={item}>
+              {item}
             </option>
           ))}
         </select>
@@ -1097,7 +1158,7 @@ export default function CanHo() {
           className="form-select w-auto"
           aria-label="Default select example"
         >
-          <option value=""> Chọn tên tòa nhà</option>
+          <option value="">Chọn tên tòa nhà</option>
           {dataToaNha.map((item, index) => (
             <option key={index} value={item.ten_toa_nha}>
               {item.ten_toa_nha}
@@ -1197,9 +1258,21 @@ export default function CanHo() {
           </button>
         </div>
       </div>
-      <table border={1} className="table table table-striped">
+      <table className="table table-light ">
         <thead>
           <tr>
+            <th scope="col">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                value=""
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setItemChecked(checked ? data : []);
+                }}
+                id="flexCheckDefault"
+              />
+            </th>
             <th scope="col">STT</th>
             <th scope="col">Căn hộ</th>
             <th scope="col">Chủ căn hộ</th>
@@ -1211,72 +1284,100 @@ export default function CanHo() {
           </tr>
         </thead>
         <tbody>
-          {data.map((item, index) => (
-            <tr key={index}>
-              <td className="align-middle">{index + 1}</td>
-              <td className="align-middle">
-                <div
-                  style={{
-                    display: "inline-block",
-                    backgroundColor: item.danh_dau,
-                    padding: "1px 5px",
-                    borderRadius: "5px",
-                  }}
-                >
-                  {item.ten_toa_nha}-{item.ma_can_ho ?? "*"}
-                  {item.truc_can_ho}
-                </div>
-              </td>
-              <td className="align-middle">{item.chu_can_ho ?? "*"}</td>
-              <td className="align-middle">{item.so_dien_thoai ?? "*"}</td>
-              <td className="align-middle">{item.gia_ban}</td>
-              <td className="align-middle">{item.gia_thue}</td>
-              <td className="w-25 text-start align-middle">
-                - {item.du_an} - {item.dien_tich}m² - {item.so_phong_ngu}PN
-                {item.so_phong_tam}WC - {item.huong_can_ho}
-                <br />- {item.loai_can_ho}
-                <br />- {item.noi_that}
-                <br />- {item.ghi_chu}
-                <br />- <strong>{item.nguoi_cap_nhat}</strong>
-              </td>
-              <td className="align-middle">
-                {role === "Admin" && (
-                  <button
-                    type="button"
+          {data.map((item, index) => {
+            const styles = {
+              danh_dau: {
+                display: "inline-block",
+                backgroundColor: item.danh_dau,
+                padding: "1px 5px",
+                borderRadius: "5px",
+              },
+            };
+            let onChecked = itemChecked.includes(item);
+
+            return (
+              <tr key={index} className={onChecked ? "table-primary" : ""}>
+                <td className="align-middle">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    onChange={() => {}}
                     onClick={() => {
-                      setDataUpdate(item);
-                      setShowModalUpdate(true);
+                      if (onChecked) {
+                        setItemChecked((pre) =>
+                          pre.filter((i) => i.id !== item.id)
+                        );
+                        return;
+                      }
+                      setItemChecked((pre) => [...pre, item]);
                     }}
-                    className="btn btn-danger my-2 w-75"
+                    checked={onChecked}
+                    id="flexCheckDefault"
+                  />
+                </td>
+                <td className="align-middle">{index + 1}</td>
+                <td className="align-middle">
+                  <div style={styles.danh_dau}>
+                    {item.ten_toa_nha}-{item.ma_can_ho ?? "*"}
+                    {item.truc_can_ho}
+                  </div>
+                </td>
+                <td className="align-middle">{item.chu_can_ho ?? "*"}</td>
+                <td className="align-middle">{item.so_dien_thoai ?? "*"}</td>
+                <td className="align-middle">{item.gia_ban}</td>
+                <td className="align-middle">{item.gia_thue}</td>
+                <td className="w-25 text-start align-middle">
+                  - {item.du_an} - {item.dien_tich}m² - {item.so_phong_ngu}PN
+                  {item.so_phong_tam}WC - {item.huong_can_ho}
+                  <br />- {item.loai_can_ho}
+                  <br />- {item.noi_that}
+                  <br />- {item.ghi_chu}
+                  <br />- <strong>{item.nguoi_cap_nhat}</strong>
+                </td>
+                <td className="align-middle">
+                  {role === "Admin" && (
+                    <Form.Check
+                      style={{ transform: "scale(1.3)" }}
+                      defaultChecked={item.trang_thai === 0}
+                      onChange={async (e) => await capNhatTrangThai(item.id, e)}
+                      type="switch"
+                      id="custom-switch"
+                    />
+                  )}
+                  {role === "Admin" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDataUpdate(item);
+                        setShowModalUpdate(true);
+                      }}
+                      className="btn btn-danger my-2 w-75"
+                    >
+                      Chi tiết
+                    </button>
+                  )}
+                  <br />
+                  <button
+                    onClick={() => showImage(item)}
+                    type="button"
+                    className={`btn w-75 ${
+                      item.hinh_anh ? "btn-primary" : "btn-secondary"
+                    }`}
                   >
-                    Chi tiết
+                    Hình ảnh
                   </button>
-                )}
-                <br />
-                <button
-                  onClick={() => showImage(item)}
-                  type="button"
-                  className={`btn w-75 ${
-                    item.hinh_anh ? "btn-primary" : "btn-secondary"
-                  }`}
-                >
-                  Hình ảnh
-                </button>
-                <br />
-                <button
-                  onClick={() => guiYeuCau(item.id)}
-                  type="button"
-                  className="btn w-75 btn-success my-2"
-                >
-                  Yêu cầu
-                </button>
-                <br />
-                <button type="button" className="btn w-75 btn-info mb-2">
-                  Xóa tạm thời
-                </button>
-              </td>
-            </tr>
-          ))}
+                  <br />
+                  <button
+                    onClick={() => guiYeuCau(item.id)}
+                    type="button"
+                    className="btn w-75 btn-success my-2"
+                  >
+                    Yêu cầu
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -1,16 +1,17 @@
 var express = require("express");
 var router = express.Router();
-var connect = require("../sql/connect");
 const ip = require("../config/ipconfig.json");
 const jwt = require("jsonwebtoken");
 const upload = require("../middleware/upload_nguoi_dung");
 const executeQuery = require("../sql/promise");
-const JWT_KEY =
-  process.env.JWT_KEY || "8jjfafw8*&njlnfaJHf9*72nnklfooeujvOOJNyb)()?6%12";
+const env = require("../env/get_env");
 
 router.get("/", async function (_, res) {
-  const sql = "SELECT * FROM nguoi_dung";
   try {
+    const sql = `SELECT id, ho_ten, ngay_bat_dau,
+    tai_khoan,gioi_tinh, so_dien_thoai, email,
+    ngay_sinh, hinh_anh, trang_thai, phan_quyen
+    FROM nguoi_dung`;
     const result = await executeQuery(sql);
     res.status(200).send(result);
   } catch (error) {
@@ -24,7 +25,6 @@ router.post(
   upload.single("hinh_anh"),
   async function (req, res) {
     try {
-      const file = req.file;
       const {
         tai_khoan,
         mat_khau,
@@ -33,23 +33,28 @@ router.post(
         so_dien_thoai,
         ngay_sinh,
         email,
-        vi_tri,
+        phan_quyen,
         gioi_tinh,
         trang_thai,
       } = req.body;
 
-      if (!file) {
-        return res.status(200).json({ response: "Lỗi lưu ảnh", type: false });
+      const jwt_token = req.headers["authorization"];
+      const data = jwt.verify(jwt_token, env.JWT_KEY);
+
+      if (phan_quyen === 'Admin') {
+        if (data.phan_quyen !== "Admin") {
+          return res.status(200).json({ response: "Không thể thêm Admin", type: false })
+        }
       }
 
-      const hinh_anh = `http://${ip.ip}:8080/${req.body.tai_khoan}/${req.body.tai_khoan}.png`;
+      const hinh_anh = `http://${ip.ip}:8080/nguoi-dung/${tai_khoan}.png`;
 
       const sql = `
-  INSERT INTO nguoi_dung 
-  (ho_ten, ngay_bat_dau, gioi_tinh, so_dien_thoai, email, ngay_sinh, hinh_anh, trang_thai, phan_quyen, tai_khoan, mat_khau) 
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    INSERT INTO nguoi_dung 
+    (ho_ten, ngay_bat_dau, gioi_tinh, so_dien_thoai, email, ngay_sinh, hinh_anh, trang_thai, phan_quyen, tai_khoan, mat_khau) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-      await executeQuery(sql, [
+      const result = await executeQuery(sql, [
         ho_ten,
         ngay_bat_dau,
         gioi_tinh,
@@ -58,16 +63,16 @@ router.post(
         ngay_sinh,
         hinh_anh,
         trang_thai,
-        vi_tri,
+        phan_quyen,
         tai_khoan,
         mat_khau,
       ]);
       res
         .status(200)
-        .json({ response: "Thêm người dùng thành công ", type: true });
+        .json({ response: "Thêm người dùng thành công ", type: true, id: result.insertId });
     } catch (error) {
-      console.error("/nguoi-dung/them-nguoi-dung", error.message);
-      res.status(500).json({ response: "Error", type: false });
+      console.error(error.message);
+      res.status(500).json({});
     }
   }
 );
@@ -80,23 +85,24 @@ router.post(
       const {
         id,
         ho_ten,
+        tai_khoan,
         ngay_bat_dau,
         so_dien_thoai,
         ngay_sinh,
         email,
-        vi_tri,
+        phan_quyen,
         gioi_tinh,
         trang_thai,
       } = req.body;
 
-      const hinh_anh = `http://${ip.ip}:8080/${req.body.tai_khoan}/${req.body.tai_khoan}.png`;
+      const hinh_anh = `http://${ip.ip}:8080/nguoi-dung/${tai_khoan}.png`;
 
       const sql = `
-      update nguoi_dung set ho_ten =? ,
+      UPDATE nguoi_dung SET ho_ten =? ,
       ngay_bat_dau = ?, gioi_tinh = ?,
       so_dien_thoai = ?, email = ?,
       ngay_sinh = ?, hinh_anh = ?,
-      trang_thai = ?, phan_quyen = ? where id = ?`;
+      trang_thai = ?, phan_quyen = ? WHERE id = ?`;
       await executeQuery(sql, [
         ho_ten,
         ngay_bat_dau,
@@ -106,7 +112,7 @@ router.post(
         ngay_sinh,
         hinh_anh,
         trang_thai,
-        vi_tri,
+        phan_quyen,
         id,
       ]);
       res
@@ -125,7 +131,7 @@ router.post("/dang-nhap", async function (req, res) {
     const sql =
       "select tai_khoan, ho_ten, phan_quyen from nguoi_dung where tai_khoan = ? and mat_khau = ?";
     const result = await executeQuery(sql, [username, password]);
-    
+
     if (result.length > 0) {
       return res.status(200).json({
         response: "Đăng nhập thành công",
@@ -139,8 +145,8 @@ router.post("/dang-nhap", async function (req, res) {
       type: false,
     });
   } catch (error) {
-    console.error("/nguoi-dung/dang-nhap ", error.message);
-    res.status(500).json({ response: "Error", type: false });
+    console.error(error.message);
+    res.status(500).json({});
   }
 });
 

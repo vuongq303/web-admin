@@ -3,8 +3,8 @@ const fs = require("fs");
 const { join } = require("path");
 
 const storage = multer.diskStorage({
-  destination: (req, hinh_anh, cb) => {
-    const dir = join(__dirname, "..", "uploads", req.body.tai_khoan);
+  destination: (_, _1, cb) => {
+    const dir = join(__dirname, "..", "uploads", "nguoi-dung");
 
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });

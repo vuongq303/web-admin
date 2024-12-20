@@ -24,7 +24,26 @@ export default function CanHoDaDuyet() {
     }
   }
 
-
+  async function xoaYeuCau(id) {
+    try {
+      const {
+        status,
+        data: { response, type },
+      } = await axios.post(`${json_config.url_connect}/yeu-cau/xoa-yeu-cau`, {
+        id,
+      });
+      if (status === 200) {
+        if (type) {
+          toast.success(response);
+          setData((pre) => pre.filter((item) => item.id !== id));
+          return;
+        }
+        toast.error(response);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   useEffect(() => {
     getData();
@@ -53,7 +72,7 @@ export default function CanHoDaDuyet() {
         </thead>
         <tbody>
           {data.map((item, index) => (
-            <tr key={item.id}>
+            <tr key={index}>
               <td className="align-middle">{index + 1}</td>
               <td className="align-middle">
                 <div
@@ -84,7 +103,11 @@ export default function CanHoDaDuyet() {
                 Đã gửi bởi: <strong>{item.nguoi_gui}</strong>
               </td>
               <td className="align-middle">
-                <button type="button" className="btn btn-danger my-2">
+                <button
+                  type="button"
+                  onClick={() => xoaYeuCau(item.id)}
+                  className="btn btn-danger my-2"
+                >
                   Xóa
                 </button>
               </td>

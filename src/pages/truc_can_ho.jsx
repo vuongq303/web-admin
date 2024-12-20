@@ -3,87 +3,96 @@ import React, { useEffect, useRef, useState } from "react";
 import json_config from "../config.json";
 import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
+import Loading from "./components/loading";
 
 export default function DuAn() {
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
-  const [id, setId] = useState(-1);
+  const [dataUpdate, setDataUpdate] = useState({});
 
   const trucCanHoRef = useRef(null);
   const trucCanHoUpdateRef = useRef(null);
 
-  async function getData() {
-    try {
-      const { data } = await axios.get(
-        json_config.url_connect + "/thong-tin-du-an/truc-can-ho"
-      );
-      setData(data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   useEffect(() => {
-    getData();
+    (async function () {
+      try {
+        const { data } = await axios.get(
+          json_config.url_connect + "/thong-tin-du-an/truc-can-ho"
+        );
+        setData(data);
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
   }, []);
 
   async function themTrucCanHo() {
+    const dataPost = { truc_can: trucCanHoRef.current.value };
+    setLoading(true);
+
     try {
-      if (trucCanHoRef.current.value === "") {
+      if (dataPost.truc_can === "") {
         toast.error("Dữ liệu trống");
         return;
       }
 
-      const { status, data } = await axios.post(
+      const {
+        status,
+        data: { response, type, id },
+      } = await axios.post(
         `${json_config.url_connect}/thong-tin-du-an/them-truc-can-ho`,
-        { truc_can: trucCanHoRef.current.value }
+        dataPost
       );
 
       if (status === 200) {
-        if (data.affectedRows > 0) {
-          toast.success("Thêm trục căn hộ mới thành công");
+        toast.success(response);
+        if (type) {
+          setLoading(false);
           setShowModal(false);
-          await getData();
-          return;
+          setData((pre) => [...pre, { id, ...dataPost }]);
         }
-        toast.error("Thêm trục căn hộ mới thất bại");
-        return;
       }
-      toast.error("Thêm trục căn hộ mới thất bại");
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
+
   async function capNhatTrucCanHo() {
+    const dataPost = {
+      truc_can: trucCanHoUpdateRef.current.value,
+      id: dataUpdate.id,
+    };
+    setLoading(true);
+
     try {
-      if (trucCanHoUpdateRef.current.value === "") {
+      if (dataPost.truc_can === "") {
         toast.error("Dữ liệu trống");
         return;
       }
-      if (id === -1) {
-        toast.error("Không xác định được vị trí");
-        return;
-      }
 
-      const { status, data } = await axios.post(
+      const {
+        status,
+        data: { response, type },
+      } = await axios.post(
         `${json_config.url_connect}/thong-tin-du-an/cap-nhat-truc-can-ho`,
-        { truc_can: trucCanHoUpdateRef.current.value, id: id }
+        dataPost
       );
 
       if (status === 200) {
-        if (data.affectedRows > 0) {
-          toast.success("Cập nhật trục căn hộ mới thành công");
+        toast.success(response);
+        if (type) {
+          setLoading(false);
           setShowModalUpdate(false);
-          await getData();
-          return;
+          setData((pre) =>
+            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+          );
         }
-        toast.error("Cập nhật trục căn hộ mới thất bại");
-        return;
       }
-      toast.error("Cập nhật trục căn hộ mới thất bại");
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -94,6 +103,7 @@ export default function DuAn() {
         autoClose={200}
         hideProgressBar={false}
       />
+      <Loading loading={loading} />
       <div className="d-flex justify-content-start m-2">
         <button
           type="button"
@@ -148,7 +158,7 @@ export default function DuAn() {
               <input
                 ref={trucCanHoUpdateRef}
                 placeholder="Cập nhật trục căn hộ..."
-                defaultValue={trucCanHoUpdateRef.current}
+                defaultValue={dataUpdate.truc_can}
                 type="text"
                 className="form-control"
                 aria-label="Sizing example input"
@@ -178,20 +188,19 @@ export default function DuAn() {
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => (
-            <tr key={item.id}>
+          {data.map((item, index) => (
+            <tr key={index}>
               <td>{item.truc_can}</td>
               <td>
                 <button
                   type="button"
                   className="btn btn-primary"
                   onClick={() => {
-                    trucCanHoUpdateRef.current = item.truc_can;
-                    setId(item.id);
+                    setDataUpdate(item);
                     setShowModalUpdate(true);
                   }}
                 >
-                 Chi tiết
+                  Chi tiết
                 </button>
               </td>
             </tr>

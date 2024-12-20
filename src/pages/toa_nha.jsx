@@ -3,106 +3,102 @@ import React, { useEffect, useState, useRef } from "react";
 import json_config from "../config.json";
 import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
+import Loading from "./components/loading";
 
 export default function DuAn() {
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [dataDuAn, setDataDuAn] = useState([]);
-
-  const [duAn, setDuAn] = useState(-1);
-  const [id, setId] = useState(-1);
-  const [duAnUpdate, setDuAnUpdate] = useState(-1);
-
+  const [dataUpdate, setDataUpdate] = useState({});
+  const [loading, setLoading] = useState(true);
   const toaNhaRef = useRef(null);
-  const toaNhaUpdateRef = useRef(null);
-
-  function findIdByTenDuAn(tenDuAn) {
-    const result = dataDuAn.find((du_an) => du_an.ten_du_an === tenDuAn);
-    return result ? result.id : 0;
-  }
-
-  async function getData() {
-    try {
-      const { data } = await axios.get(
-        json_config.url_connect + "/thong-tin-du-an/toa-nha-du-an"
-      );
-      const { du_an, toa_nha_du_an } = data;
-      setDataDuAn(du_an);
-      setData(toa_nha_du_an);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const duAnRef = useRef(null);
 
   useEffect(() => {
-    getData();
+    (async function getData() {
+      try {
+        const {
+          data: { toa_nha, du_an },
+        } = await axios.get(
+          json_config.url_connect + "/thong-tin-du-an/toa-nha"
+        );
+
+        setData(toa_nha);
+        setDataDuAn(du_an);
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
   }, []);
 
-  const changeDuAn = (event) => {
-    setDuAn(event.target.value);
-  };
+  async function themToaNha() {
+    setLoading(true);
+    const dataPost = {
+      ten_toa_nha: toaNhaRef.current.value,
+      du_an: duAnRef.current.value,
+    };
 
-  const changeDuAnUpdate = (event) => {
-    setDuAnUpdate(event.target.value);
-  };
-
-  async function themtoaNha() {
     try {
-      if (toaNhaRef.current.value === "") {
+      if (dataPost.toa_nha === "") {
         toast.error("Dữ liệu trống");
         return;
       }
 
-      const { status, data } = await axios.post(
+      const {
+        status,
+        data: { response, type, id },
+      } = await axios.post(
         `${json_config.url_connect}/thong-tin-du-an/them-toa-nha`,
-        { toa_nha: toaNhaRef.current.value, du_an: duAn }
+        dataPost
       );
 
       if (status === 200) {
-        if (data.affectedRows > 0) {
-          toast.success("Thêm tòa nhà mới thành công");
+        toast.success(response);
+        if (type) {
+          setLoading(false);
           setShowModal(false);
-          await getData();
-          return;
+          setData((pre) => [...pre, { id, ...dataPost }]);
         }
-        toast.error("Thêm tòa nhà mới thất bại");
-        return;
       }
-      toast.error("Thêm tòa nhà mới thất bại");
     } catch (error) {
       console.log(error);
     }
   }
 
-  async function capNhattoaNha() {
+  async function capNhatToaNha() {
+    setLoading(true);
+    const dataPost = {
+      ten_toa_nha: toaNhaRef.current.value,
+      du_an: duAnRef.current.value,
+      id: dataUpdate.id,
+    };
+
     try {
-      if (toaNhaUpdateRef.current.value === "") {
+      if (dataPost.ten_toa_nha === "") {
         toast.error("Dữ liệu trống");
         return;
       }
-      
-      if (id === -1) {
-        toast.error("Không xác định được vị trí");
-        return;
-      }
 
-      const { status, data } = await axios.post(
+      const {
+        status,
+        data: { response, type },
+      } = await axios.post(
         `${json_config.url_connect}/thong-tin-du-an/cap-nhat-toa-nha`,
-        { toa_nha: toaNhaUpdateRef.current.value, id: id, du_an: duAnUpdate }
+        dataPost
       );
 
       if (status === 200) {
-        if (data.affectedRows > 0) {
-          toast.success("Cập nhật tòa nhà mới thành công");
+        toast.success(response);
+        if (type) {
+          setLoading(false);
           setShowModalUpdate(false);
-          await getData();
-          return;
+          setData((pre) =>
+            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+          );
         }
-        toast.error("Cập nhật tòa nhà mới thất bại");
-        return;
       }
-      toast.error("Cập nhật tòa nhà mới thất bại");
     } catch (error) {
       console.log(error);
     }
@@ -115,6 +111,7 @@ export default function DuAn() {
         autoClose={200}
         hideProgressBar={false}
       />
+      <Loading loading={loading} />
       <div className="d-flex justify-content-start m-2">
         <button
           type="button"
@@ -146,12 +143,11 @@ export default function DuAn() {
               <select
                 className="form-select"
                 aria-label="Default select example"
-                value={duAn}
-                onChange={changeDuAn}
+                ref={duAnRef}
               >
-                {dataDuAn.map((du_an) => (
-                  <option key={du_an.id} value={du_an.id}>
-                    {du_an.ten_du_an}
+                {dataDuAn.map((item, index) => (
+                  <option key={index} value={item.ten_du_an}>
+                    {item.ten_du_an}
                   </option>
                 ))}
               </select>
@@ -161,7 +157,7 @@ export default function DuAn() {
             <Button variant="secondary" onClick={() => setShowModal(false)}>
               Close
             </Button>
-            <Button variant="primary" onClick={themtoaNha}>
+            <Button variant="primary" onClick={themToaNha}>
               Thêm mới
             </Button>
           </Modal.Footer>
@@ -179,9 +175,9 @@ export default function DuAn() {
           <Modal.Body>
             <div className="input-group mb-3">
               <input
-                ref={toaNhaUpdateRef}
+                ref={toaNhaRef}
                 placeholder="Cập nhật tòa nhà..."
-                defaultValue={toaNhaUpdateRef.current}
+                defaultValue={dataUpdate.ten_toa_nha}
                 type="text"
                 className="form-control"
                 aria-label="Sizing example input"
@@ -189,13 +185,13 @@ export default function DuAn() {
               />
               <select
                 className="form-select"
-                value={duAnUpdate}
-                onChange={changeDuAnUpdate}
+                defaultValue={dataUpdate.du_an}
+                ref={duAnRef}
                 aria-label="Default select example"
               >
-                {dataDuAn.map((du_an) => (
-                  <option key={du_an.id} value={du_an.id}>
-                    {du_an.ten_du_an}
+                {dataDuAn.map((item, index) => (
+                  <option key={index} value={item.ten_du_an}>
+                    {item.ten_du_an}
                   </option>
                 ))}
               </select>
@@ -208,7 +204,7 @@ export default function DuAn() {
             >
               Close
             </Button>
-            <Button variant="primary" onClick={capNhattoaNha}>
+            <Button variant="primary" onClick={capNhatToaNha}>
               Cập nhật
             </Button>
           </Modal.Footer>
@@ -218,24 +214,24 @@ export default function DuAn() {
       <table className="table">
         <thead>
           <tr>
+            <th scope="col">STT</th>
             <th scope="col">Tên tòa nhà</th>
             <th scope="col">Tên dự án</th>
             <th scope="col">Hành động</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => (
-            <tr key={item.id}>
+          {data.map((item, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
               <td>{item.ten_toa_nha}</td>
-              <td>{item.ten_du_an}</td>
+              <td>{item.du_an}</td>
               <td>
                 <button
                   type="button"
                   className="btn btn-primary"
                   onClick={() => {
-                    toaNhaUpdateRef.current = item.ten_toa_nha;
-                    setDuAnUpdate(findIdByTenDuAn(item.ten_du_an));
-                    setId(item.id);
+                    setDataUpdate(item);
                     setShowModalUpdate(true);
                   }}
                 >

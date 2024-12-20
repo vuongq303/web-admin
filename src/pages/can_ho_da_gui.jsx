@@ -29,6 +29,27 @@ export default function CanHoDaGui() {
     }
   }
 
+  async function xoaYeuCau(id) {
+    try {
+      const {
+        status,
+        data: { response, type },
+      } = await axios.post(`${json_config.url_connect}/yeu-cau/xoa-yeu-cau`, {
+        id,
+      });
+      if (status === 200) {
+        if (type) {
+          toast.success(response);
+          setData((pre) => pre.filter((item) => item.id !== id));
+          return;
+        }
+        toast.error(response);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   async function duyetYeuCau(id) {
     try {
       const {
@@ -47,7 +68,7 @@ export default function CanHoDaGui() {
       if (status === 200) {
         toast.success(response);
         if (type) {
-          await getData();
+          setData((pre) => pre.filter((item) => item.id !== id));
         }
       }
     } catch (error) {
@@ -113,7 +134,11 @@ export default function CanHoDaGui() {
                 Đã gửi bởi: <strong>{item.nguoi_gui}</strong>
               </td>
               <td className="align-middle">
-                <button type="button" className="btn btn-danger my-2">
+                <button
+                  onClick={() => xoaYeuCau(item.id)}
+                  type="button"
+                  className="btn btn-danger my-2"
+                >
                   Xóa
                 </button>
                 <br />

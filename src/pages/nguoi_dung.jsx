@@ -5,10 +5,12 @@ import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import {
   dateToText,
+  getRoleNguoiDung,
   gioiTinhNguoiDung,
   phanQuyenNguoiDung,
   trangThaiLamViec,
 } from "../services/utils";
+import Loading from "./components/loading";
 
 export default function NguoiDung() {
   const [data, setData] = useState([]);
@@ -17,6 +19,7 @@ export default function NguoiDung() {
   const [dataUpdate, setDataUpdate] = useState({});
   const [showImageUpdate, setShowImageUpdate] = useState("");
   const [showImage, setShowImage] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const taiKhoanRef = useRef(null);
   const matKhauRef = useRef(null);
@@ -34,8 +37,9 @@ export default function NguoiDung() {
     try {
       const { data } = await axios.get(json_config.url_connect + "/nguoi-dung");
       setData(data);
+      setLoading(false);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -44,41 +48,43 @@ export default function NguoiDung() {
   }, []);
 
   async function themNguoiDung() {
+    setLoading(true);
     try {
-      const taiKhoan = taiKhoanRef.current.value;
-      const matKhau = matKhauRef.current.value;
-      const hoTen = hoTenRef.current.value;
-      const ngayBatDau = ngayBatDauRef.current.value;
-      const soDienThoai = soDienThoaiRef.current.value;
-      const ngaySinh = ngaySinhRef.current.value;
-      const email = emailRef.current.value;
-      const viTri = viTriRef.current.value;
-      const gioiTinh = gioiTinhRef.current.value;
-      const trangThai = trangThaiRef.current.value;
-      const hinhAnh = hinhAnhRef.current.files[0];
+      const dataPost = {
+        tai_khoan: taiKhoanRef.current.value,
+        mat_khau: matKhauRef.current.value,
+        ho_ten: hoTenRef.current.value,
+        ngay_bat_dau: ngayBatDauRef.current.value,
+        so_dien_thoai: soDienThoaiRef.current.value,
+        ngay_sinh: ngaySinhRef.current.value,
+        email: emailRef.current.value,
+        phan_quyen: viTriRef.current.value,
+        gioi_tinh: gioiTinhRef.current.value,
+        trang_thai: trangThaiRef.current.value,
+        hinh_anh: hinhAnhRef.current.files[0],
+      };
 
       const formData = new FormData();
-      formData.append("tai_khoan", taiKhoan);
-      formData.append("mat_khau", matKhau);
-      formData.append("ho_ten", hoTen);
-      formData.append("ngay_bat_dau", ngayBatDau);
-      formData.append("so_dien_thoai", soDienThoai);
-      formData.append("ngay_sinh", ngaySinh);
-      formData.append("email", email);
-      formData.append("vi_tri", viTri);
-      formData.append("gioi_tinh", gioiTinh);
-      formData.append("trang_thai", trangThai);
-      formData.append("hinh_anh", hinhAnh);
+      formData.append("tai_khoan", dataPost.tai_khoan);
+      formData.append("mat_khau", dataPost.mat_khau);
+      formData.append("ho_ten", dataPost.ho_ten);
+      formData.append("ngay_bat_dau", dataPost.ngay_bat_dau);
+      formData.append("so_dien_thoai", dataPost.so_dien_thoai);
+      formData.append("ngay_sinh", dataPost.ngay_sinh);
+      formData.append("email", dataPost.email);
+      formData.append("phan_quyen", dataPost.phan_quyen);
+      formData.append("gioi_tinh", dataPost.gioi_tinh);
+      formData.append("trang_thai", dataPost.trang_thai);
+      formData.append("hinh_anh", dataPost.hinh_anh);
 
       if (
-        taiKhoan === "" ||
-        matKhau === "" ||
-        hoTen === "" ||
-        ngayBatDau === "" ||
-        soDienThoai === "" ||
-        ngaySinh === "" ||
-        email === "" ||
-        !hinhAnh
+        dataPost.tai_khoan === "" ||
+        dataPost.mat_khau === "" ||
+        dataPost.ho_ten === "" ||
+        dataPost.ngay_bat_dau === "" ||
+        dataPost.so_dien_thoai === "" ||
+        dataPost.ngay_sinh === "" ||
+        dataPost.email === ""
       ) {
         toast.error("Không được để trống thông tin");
         return;
@@ -86,17 +92,24 @@ export default function NguoiDung() {
 
       const {
         status,
-        data: { response, type },
+        data: { response, type, id },
       } = await axios.post(
         `${json_config.url_connect}/nguoi-dung/them-nguoi-dung`,
-        formData
+        formData,
+        {
+          headers: {
+            Authorization: getRoleNguoiDung(),
+            "Content-Type": "application/json",
+          },
+        }
       );
 
       if (status === 200) {
         toast.success(response);
         if (type) {
+          setLoading(false);
           setShowModal(false);
-          await getData();
+          setData((pre) => [...pre, { id, ...dataPost }]);
           return;
         }
       }
@@ -106,59 +119,72 @@ export default function NguoiDung() {
   }
 
   async function capNhatNguoiDung() {
+    setLoading(true);
     try {
-      const taiKhoan = taiKhoanRef.current.value;
-      const hoTen = hoTenRef.current.value;
-      const ngayBatDau = ngayBatDauRef.current.value;
-      const soDienThoai = soDienThoaiRef.current.value;
-      const ngaySinh = ngaySinhRef.current.value;
-      const email = emailRef.current.value;
-      const viTri = viTriRef.current.value;
-      const gioiTinh = gioiTinhRef.current.value;
-      const trangThai = trangThaiRef.current.value;
-      const hinhAnh = hinhAnhRef.current.files[0];
-      const id = dataUpdate.id;
+      const dataPost = {
+        tai_khoan: taiKhoanRef.current.value,
+        ho_ten: hoTenRef.current.value,
+        ngay_bat_dau: ngayBatDauRef.current.value,
+        so_dien_thoai: soDienThoaiRef.current.value,
+        ngay_sinh: ngaySinhRef.current.value,
+        email: emailRef.current.value,
+        phan_quyen: viTriRef.current.value,
+        gioi_tinh: gioiTinhRef.current.value,
+        trang_thai: trangThaiRef.current.value,
+        hinh_anh: hinhAnhRef.current.files[0],
+        id: dataUpdate.id,
+      };
+
+      const formData = new FormData();
+      formData.append("id", dataPost.id);
+      formData.append("tai_khoan", dataPost.tai_khoan);
+      formData.append("ho_ten", dataPost.ho_ten);
+      formData.append("ngay_bat_dau", dataPost.ngay_bat_dau);
+      formData.append("so_dien_thoai", dataPost.so_dien_thoai);
+      formData.append("ngay_sinh", dataPost.ngay_sinh);
+      formData.append("email", dataPost.email);
+      formData.append("phan_quyen", dataPost.phan_quyen);
+      formData.append("gioi_tinh", dataPost.gioi_tinh);
+      formData.append("trang_thai", dataPost.trang_thai);
+      formData.append("hinh_anh", dataPost.hinh_anh);
 
       if (
-        hoTen === "" ||
-        ngayBatDau === "" ||
-        soDienThoai === "" ||
-        ngaySinh === "" ||
-        email === ""
+        dataPost.tai_khoan === "" ||
+        dataPost.ho_ten === "" ||
+        dataPost.ngay_bat_dau === "" ||
+        dataPost.so_dien_thoai === "" ||
+        dataPost.ngay_sinh === "" ||
+        dataPost.email === ""
       ) {
         toast.error("Không được để trống thông tin");
         return;
       }
-
-      const formData = new FormData();
-      formData.append("id", id);
-      formData.append("tai_khoan", taiKhoan);
-      formData.append("ho_ten", hoTen);
-      formData.append("ngay_bat_dau", ngayBatDau);
-      formData.append("so_dien_thoai", soDienThoai);
-      formData.append("ngay_sinh", ngaySinh);
-      formData.append("email", email);
-      formData.append("vi_tri", viTri);
-      formData.append("gioi_tinh", gioiTinh);
-      formData.append("trang_thai", trangThai);
-      formData.append("hinh_anh", hinhAnh);
 
       const {
         status,
         data: { response, type },
       } = await axios.post(
         `${json_config.url_connect}/nguoi-dung/cap-nhat-nguoi-dung`,
-        formData
+        formData,
+        {
+          headers: {
+            Authorization: getRoleNguoiDung(),
+            "Content-Type": "application/json",
+          },
+        }
       );
+
       if (status === 200) {
         toast.success(response);
         if (type) {
+          setLoading(false);
           setShowModalUpdate(false);
-          await getData();
+          setData((pre) =>
+            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+          );
           return;
         }
       }
-      toast.error("Cập nhật người dùng mới thất bại");
     } catch (error) {
       console.log(error);
     }
@@ -171,6 +197,7 @@ export default function NguoiDung() {
         autoClose={200}
         hideProgressBar={false}
       />
+      <Loading loading={loading} />
       <div className="d-flex justify-content-start m-2">
         <button
           type="button"
