@@ -3,13 +3,19 @@ import React, { useEffect, useState, useRef } from "react";
 import json_config from "../config.json";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
-import { dateToText, loaiGiaoDichKhachHang } from "../services/utils";
+import Loading from "./components/loading";
+import {
+  dateToText,
+  getRoleNguoiDung,
+  loaiGiaoDichKhachHang,
+} from "../services/utils";
 
 export default function KhachHang() {
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState({});
+  const [loading, setLoading] = useState(true);
 
   const hoTenRef = useRef(null);
   const ngayKiHopDongRef = useRef(null);
@@ -17,112 +23,114 @@ export default function KhachHang() {
   const ghiChuRef = useRef(null);
   const loaiGiaoDichRef = useRef(null);
 
-  async function getData() {
-    try {
-      const { data } = await axios.get(json_config.url_connect + "/khach-hang");
-      setData(data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   useEffect(() => {
-    getData();
+    (async function getData() {
+      try {
+        const { data } = await axios.get(
+          json_config.url_connect + "/khach-hang",
+          {
+            headers: {
+              Authorization: getRoleNguoiDung(),
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        setLoading(false);
+        setData(data);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
   }, []);
 
   async function themNguoiDung() {
+    setLoading(true);
     try {
-      const hoTen = hoTenRef.current.value;
-      const ngayKiHopDong = ngayKiHopDongRef.current.value;
-      const soDienThoai = soDienThoaiRef.current.value;
-      const ghiChu = ghiChuRef.current.value;
-      const loaiGiaoDich = loaiGiaoDichRef.current.value;
+      const dataPost = {
+        ten_khach_hang: hoTenRef.current.value,
+        ngay_ki_hop_dong: ngayKiHopDongRef.current.value,
+        so_dien_thoai: soDienThoaiRef.current.value,
+        ghi_chu: ghiChuRef.current.value,
+        loai_giao_dich: loaiGiaoDichRef.current.value,
+      };
 
       if (
-        hoTen === "" ||
-        ngayKiHopDong === "" ||
-        soDienThoai === "" ||
-        ghiChu === "" ||
-        loaiGiaoDich === ""
+        dataPost.ho_ten === "" ||
+        dataPost.ngay_ki_hop_dong === "" ||
+        dataPost.so_dien_thoai === "" ||
+        dataPost.ghi_chu === "" ||
+        dataPost.loai_giao_dich === ""
       ) {
         toast.error("Không được để trống thông tin");
         return;
       }
 
-      const dataKhachHang = {
-        ten_khach_hang: hoTen,
-        so_dien_thoai: soDienThoai,
-        loai_giao_dich: loaiGiaoDich,
-        ngay_ki_hop_dong: ngayKiHopDong,
-        ghi_chu: ghiChu,
-      };
-
       const {
         status,
-        data: { response, type },
+        data: { response, type, id },
       } = await axios.post(
         `${json_config.url_connect}/khach-hang/them-khach-hang`,
-        dataKhachHang
+        dataPost
       );
 
       if (status === 200) {
         toast.success(response);
         if (type) {
+          setLoading(false);
           setShowModal(false);
-          await getData();
+          setData((pre) => [...pre, { id, ...dataPost }]);
           return;
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
   async function capNhatNguoiDung() {
+    setLoading(true);
     try {
-      const hoTen = hoTenRef.current.value;
-      const ngayKiHopDong = ngayKiHopDongRef.current.value;
-      const soDienThoai = soDienThoaiRef.current.value;
-      const ghiChu = ghiChuRef.current.value;
-      const loaiGiaoDich = loaiGiaoDichRef.current.value;
+      const dataPost = {
+        ten_khach_hang: hoTenRef.current.value,
+        ngay_ki_hop_dong: ngayKiHopDongRef.current.value,
+        so_dien_thoai: soDienThoaiRef.current.value,
+        ghi_chu: ghiChuRef.current.value,
+        loai_giao_dich: loaiGiaoDichRef.current.value,
+        id: dataUpdate.id,
+      };
 
       if (
-        hoTen === "" ||
-        ngayKiHopDong === "" ||
-        soDienThoai === "" ||
-        ghiChu === ""
+        dataPost.ho_ten === "" ||
+        dataPost.ngay_ki_hop_dong === "" ||
+        dataPost.so_dien_thoai === "" ||
+        dataPost.ghi_chu === "" ||
+        dataPost.loai_giao_dich === ""
       ) {
         toast.error("Không được để trống thông tin");
         return;
       }
-
-      const dataKhachHang = {
-        ten_khach_hang: hoTen,
-        so_dien_thoai: soDienThoai,
-        loai_giao_dich: loaiGiaoDich,
-        ngay_ki_hop_dong: ngayKiHopDong,
-        ghi_chu: ghiChu,
-        id: dataUpdate.id,
-      };
 
       const {
         status,
         data: { response, type },
       } = await axios.post(
         `${json_config.url_connect}/khach-hang/cap-nhat-khach-hang`,
-        dataKhachHang
+        dataPost
       );
+
       if (status === 200) {
         toast.success(response);
         if (type) {
+          setLoading(false);
           setShowModalUpdate(false);
-          await getData();
+          setData((pre) =>
+            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+          );
           return;
         }
       }
-      toast.error("Cập nhật khách hàng mới thất bại");
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -133,6 +141,7 @@ export default function KhachHang() {
         autoClose={200}
         hideProgressBar={false}
       />
+      <Loading loading={loading} />
       <div className="d-flex justify-content-start m-2">
         <button
           type="button"
@@ -333,14 +342,16 @@ export default function KhachHang() {
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => (
-            <tr key={item.id}>
-              <td>{item.id}</td>
-              <td>{item.ten_khach_hang}</td>
-              <td>{item.so_dien_thoai}</td>
-              <td>{item.loai_giao_dich}</td>
-              <td>{dateToText(item.ngay_ki_hop_dong)}</td>
-              <td>{item.ghi_chu.substring(0, 20)}...</td>
+          {data.map((item, index) => (
+            <tr key={index}>
+              <td className="align-middle">{index + 1}</td>
+              <td className="align-middle">{item.ten_khach_hang}</td>
+              <td className="align-middle">{item.so_dien_thoai}</td>
+              <td className="align-middle">{item.loai_giao_dich}</td>
+              <td className="align-middle">
+                {dateToText(item.ngay_ki_hop_dong)}
+              </td>
+              <td className="align-middle w-25">{item.ghi_chu}</td>
               <td>
                 <button
                   type="button"

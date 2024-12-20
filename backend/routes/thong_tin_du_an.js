@@ -43,13 +43,6 @@ router.get("/huong-can-ho", function (_, res) {
   });
 });
 
-router.get("/loai-can-ho", function (_, res) {
-  connect.query("SELECT * FROM loai_can_ho", function (err, result, fields) {
-    if (err) throw err;
-    res.status(200).send(result);
-  });
-});
-
 ///////////////////////////////////////////////////////////////////
 router.get("/truc-can-ho", async function (_, res) {
   try {
@@ -160,24 +153,38 @@ router.post("/cap-nhat-noi-that", async function (req, res) {
   }
 });
 
-router.post("/them-loai-can-ho", function (req, res) {
-  const { loai_can_ho } = req.body;
-
-  const sql = "insert into loai_can_ho(loai_can_ho) values(?)";
-  connect.query(sql, [loai_can_ho], function (err, result, fields) {
-    if (err) throw err;
-    res.status(200).json(result);
-  });
+router.get("/loai-can-ho", async function (_, res) {
+  try {
+    const result = await executeQuery("SELECT * FROM loai_can_ho")
+    res.status(200).send(result)
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send([])
+  }
 });
 
-router.post("/cap-nhat-loai-can-ho", function (req, res) {
-  const { loai_can_ho, id } = req.body;
+router.post("/them-loai-can-ho", async function (req, res) {
+  try {
+    const { loai_can_ho } = req.body
+    const sql = "INSERT INTO loai_can_ho(loai_can_ho) value(?)";
+    const result = await executeQuery(sql, [loai_can_ho])
+    res.status(200).json({ response: "Thêm loại căn hộ thành công", type: true, id: result.insertId })
+  } catch (error) {
+    console.error(error.message)
+    res.status(500).json({})
+  }
+});
 
-  const sql = "UPDATE loai_can_ho SET loai_can_ho = ? WHERE id = ?";
-  connect.query(sql, [loai_can_ho, id], function (err, result, fields) {
-    if (err) throw err;
-    res.status(200).json(result);
-  });
+router.post("/cap-nhat-loai-can-ho", async function (req, res) {
+  try {
+    const { loai_can_ho, id } = req.body;
+    const sql = "UPDATE loai_can_ho SET loai_can_ho = ? WHERE id = ?";
+    await executeQuery(sql, [loai_can_ho, id])
+    res.status(200).json({ response: "Cập nhật loại căn hộ thành công", type: true })
+  } catch (error) {
+    console.error(error.message)
+    res.status(500).json({})
+  }
 });
 
 router.post("/them-huong-can-ho", function (req, res) {

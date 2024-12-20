@@ -33,18 +33,24 @@ export default function NguoiDung() {
   const trangThaiRef = useRef(null);
   const hinhAnhRef = useRef(null);
 
-  async function getData() {
-    try {
-      const { data } = await axios.get(json_config.url_connect + "/nguoi-dung");
-      setData(data);
-      setLoading(false);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
   useEffect(() => {
-    getData();
+    (async function getData() {
+      try {
+        const { data } = await axios.get(
+          json_config.url_connect + "/nguoi-dung",
+          {
+            headers: {
+              Authorization: getRoleNguoiDung(),
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        setData(data);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
   }, []);
 
   async function themNguoiDung() {

@@ -6,16 +6,24 @@ const upload = require("../middleware/upload_nguoi_dung");
 const executeQuery = require("../sql/promise");
 const env = require("../env/get_env");
 
-router.get("/", async function (_, res) {
+router.get("/", async function (req, res) {
   try {
+    const jwt_token = req.headers["authorization"];
+    const data = jwt.verify(jwt_token, env.JWT_KEY);
+
+    if (data.phan_quyen !== env.admin && data.phan_quyen !== env.quan_ly) {
+      return res.status(401).send([])
+    }
+
     const sql = `SELECT id, ho_ten, ngay_bat_dau,
     tai_khoan,gioi_tinh, so_dien_thoai, email,
     ngay_sinh, hinh_anh, trang_thai, phan_quyen
     FROM nguoi_dung`;
+
     const result = await executeQuery(sql);
     res.status(200).send(result);
   } catch (error) {
-    console.error("/nguoi-dung/ ", error.message);
+    console.error(error.message);
     res.status(500).send([]);
   }
 });
@@ -136,7 +144,7 @@ router.post("/dang-nhap", async function (req, res) {
       return res.status(200).json({
         response: "Đăng nhập thành công",
         type: true,
-        data: jwt.sign(JSON.stringify(result[0]), JWT_KEY),
+        data: jwt.sign(JSON.stringify(result[0]), env.JWT_KEY),
       });
     }
 

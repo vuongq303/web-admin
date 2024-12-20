@@ -3,85 +3,94 @@ import React, { useEffect, useState, useRef } from "react";
 import json_config from "../config.json";
 import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
+import Loading from "./components/loading";
 
 export default function LoaiCanHo() {
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
-  const [id, setId] = useState(-1);
+  const [loading, setLoading] = useState(true);
+  const [dataUpdate, setDataUpdate] = useState({});
   const loaiCanHoRef = useRef(null);
-  const loaiCanHoUpdateRef = useRef(null);
-
-  async function getData() {
-    try {
-      const { data } = await axios.get(
-        json_config.url_connect + "/thong-tin-du-an/loai-can-ho"
-      );
-      setData(data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
 
   useEffect(() => {
-    getData();
+    (async function getData() {
+      try {
+        const { data } = await axios.get(
+          json_config.url_connect + "/thong-tin-du-an/loai-can-ho"
+        );
+        setData(data);
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
   }, []);
 
   async function themloaiCanHo() {
+    setLoading(true);
     try {
-      if (loaiCanHoRef.current.value == "") {
+      const dataPost = {
+        loai_can_ho: loaiCanHoRef.current.value,
+      };
+
+      if (dataPost.loai_can_ho == "") {
         toast.error("Dữ liệu trống");
         return;
       }
 
-      const { status, data } = await axios.post(
+      const {
+        status,
+        data: { response, id, type },
+      } = await axios.post(
         `${json_config.url_connect}/thong-tin-du-an/them-loai-can-ho`,
-        { loai_can_ho: loaiCanHoRef.current.value }
+        dataPost
       );
 
       if (status == 200) {
-        if (data.affectedRows > 0) {
-          toast.success("Thêm loại căn hộ mới thành công");
+        toast.success(response);
+        if (type) {
+          setLoading(false);
           setShowModal(false);
-          await getData();
-          return;
+          setData((pre) => [...pre, { id, ...dataPost }]);
         }
-        toast.error("Thêm loại căn hộ mới thất bại");
-        return;
       }
-      toast.error("Thêm loại căn hộ mới thất bại");
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
   async function capNhatloaiCanHo() {
+    setLoading(true);
     try {
-      if (loaiCanHoUpdateRef.current.value === "") {
+      const dataPost = {
+        loai_can_ho: loaiCanHoRef.current.value,
+        id: dataUpdate.id,
+      };
+
+      if (dataPost.loai_can_ho === "") {
         toast.error("Dữ liệu trống");
         return;
       }
-      if (id === -1) {
-        toast.error("Không xác định được vị trí");
-        return;
-      }
 
-      const { status, data } = await axios.post(
+      const {
+        status,
+        data: { response, type },
+      } = await axios.post(
         `${json_config.url_connect}/thong-tin-du-an/cap-nhat-loai-can-ho`,
-        { loai_can_ho: loaiCanHoUpdateRef.current.value, id: id }
+        dataPost
       );
 
       if (status == 200) {
-        if (data.affectedRows > 0) {
-          toast.success("Cập nhật loại căn hộ mới thành công");
+        toast.success(response);
+        if (type) {
+          setLoading(false);
           setShowModalUpdate(false);
-          await getData();
-          return;
+          setData((pre) =>
+            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+          );
         }
-        toast.error("Cập nhật loại căn hộ mới thất bại");
-        return;
       }
-      toast.error("Cập nhật loại căn hộ mới thất bại");
     } catch (error) {
       console.log(error);
     }
@@ -94,6 +103,7 @@ export default function LoaiCanHo() {
         autoClose={200}
         hideProgressBar={false}
       />
+      <Loading loading={loading} />
       <div className="d-flex justify-content-start m-2">
         <button
           type="button"
@@ -146,9 +156,9 @@ export default function LoaiCanHo() {
           <Modal.Body>
             <div className="input-group mb-3">
               <input
-                ref={loaiCanHoUpdateRef}
+                ref={loaiCanHoRef}
                 placeholder="Cập nhật loại căn hộ..."
-                defaultValue={loaiCanHoUpdateRef.current}
+                defaultValue={dataUpdate.loai_can_ho}
                 type="text"
                 className="form-control"
                 aria-label="Sizing example input"
@@ -173,26 +183,26 @@ export default function LoaiCanHo() {
       <table className="table">
         <thead>
           <tr>
+            <th scope="col">STT</th>
             <th scope="col">Loại căn hộ</th>
             <th scope="col">Hành động</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => (
-            <tr key={item.id}>
+          {data.map((item, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
               <td>{item.loai_can_ho}</td>
-
               <td>
                 <button
                   type="button"
                   className="btn btn-primary"
                   onClick={() => {
-                    loaiCanHoUpdateRef.current = item.loai_can_ho;
-                    setId(item.id);
+                    setDataUpdate(item);
                     setShowModalUpdate(true);
                   }}
                 >
-                 Chi tiết
+                  Chi tiết
                 </button>
               </td>
             </tr>
