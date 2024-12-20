@@ -3,53 +3,58 @@ import React, { useEffect, useState, useRef } from "react";
 import json_config from "../config.json";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
+import Loading from "./components/loading";
 
 export default function DuAn() {
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
-  const [id, setId] = useState(-1);
+  const [loading, setLoading] = useState(true);
+  const [dataUpdate, setDataUpdate] = useState({});
   const duAnRef = useRef(null);
-  const duAnUpdateRef = useRef(null);
-
-  async function getData() {
-    try {
-      const { data } = await axios.get(
-        json_config.url_connect + "/thong-tin-du-an/du-an"
-      );
-      setData(data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
 
   useEffect(() => {
-    getData();
+    (async function getData() {
+      try {
+        const { data } = await axios.get(
+          json_config.url_connect + "/thong-tin-du-an/du-an"
+        );
+        setLoading(false);
+        setData(data);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
   }, []);
 
   async function themduAn() {
     try {
-      if (duAnRef.current.value == "") {
+      setLoading(true);
+      const dataPost = {
+        ten_du_an: duAnRef.current.value,
+      };
+
+      if (dataPost.ten_du_an == "") {
         toast.error("Dữ liệu trống");
         return;
       }
 
-      const { status, data } = await axios.post(
+      const {
+        status,
+        data: { response, type, id },
+      } = await axios.post(
         `${json_config.url_connect}/thong-tin-du-an/them-du-an`,
-        { ten_du_an: duAnRef.current.value }
+        dataPost
       );
 
       if (status == 200) {
-        if (data.affectedRows > 0) {
-          toast.success("Thêm dự án mới thành công");
+        toast.success(response);
+        if (type) {
+          setLoading(false);
           setShowModal(false);
-          await getData();
-          return;
+          setData((pre) => [...pre, { id, ...dataPost }]);
         }
-        toast.error("Thêm dự án mới thất bại");
-        return;
       }
-      toast.error("Thêm dự án mới thất bại");
     } catch (error) {
       console.log(error);
     }
@@ -57,31 +62,35 @@ export default function DuAn() {
 
   async function capNhatduAn() {
     try {
-      if (duAnUpdateRef.current.value === "") {
+      setLoading(true);
+      const dataPost = {
+        ten_du_an: duAnRef.current.value,
+        id: dataUpdate.id,
+      };
+
+      if (dataPost.ten_du_an === "") {
         toast.error("Dữ liệu trống");
         return;
       }
-      if (id === -1) {
-        toast.error("Không xác định được vị trí");
-        return;
-      }
 
-      const { status, data } = await axios.post(
+      const {
+        status,
+        data: { response, type },
+      } = await axios.post(
         `${json_config.url_connect}/thong-tin-du-an/cap-nhat-du-an`,
-        { ten_du_an: duAnUpdateRef.current.value, id: id }
+        dataPost
       );
 
       if (status == 200) {
-        if (data.affectedRows > 0) {
-          toast.success("Cập nhật dự án mới thành công");
+        toast.success(response);
+        if (type) {
+          setLoading(false);
           setShowModalUpdate(false);
-          await getData();
-          return;
+          setData((pre) =>
+            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+          );
         }
-        toast.error("Cập nhật dự án mới thất bại");
-        return;
       }
-      toast.error("Cập nhật dự án mới thất bại");
     } catch (error) {
       console.log(error);
     }
@@ -94,6 +103,7 @@ export default function DuAn() {
         autoClose={200}
         hideProgressBar={false}
       />
+      <Loading loading={loading} />
       <div className="d-flex justify-content-start m-2">
         <button
           type="button"
@@ -146,9 +156,9 @@ export default function DuAn() {
           <Modal.Body>
             <div className="input-group mb-3">
               <input
-                ref={duAnUpdateRef}
+                ref={duAnRef}
                 placeholder="Cập nhật dự án..."
-                defaultValue={duAnUpdateRef.current}
+                defaultValue={dataUpdate.ten_du_an}
                 type="text"
                 className="form-control"
                 aria-label="Sizing example input"
@@ -179,22 +189,20 @@ export default function DuAn() {
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => (
-            <tr key={item.id}>
-              <td>{item.id}</td>
+          {data.map((item, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
               <td>{item.ten_du_an}</td>
-
               <td>
                 <button
                   type="button"
                   className="btn btn-primary"
                   onClick={() => {
-                    duAnUpdateRef.current = item.ten_du_an;
-                    setId(item.id);
+                    setDataUpdate(item);
                     setShowModalUpdate(true);
                   }}
                 >
-                 Chi tiết
+                  Chi tiết
                 </button>
               </td>
             </tr>

@@ -3,121 +3,120 @@ import React, { useEffect, useState, useRef } from "react";
 import json_config from "../config.json";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
+import { getRoleNguoiDung } from "../services/utils";
 
 export default function KhachHangNguon() {
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState({});
+  const [loading, setLoading] = useState(true);
 
   const hoTenRef = useRef(null);
   const khachGoiTuRef = useRef(null);
   const soDienThoaiRef = useRef(null);
   const ghiChuRef = useRef(null);
 
-  async function getData() {
-    try {
-      const { data } = await axios.get(
-        json_config.url_connect + "/khach-hang-nguon"
-      );
-      setData(data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   useEffect(() => {
-    getData();
+    (async function getData() {
+      try {
+        const { data } = await axios.get(
+          json_config.url_connect + "/khach-hang-nguon",
+          {
+            headers: {
+              Authorization: getRoleNguoiDung(),
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        setLoading(false);
+        setData(data);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
   }, []);
 
   async function themNguoiDung() {
     try {
-      const hoTen = hoTenRef.current.value;
-      const khachGoiTu = khachGoiTuRef.current.value;
-      const soDienThoai = soDienThoaiRef.current.value;
-      const ghiChu = ghiChuRef.current.value;
+      setLoading(true);
+      const dataPost = {
+        ten_khach_hang: hoTenRef.current.value,
+        khach_goi_tu: khachGoiTuRef.current.value,
+        so_dien_thoai: soDienThoaiRef.current.value,
+        ghi_chu: ghiChuRef.current.value,
+      };
 
       if (
-        hoTen === "" ||
-        khachGoiTu === "" ||
-        soDienThoai === "" ||
-        ghiChu === ""
+        dataPost.ten_khach_hang === "" ||
+        dataPost.khach_goi_tu === "" ||
+        dataPost.so_dien_thoai === "" ||
+        dataPost.ghi_chu === ""
       ) {
         toast.error("Không được để trống thông tin");
         return;
       }
-
-      const dataKhachHang = {
-        ten_khach_hang: hoTen,
-        so_dien_thoai: soDienThoai,
-        khach_goi_tu: khachGoiTu,
-        ghi_chu: ghiChu,
-      };
-
       const {
         status,
-        data: { response, type },
+        data: { response, type, id },
       } = await axios.post(
         `${json_config.url_connect}/khach-hang-nguon/them-khach-hang`,
-        dataKhachHang
+        dataPost
       );
 
       if (status === 200) {
         toast.success(response);
         if (type) {
+          setLoading(false);
           setShowModal(false);
-          await getData();
-          return;
+          setData((pre) => [...pre, { id, ...dataPost }]);
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
   async function capNhatNguoiDung() {
     try {
-      const hoTen = hoTenRef.current.value;
-      const soDienThoai = soDienThoaiRef.current.value;
-      const ghiChu = ghiChuRef.current.value;
-      const khachGoiTu = khachGoiTuRef.current.value;
+      setLoading(true);
+      const dataPost = {
+        ten_khach_hang: hoTenRef.current.value,
+        khach_goi_tu: khachGoiTuRef.current.value,
+        so_dien_thoai: soDienThoaiRef.current.value,
+        ghi_chu: ghiChuRef.current.value,
+        id: dataUpdate.id,
+      };
 
       if (
-        hoTen === "" ||
-        khachGoiTu === "" ||
-        soDienThoai === "" ||
-        ghiChu === ""
+        dataPost.ten_khach_hang === "" ||
+        dataPost.khach_goi_tu === "" ||
+        dataPost.so_dien_thoai === "" ||
+        dataPost.ghi_chu === ""
       ) {
         toast.error("Không được để trống thông tin");
         return;
       }
-
-      const dataKhachHang = {
-        ten_khach_hang: hoTen,
-        so_dien_thoai: soDienThoai,
-        khach_goi_tu: khachGoiTu,
-        ghi_chu: ghiChu,
-        id: dataUpdate.id,
-      };
-
       const {
         status,
-        data: { response, type },
+        data: { response, type},
       } = await axios.post(
         `${json_config.url_connect}/khach-hang-nguon/cap-nhat-khach-hang`,
-        dataKhachHang
+        dataPost
       );
+
       if (status === 200) {
         toast.success(response);
         if (type) {
+          setLoading(false);
           setShowModalUpdate(false);
-          await getData();
-          return;
+          setData((pre) =>
+            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+          );
         }
       }
-      toast.error("Cập nhật khách hàng mới thất bại");
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
