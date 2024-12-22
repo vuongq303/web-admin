@@ -2,13 +2,17 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import json_config from "../config.json";
 import { Button, Modal, Form } from "react-bootstrap";
-import JSZip from "jszip";
-import { saveAs } from "file-saver";
 import * as xlsx from "xlsx";
-import { danhDauCanHo, getRoleNguoiDung, locGiaCanHo } from "../services/utils";
+import {
+  danhDauCanHo,
+  getRoleNguoiDung,
+  locGiaCanHo,
+  phanQuyenNguoiDung,
+} from "../services/utils";
 import PreviewImage from "./components/preview_image";
 import { toast, ToastContainer } from "react-toastify";
-import { columnMapping, dataCanHoDefault } from "../data/default_data";
+import { dataCanHoDefault } from "../data/default_data";
+import { downloadImages, exportFileExcel } from "./controllers/function";
 
 export default function CanHo() {
   const [data, setData] = useState([]);
@@ -18,7 +22,7 @@ export default function CanHo() {
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [showModalHinhAnh, setShowModalHinhAnh] = useState(false);
   const [dataUpdate, setDataUpdate] = useState(dataCanHoDefault);
-  const [showImageUpdate, setShowImageUpdate] = useState([]);
+  const [showImageData, setShowImageData] = useState([]);
   const [dataToaNhaDuAn, setDataToaNhaDuAn] = useState([]);
 
   const [dataDuAn, setDataDuAn] = useState([]);
@@ -66,13 +70,16 @@ export default function CanHo() {
           `${json_config.url_connect}/thong-tin-du-an`
         );
 
-        if (status == 200) {
-          const { du_an, huong_can_ho, loai_can_ho, noi_that, truc_can_ho } =
+        if (status === 200) {
+          const { toa_nha, huong_can_ho, loai_can_ho, noi_that, truc_can_ho } =
             response;
-          const uniqueDuAn = [...new Set(du_an.map((item) => item.ten_du_an))];
 
-          setDataDuAn(uniqueDuAn);
-          setDataToaNhaDuAn(du_an);
+          const listDuAn = [...new Set(toa_nha.map((item) => item.ten_du_an))];
+          const listToaNha = toa_nha.map((item) => item.ten_toa_nha);
+
+          setDataDuAn(listDuAn);
+          setDataToaNha(listToaNha);
+          setDataToaNhaDuAn(toa_nha);
           setDataHuongCanHo(huong_can_ho);
           setDataLoaiCanHo(loai_can_ho);
           setDataNoiThat(noi_that);
@@ -89,13 +96,13 @@ export default function CanHo() {
   function showImage(item) {
     if (item.hinh_anh) {
       let arrayHinhAnh = item.hinh_anh.split(",");
-      setShowImageUpdate(
+      setShowImageData(
         arrayHinhAnh.map(
           (img) => `${json_config.url_connect}/can-ho/${item.id}/${img}`
         )
       );
     } else {
-      setShowImageUpdate([]);
+      setShowImageData([]);
     }
     setDataUpdate(item);
     setShowModalHinhAnh(true);
@@ -152,26 +159,8 @@ export default function CanHo() {
     }
   }
 
-  const downloadImages = async () => {
-    const zip = new JSZip();
-    const folder = zip.folder("images");
-
-    try {
-      for (let i = 0; i < showImageUpdate.length; i++) {
-        const response = await fetch(showImageUpdate[i]);
-        const blob = await response.blob();
-        const fileName = `image${i + 1}.jpg`;
-
-        folder.file(fileName, blob);
-      }
-      const zipBlob = await zip.generateAsync({ type: "blob" });
-      saveAs(zipBlob, "images.zip");
-    } catch (error) {
-      console.error("Lỗi khi tải ảnh:", error);
-    }
-  };
-
   async function timKiem() {
+    setLoading(true);
     let dataTimKiem = {
       ten_du_an: tenDuAnTimKiemRef.current.value,
       ten_toa_nha: tenToaNhaTimKiemRef.current.value,
@@ -197,11 +186,13 @@ export default function CanHo() {
     );
 
     if (status === 200) {
+      setLoading(false);
       setData(data);
     }
   }
 
   async function lamMoi() {
+    setLoading(true);
     tenDuAnTimKiemRef.current.value = "";
     tenToaNhaTimKiemRef.current.value = "";
     loaiNoiThatTimKiemRef.current.value = "";
@@ -212,7 +203,9 @@ export default function CanHo() {
     locGiaCanHoRef.current.value = "";
     giaTuRef.current.value = "";
     giaDenRef.current.value = "";
+    setDataToaNha([]);
     await getData();
+    setLoading(false);
   }
 
   async function capNhatAnhCanHo(event) {
@@ -226,20 +219,18 @@ export default function CanHo() {
         formData.append("hinh_anh", file);
       });
 
-      const response = await axios.post(
+      const {
+        status,
+        data: { response: message, data: images, type },
+      } = await axios.post(
         `${json_config.url_connect}/can-ho/them-anh-can-ho`,
         formData
       );
 
-      const {
-        status,
-        data: { response: message, data: images, type },
-      } = response;
-
       if (status === 200) {
         toast.success(message);
         if (type) {
-          setShowImageUpdate(
+          setShowImageData(
             images.map(
               (img) =>
                 `${json_config.url_connect}/can-ho/${dataUpdate.id}/${img}`
@@ -247,7 +238,7 @@ export default function CanHo() {
           );
           setData((prevData) =>
             prevData.map((item) =>
-              item.ma_can_ho === dataUpdate.ma_can_ho
+              item.id === dataUpdate.id
                 ? { ...item, hinh_anh: images.join(",") }
                 : item
             )
@@ -255,36 +246,32 @@ export default function CanHo() {
         }
       }
     } catch (error) {
-      console.log(error);
-      toast.error("Cập nhật ảnh thất bại. Vui lòng thử lại!");
+      console.error(error);
     }
   }
 
-  const removeImageModalUpdate = async (index) => {
-    if (role !== "Admin") {
+  const xoaAnhCanHo = async (index) => {
+    if (role !== phanQuyenNguoiDung[0] && role !== phanQuyenNguoiDung[2]) {
       toast.error("Bạn không thể xóa ảnh");
       return;
     }
-    const listImgPath = showImageUpdate[index].split("/");
-    const imgPath = listImgPath[listImgPath.length - 1];
 
+    const listImgPath = showImageData[index].split("/");
+    const imgPath = listImgPath[listImgPath.length - 1];
+    
     try {
-      const response = await axios.post(
-        `${json_config.url_connect}/can-ho/xoa-anh-can-ho`,
-        {
-          id: dataUpdate.id,
-          filename: imgPath,
-        }
-      );
       const {
         status,
         data: { response: message, data: images, type },
-      } = response;
+      } = await axios.post(`${json_config.url_connect}/can-ho/xoa-anh-can-ho`, {
+        id: dataUpdate.id,
+        filename: imgPath,
+      });
 
       if (status === 200) {
         toast.success(message);
         if (type) {
-          setShowImageUpdate(
+          setShowImageData(
             images.map(
               (img) =>
                 `${json_config.url_connect}/can-ho/${dataUpdate.id}/${img}`
@@ -292,7 +279,7 @@ export default function CanHo() {
           );
           setData((prevData) =>
             prevData.map((item) =>
-              item.ma_can_ho === dataUpdate.ma_can_ho
+              item.id === dataUpdate.id
                 ? { ...item, hinh_anh: images.join(",") }
                 : item
             )
@@ -346,7 +333,7 @@ export default function CanHo() {
       }
 
       const {
-        data: { response: message, type, id },
+        data: { response: message, type, id, nguoi_cap_nhat },
         status,
       } = await axios.post(
         `${json_config.url_connect}/can-ho/them-can-ho`,
@@ -363,7 +350,7 @@ export default function CanHo() {
         toast.success(message);
         if (type) {
           setShowModal(false);
-          setData((pre) => [...pre, { id, ...data }]);
+          setData((pre) => [{ id, nguoi_cap_nhat, ...data }, ...pre]);
         }
       }
     } catch (error) {
@@ -374,10 +361,9 @@ export default function CanHo() {
 
   async function capNhatCanHo() {
     try {
-      const data = {
+      const dataPost = {
         chu_can_ho: hoTenChuCanHoRef.current.value,
         so_dien_thoai: soDienThoaiRef.current.value,
-        ten_du_an: tenDuAnRef.current.value,
         so_phong_ngu: soPhongNguRef.current.value,
         so_phong_tam: soPhongTamRef.current.value,
         loai_can_ho: loaiCanHoRef.current.value,
@@ -386,13 +372,8 @@ export default function CanHo() {
         noi_that: noiThatRef.current.value,
         gia_ban: giaBanRef.current.value,
         gia_thue: giaThueRef.current.value,
-        mo_ta: ghiChuRef.current.value,
-        ngay_ki_hop_dong: new Date().toISOString(),
+        ghi_chu: ghiChuRef.current.value,
         danh_dau: danhDauCanHoRef.current.value,
-      };
-
-      const dataPost = {
-        ...data,
         id: dataUpdate.id,
       };
 
@@ -415,7 +396,7 @@ export default function CanHo() {
       }
 
       const {
-        data: { response: message, type },
+        data: { response: message, type, nguoi_cap_nhat },
         status,
       } = await axios.post(
         `${json_config.url_connect}/can-ho/cap-nhat-can-ho`,
@@ -434,7 +415,9 @@ export default function CanHo() {
           setShowModalUpdate(false);
           setData((prev) =>
             prev.map((item) =>
-              item.id === dataPost.id ? { ...item, ...data } : item
+              item.id === dataPost.id
+                ? { ...item, ...dataPost, nguoi_cap_nhat }
+                : item
             )
           );
         }
@@ -468,33 +451,6 @@ export default function CanHo() {
       console.error("Error while uploading Excel file:", error);
     }
   };
-
-  function exportFileExcel() {
-    if (itemChecked.length === 0) {
-      toast.error("No data");
-      return;
-    }
-    const transformedData = itemChecked.map((row) => {
-      const transformedRow = {};
-      Object.keys(row).forEach((key) => {
-        transformedRow[columnMapping[key] || key] = row[key];
-      });
-      return transformedRow;
-    });
-
-    const worksheet = xlsx.utils.json_to_sheet(transformedData);
-    const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-
-    const excelBuffer = xlsx.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-    const file = new Blob([excelBuffer], {
-      type: "application/octet-stream",
-    });
-    saveAs(file, "data.xlsx");
-  }
 
   async function capNhatTrangThai(id, e) {
     const checked = e.target.checked;
@@ -561,7 +517,7 @@ export default function CanHo() {
             )}
             <button
               type="button"
-              onClick={exportFileExcel}
+              onClick={() => exportFileExcel(itemChecked)}
               className="btn btn-secondary mx-1"
             >
               Export file excel
@@ -621,13 +577,35 @@ export default function CanHo() {
             <div className="input-group mb-3">
               <div className="form-floating">
                 <select
+                  ref={tenDuAnRef}
+                  className="form-select"
+                  onChange={(e) => {
+                    let value = e.target.value;
+                    setDataToaNha(
+                      dataToaNhaDuAn
+                        .filter((item) => item.ten_du_an === value)
+                        .map((item) => item.ten_toa_nha)
+                    );
+                  }}
+                  aria-label="Default select example"
+                >
+                  {dataDuAn.map((item, index) => (
+                    <option key={index} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+                <label htmlFor="floatingInputGrid">Tên dự án</label>
+              </div>
+              <div className="form-floating">
+                <select
                   ref={tenToaNhaRef}
                   className="form-select"
                   aria-label="Default select example"
                 >
                   {dataToaNha.map((item, index) => (
-                    <option key={index} value={item.ten_du_an}>
-                      {item.ten_du_an}
+                    <option key={index} value={item}>
+                      {item}
                     </option>
                   ))}
                 </select>
@@ -643,6 +621,8 @@ export default function CanHo() {
                 />
                 <label htmlFor="floatingInputGrid">Số phòng</label>
               </div>
+            </div>
+            <div className="input-group mb-3">
               <div className="form-floating">
                 <select
                   className="form-select"
@@ -657,8 +637,6 @@ export default function CanHo() {
                 </select>
                 <label htmlFor="floatingInputGrid">Trục căn hộ</label>
               </div>
-            </div>
-            <div className="input-group mb-3">
               <div className="form-floating">
                 <input
                   ref={hoTenChuCanHoRef}
@@ -679,6 +657,9 @@ export default function CanHo() {
                 />
                 <label htmlFor="floatingInputGrid">Số điện thoại</label>
               </div>
+            </div>
+            <label className="mb-3">Thông tin căn hộ</label>
+            <div className="input-group mb-3">
               <div className="form-floating">
                 <select
                   className="form-select"
@@ -692,23 +673,6 @@ export default function CanHo() {
                   ))}
                 </select>
                 <label htmlFor="floatingInputGrid">Đánh dấu</label>
-              </div>
-            </div>
-            <label className="mb-3">Thông tin căn hộ</label>
-            <div className="input-group mb-3">
-              <div className="form-floating">
-                <select
-                  ref={tenDuAnRef}
-                  className="form-select"
-                  aria-label="Default select example"
-                >
-                  {dataDuAn.map((item, index) => (
-                    <option key={index} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-                <label htmlFor="floatingInputGrid">Tên dự án</label>
               </div>
 
               <div className="form-floating">
@@ -854,19 +818,27 @@ export default function CanHo() {
             <label className="mb-3">Thông tin khách hàng</label>
             <div className="input-group mb-3">
               <div className="form-floating">
-                <select
+                <input
+                  ref={tenDuAnRef}
+                  disabled
+                  type="text"
+                  defaultValue={dataUpdate.ten_du_an}
+                  className="form-control"
+                  aria-label="Sizing example input"
+                  aria-describedby="inputGroup-sizing-default"
+                />
+                <label htmlFor="floatingInputGrid">Tên dự án</label>
+              </div>
+              <div className="form-floating">
+                <input
                   ref={tenToaNhaRef}
                   disabled
+                  type="text"
                   defaultValue={dataUpdate.ten_toa_nha}
-                  className="form-select"
-                  aria-label="Default select example"
-                >
-                  {dataToaNha.map((item, index) => (
-                    <option key={index} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
+                  className="form-control"
+                  aria-label="Sizing example input"
+                  aria-describedby="inputGroup-sizing-default"
+                />
                 <label htmlFor="floatingInputGrid">Tên tòa</label>
               </div>
               <div className="form-floating">
@@ -881,24 +853,20 @@ export default function CanHo() {
                 />
                 <label htmlFor="floatingInputGrid">Số phòng</label>
               </div>
-              <div className="form-floating">
-                <select
-                  className="form-select"
-                  ref={trucCanHoRef}
-                  disabled
-                  defaultValue={dataUpdate.truc_can_ho}
-                  aria-label="Default select example"
-                >
-                  {dataTrucCanHo.map((item, index) => (
-                    <option key={index} value={item.truc_can}>
-                      {item.truc_can}
-                    </option>
-                  ))}
-                </select>
-                <label htmlFor="floatingInputGrid">Trục căn hộ</label>
-              </div>
             </div>
             <div className="input-group mb-3">
+              <div className="form-floating">
+                <input
+                  ref={trucCanHoRef}
+                  disabled
+                  type="text"
+                  defaultValue={dataUpdate.truc_can_ho}
+                  className="form-control"
+                  aria-label="Sizing example input"
+                  aria-describedby="inputGroup-sizing-default"
+                />
+                <label htmlFor="floatingInputGrid">Trục căn hộ</label>
+              </div>
               <div className="form-floating">
                 <input
                   ref={hoTenChuCanHoRef}
@@ -921,6 +889,9 @@ export default function CanHo() {
                 />
                 <label htmlFor="floatingInputGrid">Số điện thoại</label>
               </div>
+            </div>
+            <label className="mb-3">Thông tin căn hộ</label>
+            <div className="input-group mb-3">
               <div className="form-floating">
                 <select
                   className="form-select"
@@ -935,24 +906,6 @@ export default function CanHo() {
                   ))}
                 </select>
                 <label htmlFor="floatingInputGrid">Đánh dấu</label>
-              </div>
-            </div>
-            <label className="mb-3">Thông tin căn hộ</label>
-            <div className="input-group mb-3">
-              <div className="form-floating">
-                <select
-                  ref={tenDuAnRef}
-                  defaultValue={dataUpdate.du_an}
-                  className="form-select"
-                  aria-label="Default select example"
-                >
-                  {dataDuAn.map((item, index) => (
-                    <option key={index} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-                <label htmlFor="floatingInputGrid">Tên dự án</label>
               </div>
 
               <div className="form-floating">
@@ -1094,7 +1047,7 @@ export default function CanHo() {
           keyboard={false}
         >
           <Modal.Header>
-            <Modal.Title>Thêm dự án mới</Modal.Title>
+            <Modal.Title>Hình ảnh</Modal.Title>
             <Button
               variant="close"
               aria-label="Close"
@@ -1116,8 +1069,8 @@ export default function CanHo() {
             </div>
             <div className="form-floating image-container">
               <PreviewImage
-                props={showImageUpdate}
-                onRemoveImage={removeImageModalUpdate}
+                props={showImageData}
+                onRemoveImage={xoaAnhCanHo}
               />
             </div>
           </Modal.Body>
@@ -1128,7 +1081,10 @@ export default function CanHo() {
             >
               Close
             </Button>
-            <Button variant="primary" onClick={downloadImages}>
+            <Button
+              variant="primary"
+              onClick={async () => downloadImages(showImageData)}
+            >
               Tải ảnh xuống
             </Button>
           </Modal.Footer>
@@ -1142,7 +1098,9 @@ export default function CanHo() {
           onChange={(e) => {
             let value = e.target.value;
             setDataToaNha(
-              dataToaNhaDuAn.filter((item) => item.ten_du_an === value)
+              dataToaNhaDuAn
+                .filter((item) => item.ten_du_an === value)
+                .map((item) => item.ten_toa_nha)
             );
           }}
         >
@@ -1160,8 +1118,8 @@ export default function CanHo() {
         >
           <option value="">Chọn tên tòa nhà</option>
           {dataToaNha.map((item, index) => (
-            <option key={index} value={item.ten_toa_nha}>
-              {item.ten_toa_nha}
+            <option key={index} value={item}>
+              {item}
             </option>
           ))}
         </select>
@@ -1327,7 +1285,8 @@ export default function CanHo() {
                 <td className="align-middle">{item.gia_ban}</td>
                 <td className="align-middle">{item.gia_thue}</td>
                 <td className="w-25 text-start align-middle">
-                  - {item.du_an} - {item.dien_tich}m² - {item.so_phong_ngu}PN
+                  - {item.ten_du_an} - {item.dien_tich}m² - {item.so_phong_ngu}
+                  PN
                   {item.so_phong_tam}WC - {item.huong_can_ho}
                   <br />- {item.loai_can_ho}
                   <br />- {item.noi_that}

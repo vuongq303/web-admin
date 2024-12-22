@@ -111,9 +111,9 @@ export default function NguoiDung() {
       );
 
       if (status === 200) {
+        setLoading(false);
         toast.success(response);
         if (type) {
-          setLoading(false);
           setShowModal(false);
           setData((pre) => [...pre, { id, ...dataPost }]);
           return;

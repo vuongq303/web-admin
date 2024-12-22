@@ -16,7 +16,7 @@ router.get("/", async function (req, res) {
 
     var sql = `SELECT id, danh_dau,
     gia_ban, gia_thue,
-    trang_thai, du_an,
+    trang_thai, ten_du_an,
     dien_tich, so_phong_ngu,
     so_phong_tam, huong_can_ho,
     loai_can_ho, noi_that,
@@ -46,14 +46,19 @@ router.post(
       const { id } = req.body;
 
       var filePath = files.map((file) => file.filename);
+      const resultHinhAnh = [];
       const [resultGetHinhAnh] = await executeQuery(
         "SELECT hinh_anh FROM can_ho WHERE id = ?",
         [id]
       );
-      const listHinhAnh = resultGetHinhAnh.hinh_anh.split(",");
-      const resultHinhAnh = [...filePath, ...listHinhAnh];
-      var path = resultHinhAnh.join(",");
 
+      if (resultGetHinhAnh.hinh_anh) {
+        const listHinhAnh = resultGetHinhAnh.hinh_anh.split(",");
+        resultHinhAnh.push(...filePath, ...listHinhAnh);
+      } else {
+        resultHinhAnh.push(...filePath);
+      }
+      const path = resultHinhAnh.join(",");
       await executeQuery("UPDATE can_ho SET hinh_anh = ? WHERE id = ?", [
         path,
         id,
@@ -95,17 +100,15 @@ router.post("/xoa-anh-can-ho", async function (req, res) {
         listUpdateHinhAnh,
         id,
       ]);
-      return res
-        .status(200)
-        .json({
-          response: "Xóa ảnh thành công",
-          type: true,
-          data: updatedHinhAnh,
-        });
+      return res.status(200).json({
+        response: "Xóa ảnh thành công",
+        type: true,
+        data: updatedHinhAnh,
+      });
     }
 
     res
-      .status(400)
+      .status(200)
       .json({ response: "Lỗi xóa ảnh, không tìm thấy dữ liệu", type: false });
   } catch (err) {
     console.error(err.message);
@@ -155,12 +158,15 @@ router.post("/them-can-ho", async (req, res) => {
     const sqlCanHo = `
         INSERT INTO can_ho 
         (ma_can_ho, chu_can_ho, so_dien_thoai, gia_ban,
-        gia_thue, du_an, dien_tich, so_phong_ngu,
+        gia_thue, ten_du_an, dien_tich, so_phong_ngu,
         so_phong_tam, huong_can_ho, loai_can_ho,
         noi_that, ghi_chu, nguoi_cap_nhat,
         trang_thai, ten_toa_nha,truc_can_ho, danh_dau) 
         VALUES (?, ? ,? ,? ,? ,? , ?, ?, ? ,? ,? ,? , ?, ?, ?, ?, ?, ?)`;
 
+    const nguoi_cap_nhat = `${data.ho_ten} đã cập nhật ngày ${now.format(
+      "DD/MM/YYYY"
+    )}`;
     const result = await executeQuery(sqlCanHo, [
       ma_can_ho,
       chu_can_ho,
@@ -175,20 +181,19 @@ router.post("/them-can-ho", async (req, res) => {
       loai_can_ho,
       noi_that,
       ghi_chu,
-      `${data.ho_ten} đã cập nhật ngày ${now.format("DD/MM/YYYY")}`,
+      nguoi_cap_nhat,
       trang_thai,
       ten_toa_nha,
       truc_can_ho,
       danh_dau,
     ]);
 
-    res
-      .status(200)
-      .json({
-        response: "Thêm căn hộ thành công",
-        type: true,
-        id: result.insertId,
-      });
+    res.status(200).json({
+      response: "Thêm căn hộ thành công",
+      type: true,
+      id: result.insertId,
+      nguoi_cap_nhat: nguoi_cap_nhat,
+    });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ response: "Lỗi thêm căn hộ", type: false });
@@ -203,14 +208,13 @@ router.post("/cap-nhat-can-ho", async (req, res) => {
     var {
       chu_can_ho,
       so_dien_thoai,
-      ten_du_an,
       dien_tich,
       so_phong_ngu,
       so_phong_tam,
       huong_can_ho,
       loai_can_ho,
       noi_that,
-      mo_ta,
+      ghi_chu,
       gia_ban,
       gia_thue,
       danh_dau,
@@ -220,34 +224,37 @@ router.post("/cap-nhat-can-ho", async (req, res) => {
     const sqlCanHo = `
         UPDATE can_ho SET chu_can_ho = ?,
         so_dien_thoai = ?, gia_ban = ?,
-        gia_thue = ?, du_an = ?,
-        dien_tich = ?, so_phong_ngu = ?,
+        gia_thue = ?, dien_tich = ?, so_phong_ngu = ?,
         so_phong_tam = ?, huong_can_ho = ?,
         loai_can_ho = ?, noi_that = ?,
         ghi_chu = ?, nguoi_cap_nhat = ?,
         danh_dau = ? WHERE id = ?`;
 
+    const nguoi_cap_nhat = `${data.ho_ten} đã cập nhật ngày ${now.format(
+      "DD/MM/YYYY"
+    )}`;
     await executeQuery(sqlCanHo, [
       chu_can_ho,
       so_dien_thoai,
       gia_ban,
       gia_thue,
-      ten_du_an,
       dien_tich,
       so_phong_ngu,
       so_phong_tam,
       huong_can_ho,
       loai_can_ho,
       noi_that,
-      mo_ta,
-      `${data.ho_ten} đã cập nhật ngày ${now.format("DD/MM/YYYY")}`,
+      ghi_chu,
+      nguoi_cap_nhat,
       danh_dau,
       id,
     ]);
 
-    res
-      .status(200)
-      .json({ response: "Cập nhật căn hộ thành công", type: true });
+    res.status(200).json({
+      response: "Cập nhật căn hộ thành công",
+      type: true,
+      nguoi_cap_nhat: nguoi_cap_nhat,
+    });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ response: "Lỗi cập nhật căn hộ", type: false });

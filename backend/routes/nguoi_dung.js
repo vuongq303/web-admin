@@ -12,7 +12,7 @@ router.get("/", async function (req, res) {
     const data = jwt.verify(jwt_token, env.JWT_KEY);
 
     if (data.phan_quyen !== env.admin && data.phan_quyen !== env.quan_ly) {
-      return res.status(401).send([])
+      return res.status(401).send([]);
     }
 
     const sql = `SELECT id, ho_ten, ngay_bat_dau,
@@ -49,10 +49,22 @@ router.post(
       const jwt_token = req.headers["authorization"];
       const data = jwt.verify(jwt_token, env.JWT_KEY);
 
-      if (phan_quyen === 'Admin') {
-        if (data.phan_quyen !== "Admin") {
-          return res.status(200).json({ response: "Không thể thêm Admin", type: false })
-        }
+      if (data.phan_quyen !== env.admin) {
+        return res
+          .status(200)
+          .json({ response: "Không thể thêm Admin", type: false });
+      }
+
+      const checkUser = await executeQuery(
+        "SELECT id FROM nguoi_dung WHERE tai_khoan = ?",
+        [tai_khoan]
+      );
+
+      if (checkUser.length > 0) {
+        return res.status(200).json({
+          response: "Tài khoản đã tồn tại",
+          type: false,
+        });
       }
 
       const hinh_anh = `http://${ip.ip}:8080/nguoi-dung/${tai_khoan}.png`;
@@ -75,9 +87,11 @@ router.post(
         tai_khoan,
         mat_khau,
       ]);
-      res
-        .status(200)
-        .json({ response: "Thêm người dùng thành công ", type: true, id: result.insertId });
+      res.status(200).json({
+        response: "Thêm người dùng thành công ",
+        type: true,
+        id: result.insertId,
+      });
     } catch (error) {
       console.error(error.message);
       res.status(500).json({});

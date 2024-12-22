@@ -79,9 +79,9 @@ router.get("/toa-nha", async function (_, res) {
 
 router.post("/them-toa-nha", async function (req, res) {
   try {
-    const { ten_toa_nha, du_an } = req.body;
-    const sql = "INSERT INTO toa_nha(ten_toa_nha,du_an) value(?, ?)";
-    const result = await executeQuery(sql, [ten_toa_nha, du_an])
+    const { ten_toa_nha, ten_du_an } = req.body;
+    const sql = "INSERT INTO toa_nha(ten_toa_nha, ten_du_an) value(?, ?)";
+    const result = await executeQuery(sql, [ten_toa_nha, ten_du_an])
     res.status(200).json({ response: "Thêm tòa nhà thành công", type: true, id: result.insertId })
   } catch (error) {
     console.error(error.message)
@@ -91,9 +91,9 @@ router.post("/them-toa-nha", async function (req, res) {
 
 router.post("/cap-nhat-toa-nha", async function (req, res) {
   try {
-    const { ten_toa_nha, du_an, id } = req.body;
-    const sql = "UPDATE toa_nha SET ten_toa_nha = ? , du_an = ? WHERE id = ?";
-    await executeQuery(sql, [ten_toa_nha, du_an, id])
+    const { ten_toa_nha, ten_du_an, id } = req.body;
+    const sql = "UPDATE toa_nha SET ten_toa_nha = ? , ten_du_an = ? WHERE id = ?";
+    await executeQuery(sql, [ten_toa_nha, ten_du_an, id])
     res.status(200).json({ response: "Cập nhật tòa nhà thành công", type: true })
   } catch (error) {
     console.error(error.message);

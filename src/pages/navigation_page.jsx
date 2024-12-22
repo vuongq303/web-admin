@@ -13,16 +13,15 @@ import {
   faPerson,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import json_config from "../config.json";
+import { getRoleNguoiDung, phanQuyenNguoiDung } from "../services/utils";
 
 export default function NavigationPage({ children }) {
-  const location = useLocation();
-
   return (
     <div style={{ display: "flex" }}>
-      {location.pathname !== "/dang-nhap" && location.pathname !== "/" && (
-        <SizeBar />
-      )}
+      <SizeBar />
       <div style={{ flex: 1 }}>{children}</div>
     </div>
   );
@@ -30,14 +29,27 @@ export default function NavigationPage({ children }) {
 
 function SizeBar() {
   const navigator = useNavigate();
-  const [taiKhoan, setTaiKhoan] = useState("");
+  const [hoTen, setHoten] = useState("");
+  const [role, setRole] = useState("");
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
-    const tai_khoan = localStorage.getItem("tai_khoan");
-    if (tai_khoan) {
-      setTaiKhoan(tai_khoan);
-    }
+    (async function () {
+      const {
+        status,
+        data: { ho_ten, phan_quyen },
+      } = await axios.get(`${json_config.url_connect}/phan-quyen`, {
+        headers: {
+          Authorization: getRoleNguoiDung(),
+          "Content-Type": "application/json",
+        },
+      });
+      if (status === 200) {
+        setHoten(ho_ten);
+
+        setRole(phan_quyen);
+      }
+    })();
   }, []);
 
   const styles = {
@@ -100,7 +112,7 @@ function SizeBar() {
           style={{ marginLeft: 32 }}
           color="#009fdb"
         />
-        <p style={styles.tai_khoan}>Welcome {taiKhoan}</p>
+        <p style={styles.tai_khoan}>{hoTen}</p>
       </div>
       <div style={styles.container_manager}>
         <p style={styles.item_manager}>Manager</p>
@@ -121,104 +133,121 @@ function SizeBar() {
         )}
       </div>
       <Menu>
-        <MenuItem
-          className="item-menu"
-          icon={<FontAwesomeIcon icon={faPerson} />}
-          onClick={() => navigator("/nguoi-dung")}
-        >
-          Nhân sự
-        </MenuItem>
-        <MenuItem
-          icon={<FontAwesomeIcon icon={faUser} />}
-          className="item-menu"
-          onClick={() => navigator("/khach-hang-nguon")}
-        >
-          Data khách hàng
-        </MenuItem>
-        <MenuItem
-          icon={<FontAwesomeIcon icon={faUserTie} />}
-          className="item-menu"
-          onClick={() => navigator("/cham-soc-khach-hang")}
-        >
-          Chăm sóc khách hàng
-        </MenuItem>
+        {(role === phanQuyenNguoiDung[0] || role === phanQuyenNguoiDung[2]) && (
+          <MenuItem
+            className="item-menu"
+            icon={<FontAwesomeIcon icon={faPerson} />}
+            onClick={() => navigator("/nguoi-dung")}
+          >
+            Nhân sự
+          </MenuItem>
+        )}
 
-        <SubMenu
-          icon={<FontAwesomeIcon icon={faBuilding} />}
-          label="Sale"
-          className="item-menu"
-        >
+        {(role === phanQuyenNguoiDung[0] || role === phanQuyenNguoiDung[2]) && (
           <MenuItem
-            icon={<div></div>}
+            icon={<FontAwesomeIcon icon={faUser} />}
             className="item-menu"
-            onClick={() => navigator("/can-ho")}
+            onClick={() => navigator("/khach-hang-nguon")}
           >
-            Data nguồn
+            Data khách hàng
           </MenuItem>
-          <MenuItem
-            icon={<div></div>}
-            className="item-menu"
-            onClick={() => navigator("/can-ho-da-gui")}
-          >
-            Căn hộ đã yêu cầu
-          </MenuItem>
-          <MenuItem
-            icon={<div></div>}
-            className="item-menu"
-            onClick={() => navigator("/can-ho-da-duyet")}
-          >
-            Căn hộ đã duyệt
-          </MenuItem>
-        </SubMenu>
-        <SubMenu
-          label="Trục căn"
-          className="item-menu"
-          icon={<FontAwesomeIcon icon={faProjectDiagram} />}
-        >
-          <MenuItem
-            icon={<div></div>}
-            className="item-menu"
-            onClick={() => navigator("/du-an")}
-          >
-            Dự án
-          </MenuItem>
-          <MenuItem
-            icon={<div></div>}
-            onClick={() => navigator("/huong-can-ho")}
-          >
-            Hướng ban công
-          </MenuItem>
+        )}
 
+        {(role === phanQuyenNguoiDung[0] ||
+          role === phanQuyenNguoiDung[2] ||
+          role === phanQuyenNguoiDung[3]) && (
           <MenuItem
+            icon={<FontAwesomeIcon icon={faUserTie} />}
             className="item-menu"
-            icon={<div></div>}
-            onClick={() => navigator("/loai-can-ho")}
+            onClick={() => navigator("/cham-soc-khach-hang")}
           >
-            Loại căn hộ
+            Chăm sóc khách hàng
           </MenuItem>
-          <MenuItem
-            icon={<div></div>}
-            className="item-menu"
-            onClick={() => navigator("/noi-that")}
-          >
-            Nội thất
-          </MenuItem>
+        )}
 
-          <MenuItem
-            icon={<div></div>}
+        {(role === phanQuyenNguoiDung[0] ||
+          role === phanQuyenNguoiDung[1] ||
+          role === phanQuyenNguoiDung[2]) && (
+          <SubMenu
+            icon={<FontAwesomeIcon icon={faBuilding} />}
+            label="Sale"
             className="item-menu"
-            onClick={() => navigator("/toa-nha")}
           >
-            Tòa nhà
-          </MenuItem>
-          <MenuItem
-            icon={<div></div>}
+            <MenuItem
+              icon={<div></div>}
+              className="item-menu"
+              onClick={() => navigator("/can-ho")}
+            >
+              Data nguồn
+            </MenuItem>
+            <MenuItem
+              icon={<div></div>}
+              className="item-menu"
+              onClick={() => navigator("/can-ho-da-gui")}
+            >
+              Căn hộ đã yêu cầu
+            </MenuItem>
+            <MenuItem
+              icon={<div></div>}
+              className="item-menu"
+              onClick={() => navigator("/can-ho-da-duyet")}
+            >
+              Căn hộ đã duyệt
+            </MenuItem>
+          </SubMenu>
+        )}
+
+        {(role === phanQuyenNguoiDung[0] || role === phanQuyenNguoiDung[2]) && (
+          <SubMenu
+            label="Trục căn"
             className="item-menu"
-            onClick={() => navigator("/truc-can-ho")}
+            icon={<FontAwesomeIcon icon={faProjectDiagram} />}
           >
-            Trục căn hộ
-          </MenuItem>
-        </SubMenu>
+            <MenuItem
+              icon={<div></div>}
+              className="item-menu"
+              onClick={() => navigator("/du-an")}
+            >
+              Dự án
+            </MenuItem>
+            <MenuItem
+              icon={<div></div>}
+              onClick={() => navigator("/huong-can-ho")}
+            >
+              Hướng ban công
+            </MenuItem>
+
+            <MenuItem
+              className="item-menu"
+              icon={<div></div>}
+              onClick={() => navigator("/loai-can-ho")}
+            >
+              Loại căn hộ
+            </MenuItem>
+            <MenuItem
+              icon={<div></div>}
+              className="item-menu"
+              onClick={() => navigator("/noi-that")}
+            >
+              Nội thất
+            </MenuItem>
+
+            <MenuItem
+              icon={<div></div>}
+              className="item-menu"
+              onClick={() => navigator("/toa-nha")}
+            >
+              Tòa nhà
+            </MenuItem>
+            <MenuItem
+              icon={<div></div>}
+              className="item-menu"
+              onClick={() => navigator("/truc-can-ho")}
+            >
+              Trục căn hộ
+            </MenuItem>
+          </SubMenu>
+        )}
       </Menu>
       <div style={styles.container_logout}>
         <p style={styles.item_logout}>Logout</p>

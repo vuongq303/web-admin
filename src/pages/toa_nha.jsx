@@ -13,7 +13,7 @@ export default function DuAn() {
   const [dataUpdate, setDataUpdate] = useState({});
   const [loading, setLoading] = useState(true);
   const toaNhaRef = useRef(null);
-  const duAnRef = useRef(null);
+  const tenDuAnRef = useRef(null);
 
   useEffect(() => {
     (async function getData() {
@@ -37,7 +37,7 @@ export default function DuAn() {
     setLoading(true);
     const dataPost = {
       ten_toa_nha: toaNhaRef.current.value,
-      du_an: duAnRef.current.value,
+      ten_du_an: tenDuAnRef.current.value,
     };
 
     try {
@@ -71,7 +71,7 @@ export default function DuAn() {
     setLoading(true);
     const dataPost = {
       ten_toa_nha: toaNhaRef.current.value,
-      du_an: duAnRef.current.value,
+      ten_du_an: tenDuAnRef.current.value,
       id: dataUpdate.id,
     };
 
@@ -143,7 +143,7 @@ export default function DuAn() {
               <select
                 className="form-select"
                 aria-label="Default select example"
-                ref={duAnRef}
+                ref={tenDuAnRef}
               >
                 {dataDuAn.map((item, index) => (
                   <option key={index} value={item.ten_du_an}>
@@ -185,8 +185,8 @@ export default function DuAn() {
               />
               <select
                 className="form-select"
-                defaultValue={dataUpdate.du_an}
-                ref={duAnRef}
+                defaultValue={dataUpdate.ten_du_an}
+                ref={tenDuAnRef}
                 aria-label="Default select example"
               >
                 {dataDuAn.map((item, index) => (
@@ -225,7 +225,7 @@ export default function DuAn() {
             <tr key={index}>
               <td>{index + 1}</td>
               <td>{item.ten_toa_nha}</td>
-              <td>{item.du_an}</td>
+              <td>{item.ten_du_an}</td>
               <td>
                 <button
                   type="button"

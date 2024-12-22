@@ -33,7 +33,6 @@ export default function DangNhap() {
       if (status == 200) {
         if (type) {
           localStorage.setItem("role", data);
-          localStorage.setItem("tai_khoan", user.username);
           navigation("/can-ho");
           return;
         }

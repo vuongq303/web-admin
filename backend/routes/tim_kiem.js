@@ -12,7 +12,7 @@ router.get("/", async function (req, res) {
 
     const data = jwt.verify(jwt_token, env.JWT_KEY);
     var sql =
-      "SELECT id, danh_dau, gia_ban, gia_thue, trang_thai, du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho FROM can_ho";
+      "SELECT id, danh_dau, gia_ban, gia_thue, trang_thai, ten_du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho FROM can_ho";
     if (data.phan_quyen === "Admin") {
       sql = `SELECT * FROM can_ho`;
     }
@@ -22,7 +22,7 @@ router.get("/", async function (req, res) {
     } = req.query;
 
     if (ten_du_an !== "") {
-      condition.push("du_an = ?");
+      condition.push("ten_du_an = ?");
       value.push(ten_du_an);
     }
 
