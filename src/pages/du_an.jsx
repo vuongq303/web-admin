@@ -29,7 +29,7 @@ export default function DuAn() {
 
   async function themduAn() {
     try {
-      setLoading(true);
+     
       const dataPost = {
         ten_du_an: duAnRef.current.value,
       };
@@ -38,7 +38,7 @@ export default function DuAn() {
         toast.error("Dữ liệu trống");
         return;
       }
-
+      setLoading(true);
       const {
         status,
         data: { response, type, id },
@@ -62,7 +62,7 @@ export default function DuAn() {
 
   async function capNhatduAn() {
     try {
-      setLoading(true);
+      
       const dataPost = {
         ten_du_an: duAnRef.current.value,
         id: dataUpdate.id,
@@ -72,7 +72,7 @@ export default function DuAn() {
         toast.error("Dữ liệu trống");
         return;
       }
-
+      setLoading(true);
       const {
         status,
         data: { response, type },

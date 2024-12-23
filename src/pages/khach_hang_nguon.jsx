@@ -3,7 +3,8 @@ import React, { useEffect, useState, useRef } from "react";
 import json_config from "../config.json";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
-import { getRoleNguoiDung } from "../services/utils";
+import { dateToText, getRoleNguoiDung } from "../services/utils";
+import Loading from "./components/loading";
 
 export default function KhachHangNguon() {
   const [data, setData] = useState([]);
@@ -16,6 +17,7 @@ export default function KhachHangNguon() {
   const khachGoiTuRef = useRef(null);
   const soDienThoaiRef = useRef(null);
   const ghiChuRef = useRef(null);
+  const ngayPhatSinhRef = useRef(null);
 
   useEffect(() => {
     (async function getData() {
@@ -39,23 +41,25 @@ export default function KhachHangNguon() {
 
   async function themNguoiDung() {
     try {
-      setLoading(true);
       const dataPost = {
         ten_khach_hang: hoTenRef.current.value,
         khach_goi_tu: khachGoiTuRef.current.value,
         so_dien_thoai: soDienThoaiRef.current.value,
         ghi_chu: ghiChuRef.current.value,
+        ngay_phat_sinh: ngayPhatSinhRef.current.value,
       };
 
       if (
         dataPost.ten_khach_hang === "" ||
         dataPost.khach_goi_tu === "" ||
         dataPost.so_dien_thoai === "" ||
-        dataPost.ghi_chu === ""
+        dataPost.ghi_chu === "" ||
+        dataPost.ngay_phat_sinh === ""
       ) {
         toast.error("Không được để trống thông tin");
         return;
       }
+      setLoading(true);
       const {
         status,
         data: { response, type, id },
@@ -79,12 +83,12 @@ export default function KhachHangNguon() {
 
   async function capNhatNguoiDung() {
     try {
-      setLoading(true);
       const dataPost = {
         ten_khach_hang: hoTenRef.current.value,
         khach_goi_tu: khachGoiTuRef.current.value,
         so_dien_thoai: soDienThoaiRef.current.value,
         ghi_chu: ghiChuRef.current.value,
+        ngay_phat_sinh: ngayPhatSinhRef.current.value,
         id: dataUpdate.id,
       };
 
@@ -92,14 +96,16 @@ export default function KhachHangNguon() {
         dataPost.ten_khach_hang === "" ||
         dataPost.khach_goi_tu === "" ||
         dataPost.so_dien_thoai === "" ||
-        dataPost.ghi_chu === ""
+        dataPost.ghi_chu === "" ||
+        dataPost.ngay_phat_sinh === ""
       ) {
         toast.error("Không được để trống thông tin");
         return;
       }
+      setLoading(true);
       const {
         status,
-        data: { response, type},
+        data: { response, type },
       } = await axios.post(
         `${json_config.url_connect}/khach-hang-nguon/cap-nhat-khach-hang`,
         dataPost
@@ -127,6 +133,7 @@ export default function KhachHangNguon() {
         autoClose={200}
         hideProgressBar={false}
       />
+      <Loading loading={loading} />
       <div className="d-flex justify-content-start m-2">
         <button
           type="button"
@@ -156,6 +163,16 @@ export default function KhachHangNguon() {
                   aria-describedby="inputGroup-sizing-default"
                 />
                 <label htmlFor="floatingInputGrid">Họ tên</label>
+              </div>
+              <div className="form-floating">
+                <input
+                  ref={ngayPhatSinhRef}
+                  type="date"
+                  className="form-control"
+                  aria-label="Sizing example input"
+                  aria-describedby="inputGroup-sizing-default"
+                />
+                <label htmlFor="floatingInputGrid">Ngày phát sinh</label>
               </div>
             </div>
             <div className="input-group mb-3">
@@ -232,6 +249,20 @@ export default function KhachHangNguon() {
                 />
                 <label htmlFor="floatingInputGrid">Họ tên</label>
               </div>
+              <div className="form-floating">
+                <input
+                  ref={ngayPhatSinhRef}
+                  type="date"
+                  defaultValue={
+                    dataUpdate.ngay_phat_sinh &&
+                    dateToText(dataUpdate.ngay_phat_sinh)
+                  }
+                  className="form-control"
+                  aria-label="Sizing example input"
+                  aria-describedby="inputGroup-sizing-default"
+                />
+                <label htmlFor="floatingInputGrid">Ngày phát sinh</label>
+              </div>
             </div>
             <div className="input-group mb-3">
               <div className="form-floating">
@@ -294,6 +325,7 @@ export default function KhachHangNguon() {
             <th scope="col">Họ tên</th>
             <th scope="col">Số điện thoại</th>
             <th scope="col">Khách hàng từ</th>
+            <th scope="col">Ngày phát sinh</th>
             <th scope="col">Ghi chú</th>
             <th scope="col">Hành động</th>
           </tr>
@@ -305,6 +337,9 @@ export default function KhachHangNguon() {
               <td className="align-middle">{item.ten_khach_hang}</td>
               <td className="align-middle"> {item.so_dien_thoai}</td>
               <td className="align-middle">{item.khach_goi_tu}</td>
+              <td className="align-middle">
+                {dateToText(item.ngay_phat_sinh)}
+              </td>
               <td className="w-25 align-middle">{item.ghi_chu}</td>
               <td className="align-middle">
                 <button

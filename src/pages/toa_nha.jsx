@@ -34,7 +34,7 @@ export default function DuAn() {
   }, []);
 
   async function themToaNha() {
-    setLoading(true);
+   
     const dataPost = {
       ten_toa_nha: toaNhaRef.current.value,
       ten_du_an: tenDuAnRef.current.value,
@@ -45,7 +45,7 @@ export default function DuAn() {
         toast.error("Dữ liệu trống");
         return;
       }
-
+      setLoading(true);
       const {
         status,
         data: { response, type, id },
@@ -68,7 +68,7 @@ export default function DuAn() {
   }
 
   async function capNhatToaNha() {
-    setLoading(true);
+   
     const dataPost = {
       ten_toa_nha: toaNhaRef.current.value,
       ten_du_an: tenDuAnRef.current.value,
@@ -80,7 +80,7 @@ export default function DuAn() {
         toast.error("Dữ liệu trống");
         return;
       }
-
+      setLoading(true);
       const {
         status,
         data: { response, type },

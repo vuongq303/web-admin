@@ -4,10 +4,10 @@ import json_config from "../config.json";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import {
+  dataPhanQuyen,
   dateToText,
   getRoleNguoiDung,
   gioiTinhNguoiDung,
-  phanQuyenNguoiDung,
   trangThaiLamViec,
 } from "../services/utils";
 import Loading from "./components/loading";
@@ -54,7 +54,6 @@ export default function NguoiDung() {
   }, []);
 
   async function themNguoiDung() {
-    setLoading(true);
     try {
       const dataPost = {
         tai_khoan: taiKhoanRef.current.value,
@@ -95,7 +94,7 @@ export default function NguoiDung() {
         toast.error("Không được để trống thông tin");
         return;
       }
-
+      setLoading(true);
       const {
         status,
         data: { response, type, id },
@@ -125,7 +124,6 @@ export default function NguoiDung() {
   }
 
   async function capNhatNguoiDung() {
-    setLoading(true);
     try {
       const dataPost = {
         tai_khoan: taiKhoanRef.current.value,
@@ -165,7 +163,7 @@ export default function NguoiDung() {
         toast.error("Không được để trống thông tin");
         return;
       }
-
+      setLoading(true);
       const {
         status,
         data: { response, type },
@@ -329,7 +327,7 @@ export default function NguoiDung() {
                   aria-label="Default select example"
                   ref={viTriRef}
                 >
-                  {phanQuyenNguoiDung.map((item, index) => (
+                  {dataPhanQuyen.map((item, index) => (
                     <option key={index} value={item}>
                       {item}
                     </option>
@@ -508,7 +506,7 @@ export default function NguoiDung() {
                   ref={viTriRef}
                   defaultValue={dataUpdate.phan_quyen}
                 >
-                  {phanQuyenNguoiDung.map((item, index) => (
+                  {dataPhanQuyen.map((item, index) => (
                     <option key={index} value={item}>
                       {item}
                     </option>
@@ -574,6 +572,7 @@ export default function NguoiDung() {
           <tr>
             <th scope="col">STT</th>
             <th scope="col">Họ tên</th>
+            <th scope="col">Tài khoản</th>
             <th scope="col">Ngày bắt đầu</th>
             <th scope="col">Số điện thoại</th>
             <th scope="col">Email</th>
@@ -588,6 +587,7 @@ export default function NguoiDung() {
             <tr key={item.id}>
               <td>{item.id}</td>
               <td>{item.ho_ten}</td>
+              <td>{item.tai_khoan}</td>
               <td>{dateToText(item.ngay_bat_dau)}</td>
               <td>{item.so_dien_thoai}</td>
               <td>{item.email}</td>

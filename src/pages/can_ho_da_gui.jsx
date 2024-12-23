@@ -248,16 +248,22 @@ export default function CanHoDaGui() {
                     borderRadius: "5px",
                   }}
                 >
-                  {item.ten_toa_nha}-{item.ma_can_ho ?? "*"}
+                  {item.ten_toa_nha}-{item.ma_can_ho ?? "x"}
                   {item.truc_can_ho}
                 </div>
               </td>
-              <td className="align-middle" style={{ width: "10%" }}>{item.chu_can_ho ?? "*"}</td>
               <td className="align-middle" style={{ width: "10%" }}>
-                {item.so_dien_thoai ?? "*"}
+                {item.chu_can_ho ?? "x"}
               </td>
-              <td className="align-middle">{item.gia_ban}</td>
-              <td className="align-middle">{item.gia_thue}</td>
+              <td className="align-middle" style={{ width: "10%" }}>
+                {item.so_dien_thoai ?? "x"}
+              </td>
+              <td className="align-middle">
+                {item.gia_ban.toLocaleString("en-US")}
+              </td>
+              <td className="align-middle">
+                {item.gia_thue.toLocaleString("en-US")}
+              </td>
               <td className="w-25 text-start align-middle">
                 - {item.ten_du_an} - {item.dien_tich}m² - {item.so_phong_ngu}PN
                 {item.so_phong_tam}WC - {item.huong_can_ho}
@@ -266,7 +272,11 @@ export default function CanHoDaGui() {
                 <br />- {item.ghi_chu}
               </td>
               <td className="align-middle">
-                Trạng thái: <strong>{item.trang_thai}</strong> <br />
+                Trạng thái:
+                <strong>
+                  {item.trang_thai === 0 ? " Đang chờ" : " Đã duyệt"}
+                </strong>
+                <br />
                 Đã gửi bởi: <strong>{item.nguoi_gui}</strong>
               </td>
               <td className="align-middle">

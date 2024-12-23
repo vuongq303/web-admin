@@ -30,15 +30,14 @@ export default function DuAn() {
   }, []);
 
   async function themTrucCanHo() {
-    const dataPost = { truc_can: trucCanHoRef.current.value };
-    setLoading(true);
+    const dataPost = { truc_can: trucCanHoRef.current.value }
 
     try {
       if (dataPost.truc_can === "") {
         toast.error("Dữ liệu trống");
         return;
       }
-
+      setLoading(true);
       const {
         status,
         data: { response, type, id },
@@ -65,6 +64,12 @@ export default function DuAn() {
       truc_can: trucCanHoUpdateRef.current.value,
       id: dataUpdate.id,
     };
+
+    if (dataPost.truc_can === "") {
+      toast.error("Dữ liệu trống");
+      return;
+    }
+    
     setLoading(true);
 
     try {

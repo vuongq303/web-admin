@@ -46,15 +46,6 @@ router.post(
         trang_thai,
       } = req.body;
 
-      const jwt_token = req.headers["authorization"];
-      const data = jwt.verify(jwt_token, env.JWT_KEY);
-
-      if (data.phan_quyen !== env.admin) {
-        return res
-          .status(200)
-          .json({ response: "Không thể thêm Admin", type: false });
-      }
-
       const checkUser = await executeQuery(
         "SELECT id FROM nguoi_dung WHERE tai_khoan = ?",
         [tai_khoan]

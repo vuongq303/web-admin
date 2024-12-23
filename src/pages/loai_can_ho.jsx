@@ -28,7 +28,7 @@ export default function LoaiCanHo() {
   }, []);
 
   async function themloaiCanHo() {
-    setLoading(true);
+    
     try {
       const dataPost = {
         loai_can_ho: loaiCanHoRef.current.value,
@@ -38,7 +38,7 @@ export default function LoaiCanHo() {
         toast.error("Dữ liệu trống");
         return;
       }
-
+      setLoading(true);
       const {
         status,
         data: { response, id, type },
@@ -61,7 +61,7 @@ export default function LoaiCanHo() {
   }
 
   async function capNhatloaiCanHo() {
-    setLoading(true);
+ 
     try {
       const dataPost = {
         loai_can_ho: loaiCanHoRef.current.value,
@@ -72,7 +72,7 @@ export default function LoaiCanHo() {
         toast.error("Dữ liệu trống");
         return;
       }
-
+      setLoading(true);
       const {
         status,
         data: { response, type },

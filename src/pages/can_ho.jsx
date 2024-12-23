@@ -164,7 +164,7 @@ export default function CanHo() {
         setLoading(false);
         setRole(role);
         setData(response);
-        setTotalPage(totalPage);
+        setTotalPage(totalPages);
       }
     } catch (error) {
       console.log(error);
@@ -175,7 +175,6 @@ export default function CanHo() {
   const handlePrevPage = () => setPage((prevPage) => Math.max(prevPage - 1, 1));
 
   async function timKiem() {
-    setLoading(true);
     let dataTimKiem = {
       ten_du_an: tenDuAnTimKiemRef.current.value,
       ten_toa_nha: tenToaNhaTimKiemRef.current.value,
@@ -188,7 +187,7 @@ export default function CanHo() {
       gia_tu: giaBanTuState.replace(/,/g, ""),
       gia_den: giaBanDenState.replace(/,/g, ""),
     };
-
+    setLoading(true);
     const { status, data } = await axios.get(
       `${json_config.url_connect}/tim-kiem`,
       {
@@ -204,7 +203,7 @@ export default function CanHo() {
       setLoading(false);
       setData(data);
       setPage(1);
-      setTotalPage(0);
+      setTotalPage(1);
     }
   }
 
@@ -222,7 +221,6 @@ export default function CanHo() {
     setGiaBanDenState("");
     setDataToaNha([]);
     await getData();
-    setLoading(false);
   }
 
   async function capNhatAnhCanHo(event) {
@@ -348,7 +346,7 @@ export default function CanHo() {
         toast.error("Kiểm tra lại dữ liệu");
         return;
       }
-
+      setLoading(true);
       const {
         data: { response: message, type, id, nguoi_cap_nhat },
         status,
@@ -366,6 +364,7 @@ export default function CanHo() {
       if (status === 200) {
         toast.success(message);
         if (type) {
+          setLoading(false);
           setShowModal(false);
           setData((pre) => [{ id, nguoi_cap_nhat, ...data }, ...pre]);
         }
@@ -542,20 +541,48 @@ export default function CanHo() {
           </div>
 
           <div className="text-start">
-            <strong style={{ backgroundColor: "yellow", padding: 2 }}>
-              Vàng
-            </strong>{" "}
-            Căn giá rẻ
-            <br />
-            <strong style={{ backgroundColor: "red", padding: 2 }}>
-              Đỏ
-            </strong>{" "}
-            Căn ngoại giao (Không gọi trực tiếp chủ nhà)
-            <br />
-            <strong style={{ backgroundColor: "orange", padding: 2 }}>
-              Cam
-            </strong>{" "}
-            (Căn kết hợp)
+            <div className="d-flex flex-row">
+              <div
+                style={{
+                  backgroundColor: "yellow",
+                  padding: 2,
+                  width: 50,
+                  textAlign: "center",
+                  marginRight: 3,
+                }}
+              >
+                Vàng
+              </div>
+              <div> Căn giá rẻ</div>
+            </div>
+            <div className="d-flex flex-row my-2">
+              <div
+                style={{
+                  backgroundColor: "red",
+                  padding: 2,
+                  width: 50,
+                  textAlign: "center",
+                  marginRight: 3,
+                }}
+              >
+                Đỏ
+              </div>
+              <div> Căn ngoại giao(Không gọi trực tiếp chủ nhà)</div>
+            </div>
+            <div className="d-flex flex-row">
+              <div
+                style={{
+                  backgroundColor: "orange",
+                  padding: 2,
+                  width: 50,
+                  textAlign: "center",
+                  marginRight: 3,
+                }}
+              >
+                Cam
+              </div>
+              <div> Căn kết hợp</div>
+            </div>
           </div>
         </div>
         <Modal className="modal-sm" show={loading} backdrop="static">
@@ -636,7 +663,7 @@ export default function CanHo() {
                   aria-label="Sizing example input"
                   aria-describedby="inputGroup-sizing-default"
                 />
-                <label htmlFor="floatingInputGrid">Số phòng</label>
+                <label htmlFor="floatingInputGrid">Số tầng</label>
               </div>
             </div>
             <div className="input-group mb-3">
@@ -868,7 +895,7 @@ export default function CanHo() {
                   aria-label="Sizing example input"
                   aria-describedby="inputGroup-sizing-default"
                 />
-                <label htmlFor="floatingInputGrid">Số phòng</label>
+                <label htmlFor="floatingInputGrid">Số tầng</label>
               </div>
             </div>
             <div className="input-group mb-3">
@@ -1306,15 +1333,15 @@ export default function CanHo() {
                 <td className="align-middle">{index + 1}</td>
                 <td className="align-middle">
                   <div style={styles.danh_dau}>
-                    {item.ten_toa_nha}-{item.ma_can_ho ?? "*"}
+                    {item.ten_toa_nha}-{item.ma_can_ho ?? "x"}
                     {item.truc_can_ho}
                   </div>
                 </td>
                 <td className="align-middle" style={{ width: "10%" }}>
-                  {item.chu_can_ho ?? "*"}
+                  {item.chu_can_ho ?? "x"}
                 </td>
                 <td className="align-middle" style={{ width: "10%" }}>
-                  {item.so_dien_thoai ?? "*"}
+                  {item.so_dien_thoai ?? "x"}
                 </td>
                 <td className="align-middle">
                   {item.gia_ban.toLocaleString("en-US")}
@@ -1387,7 +1414,7 @@ export default function CanHo() {
           Previous
         </button>
         <button
-          disabled={page === totalPage + 1}
+          disabled={page === totalPage}
           style={{ width: 100 }}
           className="btn btn-primary mx-1"
           onClick={handleNextPage}

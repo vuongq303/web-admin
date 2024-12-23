@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./css/css.css";
 import { Menu, Sidebar, MenuItem, SubMenu } from "react-pro-sidebar";
 import { faUserTie } from "@fortawesome/free-solid-svg-icons/faUserTie";
@@ -33,7 +33,7 @@ function SizeBar() {
   const [role, setRole] = useState("");
   const [collapsed, setCollapsed] = useState(false);
 
-  useEffect(() => {
+  useMemo(() => {
     (async function () {
       const {
         status,
@@ -46,7 +46,6 @@ function SizeBar() {
       });
       if (status === 200) {
         setHoten(ho_ten);
-
         setRole(phan_quyen);
       }
     })();
@@ -199,7 +198,7 @@ function SizeBar() {
 
         {(role === phanQuyenNguoiDung[0] || role === phanQuyenNguoiDung[2]) && (
           <SubMenu
-            label="Trục căn"
+            label="Dự án"
             className="item-menu"
             icon={<FontAwesomeIcon icon={faProjectDiagram} />}
           >
@@ -208,7 +207,7 @@ function SizeBar() {
               className="item-menu"
               onClick={() => navigator("/du-an")}
             >
-              Dự án
+              Tên dự án
             </MenuItem>
             <MenuItem
               icon={<div></div>}

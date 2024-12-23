@@ -19,6 +19,9 @@ export default function KhachHang() {
 
   const hoTenRef = useRef(null);
   const ngayKiHopDongRef = useRef(null);
+  const hoTenChuNhaRef = useRef(null);
+  const maCanHoRef = useRef(null);
+  const soDienThoaiChuNhaRef = useRef(null);
   const soDienThoaiRef = useRef(null);
   const ghiChuRef = useRef(null);
   const loaiGiaoDichRef = useRef(null);
@@ -44,7 +47,6 @@ export default function KhachHang() {
   }, []);
 
   async function themNguoiDung() {
-    setLoading(true);
     try {
       const dataPost = {
         ten_khach_hang: hoTenRef.current.value,
@@ -52,6 +54,9 @@ export default function KhachHang() {
         so_dien_thoai: soDienThoaiRef.current.value,
         ghi_chu: ghiChuRef.current.value,
         loai_giao_dich: loaiGiaoDichRef.current.value,
+        ma_can_ho: maCanHoRef.current.value,
+        ho_ten_chu_nha: hoTenChuNhaRef.current.value,
+        so_dien_thoai_chu_nha: soDienThoaiChuNhaRef.current.value,
       };
 
       if (
@@ -59,12 +64,16 @@ export default function KhachHang() {
         dataPost.ngay_ki_hop_dong === "" ||
         dataPost.so_dien_thoai === "" ||
         dataPost.ghi_chu === "" ||
-        dataPost.loai_giao_dich === ""
+        dataPost.loai_giao_dich === "" ||
+        dataPost.ma_can_ho === "" ||
+        dataPost.ho_ten_chu_nha === "" ||
+        dataPost.so_dien_thoai_chu_nha === ""
       ) {
         toast.error("Không được để trống thông tin");
         return;
       }
 
+      setLoading(true);
       const {
         status,
         data: { response, type, id },
@@ -88,7 +97,6 @@ export default function KhachHang() {
   }
 
   async function capNhatNguoiDung() {
-    setLoading(true);
     try {
       const dataPost = {
         ten_khach_hang: hoTenRef.current.value,
@@ -96,6 +104,9 @@ export default function KhachHang() {
         so_dien_thoai: soDienThoaiRef.current.value,
         ghi_chu: ghiChuRef.current.value,
         loai_giao_dich: loaiGiaoDichRef.current.value,
+        ma_can_ho: maCanHoRef.current.value,
+        ho_ten_chu_nha: hoTenChuNhaRef.current.value,
+        so_dien_thoai_chu_nha: soDienThoaiChuNhaRef.current.value,
         id: dataUpdate.id,
       };
 
@@ -104,12 +115,16 @@ export default function KhachHang() {
         dataPost.ngay_ki_hop_dong === "" ||
         dataPost.so_dien_thoai === "" ||
         dataPost.ghi_chu === "" ||
-        dataPost.loai_giao_dich === ""
+        dataPost.loai_giao_dich === "" ||
+        dataPost.ma_can_ho === "" ||
+        dataPost.ho_ten_chu_nha === "" ||
+        dataPost.so_dien_thoai_chu_nha === ""
       ) {
         toast.error("Không được để trống thông tin");
         return;
       }
 
+      setLoading(true);
       const {
         status,
         data: { response, type },
@@ -164,37 +179,36 @@ export default function KhachHang() {
             <div className="input-group mb-3">
               <div className="form-floating">
                 <input
-                  ref={hoTenRef}
+                  ref={maCanHoRef}
                   type="text"
                   className="form-control"
                   aria-label="Sizing example input"
                   aria-describedby="inputGroup-sizing-default"
                 />
-                <label htmlFor="floatingInputGrid">Họ tên</label>
+                <label htmlFor="floatingInputGrid">Mã căn hộ</label>
               </div>
-              <select
-                className="form-select"
-                aria-label="Default select example"
-                ref={loaiGiaoDichRef}
-              >
-                {loaiGiaoDichKhachHang.map((item, index) => (
-                  <option key={index} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
+              <div className="form-floating">
+                <input
+                  ref={hoTenChuNhaRef}
+                  type="text"
+                  className="form-control"
+                  aria-label="Sizing example input"
+                  aria-describedby="inputGroup-sizing-default"
+                />
+                <label htmlFor="floatingInputGrid">Họ tên chủ nhà</label>
+              </div>
             </div>
 
             <div className="input-group mb-3">
               <div className="form-floating">
                 <input
-                  ref={soDienThoaiRef}
+                  ref={soDienThoaiChuNhaRef}
                   type="text"
                   className="form-control"
                   aria-label="Sizing example input"
                   aria-describedby="inputGroup-sizing-default"
                 />
-                <label htmlFor="floatingInputGrid">Số điện thoại</label>
+                <label htmlFor="floatingInputGrid">Số điện thoại chủ nhà</label>
               </div>
               <div className="form-floating">
                 <input
@@ -205,6 +219,48 @@ export default function KhachHang() {
                   aria-describedby="inputGroup-sizing-default"
                 />
                 <label htmlFor="floatingInputGrid">Ngày kí hợp đồng</label>
+              </div>
+            </div>
+
+            <div className="input-group mb-3">
+              <div className="form-floating">
+                <input
+                  ref={hoTenRef}
+                  type="text"
+                  className="form-control"
+                  aria-label="Sizing example input"
+                  aria-describedby="inputGroup-sizing-default"
+                />
+                <label htmlFor="floatingInputGrid">Họ tên khách hàng</label>
+              </div>
+              <div className="form-floating">
+                <input
+                  ref={soDienThoaiRef}
+                  type="text"
+                  className="form-control"
+                  aria-label="Sizing example input"
+                  aria-describedby="inputGroup-sizing-default"
+                />
+                <label htmlFor="floatingInputGrid">
+                  Số điện thoại khách hàng
+                </label>
+              </div>
+            </div>
+
+            <div className="input-group mb-3">
+              <div className="form-floating">
+                <select
+                  className="form-select"
+                  aria-label="Default select example"
+                  ref={loaiGiaoDichRef}
+                >
+                  {loaiGiaoDichKhachHang.map((item, index) => (
+                    <option key={index} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+                <label htmlFor="floatingInputGrid">Loại giao dịch</label>
               </div>
             </div>
 
@@ -250,6 +306,59 @@ export default function KhachHang() {
             <div className="input-group mb-3">
               <div className="form-floating">
                 <input
+                  ref={maCanHoRef}
+                  type="text"
+                  defaultValue={dataUpdate.ma_can_ho}
+                  className="form-control"
+                  aria-label="Sizing example input"
+                  aria-describedby="inputGroup-sizing-default"
+                />
+                <label htmlFor="floatingInputGrid">Mã căn hộ</label>
+              </div>
+              <div className="form-floating">
+                <input
+                  ref={hoTenChuNhaRef}
+                  type="text"
+                  defaultValue={dataUpdate.ho_ten_chu_nha}
+                  className="form-control"
+                  aria-label="Sizing example input"
+                  aria-describedby="inputGroup-sizing-default"
+                />
+                <label htmlFor="floatingInputGrid">Họ tên chủ nhà</label>
+              </div>
+            </div>
+
+            <div className="input-group mb-3">
+              <div className="form-floating">
+                <input
+                  ref={soDienThoaiChuNhaRef}
+                  type="text"
+                  defaultValue={dataUpdate.so_dien_thoai_chu_nha}
+                  className="form-control"
+                  aria-label="Sizing example input"
+                  aria-describedby="inputGroup-sizing-default"
+                />
+                <label htmlFor="floatingInputGrid">Số điện thoại chủ nhà</label>
+              </div>
+              <div className="form-floating">
+                <input
+                  ref={ngayKiHopDongRef}
+                  defaultValue={
+                    dataUpdate.ngay_ki_hop_dong &&
+                    dateToText(dataUpdate.ngay_ki_hop_dong)
+                  }
+                  type="date"
+                  className="form-control"
+                  aria-label="Sizing example input"
+                  aria-describedby="inputGroup-sizing-default"
+                />
+                <label htmlFor="floatingInputGrid">Ngày kí hợp đồng</label>
+              </div>
+            </div>
+
+            <div className="input-group mb-3">
+              <div className="form-floating">
+                <input
                   ref={hoTenRef}
                   type="text"
                   defaultValue={dataUpdate.ten_khach_hang}
@@ -257,46 +366,38 @@ export default function KhachHang() {
                   aria-label="Sizing example input"
                   aria-describedby="inputGroup-sizing-default"
                 />
-                <label htmlFor="floatingInputGrid">Họ tên</label>
+                <label htmlFor="floatingInputGrid">Họ tên khách hàng</label>
               </div>
-              <select
-                className="form-select"
-                aria-label="Default select example"
-                ref={loaiGiaoDichRef}
-              >
-                {loaiGiaoDichKhachHang.map((item, index) => (
-                  <option key={index} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
+              <div className="form-floating">
+                <input
+                  ref={soDienThoaiRef}
+                  type="text"
+                  defaultValue={dataUpdate.so_dien_thoai}
+                  className="form-control"
+                  aria-label="Sizing example input"
+                  aria-describedby="inputGroup-sizing-default"
+                />
+                <label htmlFor="floatingInputGrid">
+                  Số điện thoại khách hàng
+                </label>
+              </div>
             </div>
 
             <div className="input-group mb-3">
               <div className="form-floating">
-                <input
-                  ref={soDienThoaiRef}
-                  defaultValue={dataUpdate.so_dien_thoai}
-                  type="text"
-                  className="form-control"
-                  aria-label="Sizing example input"
-                  aria-describedby="inputGroup-sizing-default"
-                />
-                <label htmlFor="floatingInputGrid">Số điện thoại</label>
-              </div>
-              <div className="form-floating">
-                <input
-                  ref={ngayKiHopDongRef}
-                  type="date"
-                  defaultValue={
-                    dataUpdate.ngay_ki_hop_dong &&
-                    dateToText(dataUpdate.ngay_ki_hop_dong)
-                  }
-                  className="form-control"
-                  aria-label="Sizing example input"
-                  aria-describedby="inputGroup-sizing-default"
-                />
-                <label htmlFor="floatingInputGrid">Ngày kí hợp đồng</label>
+                <select
+                  className="form-select"
+                  defaultValue={dataUpdate.loai_giao_dich}
+                  aria-label="Default select example"
+                  ref={loaiGiaoDichRef}
+                >
+                  {loaiGiaoDichKhachHang.map((item, index) => (
+                    <option key={index} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+                <label htmlFor="floatingInputGrid">Loại giao dịch</label>
               </div>
             </div>
 
@@ -333,10 +434,13 @@ export default function KhachHang() {
         <thead>
           <tr>
             <th scope="col">STT</th>
-            <th scope="col">Họ tên</th>
-            <th scope="col">Số điện thoại</th>
+            <th scope="col">Mã căn hộ</th>
+            <th scope="col">Họ tên khách hàng</th>
+            <th scope="col">Số điện thoại khách hàng</th>
             <th scope="col">Loại giao dịch</th>
             <th scope="col">Ngày kí hợp đồng</th>
+            <th scope="col">Họ tên chủ nhà</th>
+            <th scope="col">Số điện thoại chủ nhà</th>
             <th scope="col">Ghi chú</th>
             <th scope="col">Hành động</th>
           </tr>
@@ -345,13 +449,22 @@ export default function KhachHang() {
           {data.map((item, index) => (
             <tr key={index}>
               <td className="align-middle">{index + 1}</td>
+              <td className="align-middle">{item.ma_can_ho}</td>
               <td className="align-middle">{item.ten_khach_hang}</td>
-              <td className="align-middle">{item.so_dien_thoai}</td>
+              <td className="align-middle" style={{ width: "10%" }}>
+                {item.so_dien_thoai}
+              </td>
               <td className="align-middle">{item.loai_giao_dich}</td>
               <td className="align-middle">
                 {dateToText(item.ngay_ki_hop_dong)}
               </td>
-              <td className="align-middle w-25">{item.ghi_chu}</td>
+              <td className="align-middle">{item.ho_ten_chu_nha}</td>
+              <td className="align-middle" style={{ width: "10%" }}>
+                {item.so_dien_thoai_chu_nha}
+              </td>
+              <td className="align-middle" style={{ width: "15%" }}>
+                {item.ghi_chu}
+              </td>
               <td>
                 <button
                   type="button"

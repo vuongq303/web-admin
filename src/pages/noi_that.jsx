@@ -28,14 +28,13 @@ export default function DuAn() {
   }, []);
 
   async function themNoiThat() {
-    setLoading(true);
     const dataPost = { loai_noi_that: noiThatRef.current.value };
     try {
       if (dataPost.loai_noi_that === "") {
         toast.error("Dữ liệu trống");
         return;
       }
-
+      setLoading(true);
       const {
         status,
         data: { response, type, id },
@@ -58,12 +57,15 @@ export default function DuAn() {
   }
 
   async function capNhatNoiThat() {
-    setLoading(true);
     const dataPost = {
       loai_noi_that: noiThatRef.current.value,
       id: dataUpdate.id,
     };
-
+    if (dataPost.loai_noi_that === "") {
+      toast.error("Dữ liệu trống");
+      return;
+    }
+    setLoading(true);
     try {
       if (dataPost.id === "") {
         toast.error("Dữ liệu trống");

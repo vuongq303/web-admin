@@ -19,7 +19,7 @@ router.get("/danh-sach-gui-yeu-cau", async function (req, res) {
     can_ho.so_phong_tam, can_ho.huong_can_ho,
     can_ho.loai_can_ho, can_ho.noi_that,
     can_ho.ghi_chu, can_ho.ten_toa_nha,
-    can_ho.truc_can_ho, can_ho.ma_can_ho, can_ho.hinh_anh,
+    can_ho.truc_can_ho, can_ho.hinh_anh,
     yeu_cau.* FROM can_ho JOIN yeu_cau
     ON yeu_cau.can_ho = can_ho.id 
     WHERE yeu_cau.trang_thai = '0' AND yeu_cau.nguoi_gui = '${data.tai_khoan}'`;
@@ -50,27 +50,27 @@ router.get("/danh-sach-duyet-yeu-cau", async function (req, res) {
 
     var sql = `SELECT can_ho.danh_dau,
     can_ho.gia_ban, can_ho.gia_thue, can_ho.ten_du_an,
-    can_ho.dien_tich, can_ho.so_phong_ngu,
-    can_ho.so_phong_tam, can_ho.huong_can_ho,
-    can_ho.loai_can_ho, can_ho.noi_that,
+    can_ho.dien_tich, can_ho.so_phong_ngu, can_ho.chu_can_ho,
+    can_ho.so_phong_tam, can_ho.huong_can_ho,can_ho.so_dien_thoai,
+    can_ho.loai_can_ho, can_ho.noi_that,can_ho.ma_can_ho,
     can_ho.ghi_chu, can_ho.ten_toa_nha,
     can_ho.truc_can_ho,can_ho.hinh_anh ,yeu_cau.* FROM can_ho
     JOIN yeu_cau ON yeu_cau.can_ho = can_ho.id 
-    WHERE yeu_cau.trang_thai = '1' AND yeu_cau.nguoi_gui = ?`;
+    WHERE yeu_cau.trang_thai = '1' AND yeu_cau.nguoi_gui = '${data.tai_khoan}'`;
 
-    if (data.phan_quyen === env.nhan_vien) {
+    if (data.phan_quyen === env.admin || data.phan_quyen === env.quan_ly) {
       sql = `SELECT can_ho.danh_dau, can_ho.chu_can_ho,
       can_ho.so_dien_thoai, can_ho.gia_ban, can_ho.gia_thue,
       can_ho.ten_du_an, can_ho.dien_tich, can_ho.so_phong_ngu,
       can_ho.so_phong_tam, can_ho.huong_can_ho,
       can_ho.loai_can_ho, can_ho.noi_that,
-      can_ho.ghi_chu, can_ho.ten_toa_nha,
-      can_ho.truc_can_ho,can_ho.hinh_anh ,yeu_cau.*
+      can_ho.ghi_chu, can_ho.ten_toa_nha, can_ho.ma_can_ho,
+      can_ho.truc_can_ho, can_ho.hinh_anh ,yeu_cau.*
       FROM can_ho JOIN yeu_cau ON yeu_cau.can_ho = can_ho.id 
       WHERE yeu_cau.trang_thai = '1'`;
     }
 
-    const result = await executeQuery(sql, [data.tai_khoan]);
+    const result = await executeQuery(sql);
     res.status(200).send(result);
   } catch (error) {
     console.error(error.message);

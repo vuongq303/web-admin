@@ -37,7 +37,7 @@ export default function HuongCanHo() {
         toast.error("Dữ liệu trống");
         return;
       }
-
+      setLoading(true);
       const {
         status,
         data: { response, type, id },
@@ -70,7 +70,7 @@ export default function HuongCanHo() {
         toast.error("Dữ liệu trống");
         return;
       }
-
+      setLoading(true);
       const {
         status,
         data: { response, type },
