@@ -15,8 +15,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import json_config from "../config.json";
 import { getRoleNguoiDung, phanQuyenNguoiDung } from "../services/utils";
+import { ketNoi, modulePhanQuyen } from "../data/module";
 
 export default function NavigationPage({ children }) {
   return (
@@ -35,18 +35,22 @@ function SizeBar() {
 
   useMemo(() => {
     (async function () {
-      const {
-        status,
-        data: { ho_ten, phan_quyen },
-      } = await axios.get(`${json_config.url_connect}/phan-quyen`, {
-        headers: {
-          Authorization: getRoleNguoiDung(),
-          "Content-Type": "application/json",
-        },
-      });
-      if (status === 200) {
-        setHoten(ho_ten);
-        setRole(phan_quyen);
+      try {
+        const {
+          status,
+          data: { ho_ten, phan_quyen },
+        } = await axios.get(`${ketNoi.url}/phan-quyen`, {
+          headers: {
+            Authorization: getRoleNguoiDung(),
+            "Content-Type": "application/json",
+          },
+        });
+        if (status === 200) {
+          setHoten(ho_ten);
+          setRole(phan_quyen);
+        }
+      } catch (error) {
+        console.error(error);
       }
     })();
   }, []);
@@ -132,7 +136,8 @@ function SizeBar() {
         )}
       </div>
       <Menu>
-        {(role === phanQuyenNguoiDung[0] || role === phanQuyenNguoiDung[2]) && (
+        {(role === modulePhanQuyen.admin ||
+          role === modulePhanQuyen.quanLy) && (
           <MenuItem
             className="item-menu"
             icon={<FontAwesomeIcon icon={faPerson} />}
@@ -142,7 +147,8 @@ function SizeBar() {
           </MenuItem>
         )}
 
-        {(role === phanQuyenNguoiDung[0] || role === phanQuyenNguoiDung[2]) && (
+        {(role === modulePhanQuyen.admin ||
+          role === modulePhanQuyen.quanLy) && (
           <MenuItem
             icon={<FontAwesomeIcon icon={faUser} />}
             className="item-menu"
@@ -152,9 +158,9 @@ function SizeBar() {
           </MenuItem>
         )}
 
-        {(role === phanQuyenNguoiDung[0] ||
-          role === phanQuyenNguoiDung[2] ||
-          role === phanQuyenNguoiDung[3]) && (
+        {(role === modulePhanQuyen.admin ||
+          role === modulePhanQuyen.quanLy ||
+          role === modulePhanQuyen.cskh) && (
           <MenuItem
             icon={<FontAwesomeIcon icon={faUserTie} />}
             className="item-menu"
@@ -164,9 +170,9 @@ function SizeBar() {
           </MenuItem>
         )}
 
-        {(role === phanQuyenNguoiDung[0] ||
-          role === phanQuyenNguoiDung[1] ||
-          role === phanQuyenNguoiDung[2]) && (
+        {(role === modulePhanQuyen.admin ||
+          role === modulePhanQuyen.quanLy ||
+          role === modulePhanQuyen.nhanVien) && (
           <SubMenu
             icon={<FontAwesomeIcon icon={faBuilding} />}
             label="Sale"
@@ -196,7 +202,8 @@ function SizeBar() {
           </SubMenu>
         )}
 
-        {(role === phanQuyenNguoiDung[0] || role === phanQuyenNguoiDung[2]) && (
+        {(role === modulePhanQuyen.admin ||
+          role === modulePhanQuyen.quanLy) && (
           <SubMenu
             label="Dự án"
             className="item-menu"

@@ -18,7 +18,7 @@ router.get("/", async function (req, res) {
     const sql = `SELECT id, ho_ten, ngay_bat_dau,
     tai_khoan,gioi_tinh, so_dien_thoai, email,
     ngay_sinh, hinh_anh, trang_thai, phan_quyen
-    FROM nguoi_dung`;
+    FROM nguoi_dung ORDER BY trang_thai DESC, phan_quyen ASC`
 
     const result = await executeQuery(sql);
     res.status(200).send(result);

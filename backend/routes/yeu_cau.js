@@ -114,10 +114,10 @@ router.post("/gui-yeu-cau", async function (req, res) {
         .json({ response: "Gửi yêu cầu trùng lặp", type: false });
     }
 
-    const sql = `INSERT INTO yeu_cau (id, can_ho, trang_thai, nguoi_gui) 
-    VALUE(?, ?, ?, ?)`;
+    const sql = `INSERT INTO yeu_cau (id, can_ho, trang_thai, nguoi_gui, thong_tin) 
+    VALUE(?, ?, ?, ?, ?)`;
 
-    await executeQuery(sql, [id, can_ho, 0, data.tai_khoan]);
+    await executeQuery(sql, [id, can_ho, 0, data.tai_khoan, `${data.tai_khoan} đã gửi lúc ${start}`]);
     const fileData = fs.readFileSync(jsonPath, "utf8");
     const yeuCauArray = JSON.parse(fileData);
     const isDuplicate = yeuCauArray.some(
@@ -138,8 +138,15 @@ router.post("/gui-yeu-cau", async function (req, res) {
 router.post("/duyet-yeu-cau", async function (req, res) {
   try {
     const { id } = req.body;
-    const sql = `UPDATE yeu_cau SET trang_thai = '1' where id = ?`;
-    await executeQuery(sql, [id]);
+
+    const jwt_token = req.headers["authorization"];
+    const data = jwt.verify(jwt_token, env.JWT_KEY);
+
+    let now = moment();
+    const start = now.format("HH:mm DD-MM-YYYY");
+
+    const sql = `UPDATE yeu_cau SET trang_thai = ?, thong_tin = ? where id = ?`;
+    await executeQuery(sql, [1, `${data.tai_khoan} đã duyệt lúc ${start}`, id]);
 
     res.status(200).json({ response: "Yêu cầu đã được duyệt", type: true });
   } catch (error) {
@@ -148,16 +155,5 @@ router.post("/duyet-yeu-cau", async function (req, res) {
   }
 });
 
-router.post("/xoa-yeu-cau", async function (req, res) {
-  try {
-    const { id } = req.body;
-    const sql = `DELETE FROM yeu_cau WHERE id = ?`;
-    await executeQuery(sql, [id]);
-    res.status(200).json({ response: "Đã xóa yêu cầu", type: true });
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ response: "Error", type: false });
-  }
-});
 
 module.exports = router;

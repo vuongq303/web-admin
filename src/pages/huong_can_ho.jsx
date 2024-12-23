@@ -1,9 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
-import json_config from "../config.json";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import Loading from "./components/loading";
+import { ketNoi } from "../data/module";
 
 export default function HuongCanHo() {
   const [data, setData] = useState([]);
@@ -17,7 +17,7 @@ export default function HuongCanHo() {
     (async function getData() {
       try {
         const { data } = await axios.get(
-          json_config.url_connect + "/thong-tin-du-an/huong-can-ho"
+          `${ketNoi.url}/thong-tin-du-an/huong-can-ho`
         );
         setLoading(false);
         setData(data);
@@ -27,6 +27,10 @@ export default function HuongCanHo() {
     })();
   }, []);
 
+  function openModalUpdate(item) {
+    setDataUpdate(item);
+    setShowModalUpdate(true);
+  }
   async function themhuongCanHo() {
     try {
       const dataPost = {
@@ -42,7 +46,7 @@ export default function HuongCanHo() {
         status,
         data: { response, type, id },
       } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/them-huong-can-ho`,
+        `${ketNoi.url}/thong-tin-du-an/them-huong-can-ho`,
         dataPost
       );
 
@@ -75,7 +79,7 @@ export default function HuongCanHo() {
         status,
         data: { response, type },
       } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/cap-nhat-huong-can-ho`,
+        `${ketNoi.url}/thong-tin-du-an/cap-nhat-huong-can-ho`,
         dataPost
       );
 
@@ -194,10 +198,7 @@ export default function HuongCanHo() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => {
-                    setDataUpdate(item);
-                    setShowModalUpdate(true);
-                  }}
+                  onClick={() => openModalUpdate(item)}
                 >
                   Chi tiết
                 </button>

@@ -1,48 +1,48 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
-import json_config from "../config.json";
 import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
 import Loading from "./components/loading";
+import { ketNoi } from "../data/module";
 
-export default function DuAn() {
+export default function () {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState({});
-
   const trucCanHoRef = useRef(null);
-  const trucCanHoUpdateRef = useRef(null);
 
   useEffect(() => {
     (async function () {
       try {
         const { data } = await axios.get(
-          json_config.url_connect + "/thong-tin-du-an/truc-can-ho"
+          `${ketNoi.url}/thong-tin-du-an/truc-can-ho`
         );
-        setData(data);
         setLoading(false);
+        setData(data);
       } catch (error) {
-        console.log(error);
+        setLoading(false);
+        toast.error("Lỗi lấy dữ liệu");
       }
     })();
   }, []);
 
   async function themTrucCanHo() {
-    const dataPost = { truc_can: trucCanHoRef.current.value }
+    const dataPost = { truc_can: trucCanHoRef.current.value };
 
     try {
       if (dataPost.truc_can === "") {
         toast.error("Dữ liệu trống");
         return;
       }
+
       setLoading(true);
       const {
         status,
         data: { response, type, id },
       } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/them-truc-can-ho`,
+        `${ketNoi.url}/thong-tin-du-an/them-truc-can-ho`,
         dataPost
       );
 
@@ -55,13 +55,14 @@ export default function DuAn() {
         }
       }
     } catch (error) {
-      console.error(error);
+      setLoading(false);
+      toast.error("Lỗi thêm trục căn hộ");
     }
   }
 
   async function capNhatTrucCanHo() {
     const dataPost = {
-      truc_can: trucCanHoUpdateRef.current.value,
+      truc_can: trucCanHoRef.current.value,
       id: dataUpdate.id,
     };
 
@@ -69,20 +70,15 @@ export default function DuAn() {
       toast.error("Dữ liệu trống");
       return;
     }
-    
+
     setLoading(true);
 
     try {
-      if (dataPost.truc_can === "") {
-        toast.error("Dữ liệu trống");
-        return;
-      }
-
       const {
         status,
         data: { response, type },
       } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/cap-nhat-truc-can-ho`,
+        `${ketNoi.url}/thong-tin-du-an/cap-nhat-truc-can-ho`,
         dataPost
       );
 
@@ -97,15 +93,21 @@ export default function DuAn() {
         }
       }
     } catch (error) {
-      console.error(error);
+      setLoading(false);
+      toast.error("Lỗi cập nhật trục căn hộ");
     }
+  }
+
+  function openModalUpdate(item) {
+    setDataUpdate(item);
+    setShowModalUpdate(true);
   }
 
   return (
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={200}
+        autoClose={500}
         hideProgressBar={false}
       />
       <Loading loading={loading} />
@@ -117,7 +119,6 @@ export default function DuAn() {
         >
           Thêm mới
         </button>
-        {/*  */}
         <Modal show={showModal} backdrop="static" keyboard={false}>
           <Modal.Header>
             <Modal.Title>Thêm trục căn hộ mới</Modal.Title>
@@ -148,7 +149,6 @@ export default function DuAn() {
             </Button>
           </Modal.Footer>
         </Modal>
-        {/*  */}
         <Modal show={showModalUpdate} backdrop="static" keyboard={false}>
           <Modal.Header>
             <Modal.Title>Cập nhật trục căn hộ</Modal.Title>
@@ -161,7 +161,7 @@ export default function DuAn() {
           <Modal.Body>
             <div className="input-group mb-3">
               <input
-                ref={trucCanHoUpdateRef}
+                ref={trucCanHoRef}
                 placeholder="Cập nhật trục căn hộ..."
                 defaultValue={dataUpdate.truc_can}
                 type="text"
@@ -183,11 +183,11 @@ export default function DuAn() {
             </Button>
           </Modal.Footer>
         </Modal>
-        {/*  */}
       </div>
       <table className="table">
         <thead>
           <tr>
+            <th scope="col">STT</th>
             <th scope="col">Trục căn hộ</th>
             <th scope="col">Hành động</th>
           </tr>
@@ -195,15 +195,13 @@ export default function DuAn() {
         <tbody>
           {data.map((item, index) => (
             <tr key={index}>
+              <td>{index + 1}</td>
               <td>{item.truc_can}</td>
               <td>
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => {
-                    setDataUpdate(item);
-                    setShowModalUpdate(true);
-                  }}
+                  onClick={() => openModalUpdate(item)}
                 >
                   Chi tiết
                 </button>

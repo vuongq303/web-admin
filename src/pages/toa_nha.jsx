@@ -1,9 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
-import json_config from "../config.json";
 import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
 import Loading from "./components/loading";
+import { ketNoi } from "../data/module";
 
 export default function DuAn() {
   const [data, setData] = useState([]);
@@ -21,36 +21,37 @@ export default function DuAn() {
         const {
           data: { toa_nha, du_an },
         } = await axios.get(
-          json_config.url_connect + "/thong-tin-du-an/toa-nha"
+           `${ketNoi.url}/thong-tin-du-an/toa-nha`
         );
 
+        setLoading(false);
         setData(toa_nha);
         setDataDuAn(du_an);
-        setLoading(false);
       } catch (error) {
-        console.log(error);
+        toast.error("Lỗi khi lấy dữ liệu");
+        setLoading(false);
       }
     })();
   }, []);
 
   async function themToaNha() {
-   
     const dataPost = {
       ten_toa_nha: toaNhaRef.current.value,
       ten_du_an: tenDuAnRef.current.value,
     };
 
+    if (dataPost.toa_nha === "") {
+      toast.error("Dữ liệu trống");
+      return;
+    }
+    setLoading(true);
+
     try {
-      if (dataPost.toa_nha === "") {
-        toast.error("Dữ liệu trống");
-        return;
-      }
-      setLoading(true);
       const {
         status,
         data: { response, type, id },
       } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/them-toa-nha`,
+        `${ketNoi.url}/thong-tin-du-an/them-toa-nha`,
         dataPost
       );
 
@@ -63,29 +64,35 @@ export default function DuAn() {
         }
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Lỗi khi thêm tòa nhà");
+      setLoading(false);
     }
   }
 
+  function openModalUpdate(item) {
+    setDataUpdate(item);
+    setShowModalUpdate(true);
+  }
+
   async function capNhatToaNha() {
-   
     const dataPost = {
       ten_toa_nha: toaNhaRef.current.value,
       ten_du_an: tenDuAnRef.current.value,
       id: dataUpdate.id,
     };
 
+    if (dataPost.ten_toa_nha === "") {
+      toast.error("Dữ liệu trống");
+      return;
+    }
+    setLoading(true);
+
     try {
-      if (dataPost.ten_toa_nha === "") {
-        toast.error("Dữ liệu trống");
-        return;
-      }
-      setLoading(true);
       const {
         status,
         data: { response, type },
       } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/cap-nhat-toa-nha`,
+        `${ketNoi.url}/thong-tin-du-an/cap-nhat-toa-nha`,
         dataPost
       );
 
@@ -100,7 +107,8 @@ export default function DuAn() {
         }
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Lỗi khi cập nhật tòa nhà");
+      setLoading(false);
     }
   }
 
@@ -108,7 +116,7 @@ export default function DuAn() {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={200}
+        autoClose={500}
         hideProgressBar={false}
       />
       <Loading loading={loading} />
@@ -230,10 +238,7 @@ export default function DuAn() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => {
-                    setDataUpdate(item);
-                    setShowModalUpdate(true);
-                  }}
+                  onClick={() => openModalUpdate(item)}
                 >
                   Chi tiết
                 </button>

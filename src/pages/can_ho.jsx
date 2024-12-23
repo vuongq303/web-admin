@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import json_config from "../config.json";
 import { Button, Modal, Form } from "react-bootstrap";
 import * as xlsx from "xlsx";
 import {
@@ -13,6 +12,7 @@ import PreviewImage from "./components/preview_image";
 import { toast, ToastContainer } from "react-toastify";
 import { dataCanHoDefault } from "../data/default_data";
 import { downloadImages, exportFileExcel } from "./controllers/function";
+import { ketNoi, modulePhanQuyen } from "../data/module";
 
 export default function CanHo() {
   const [data, setData] = useState([]);
@@ -72,7 +72,7 @@ export default function CanHo() {
       setLoading(true);
       try {
         const { status, data: response } = await axios.get(
-          `${json_config.url_connect}/thong-tin-du-an`
+          `${ketNoi.url}/thong-tin-du-an`
         );
 
         if (status === 200) {
@@ -100,9 +100,7 @@ export default function CanHo() {
     if (item.hinh_anh) {
       let arrayHinhAnh = item.hinh_anh.split(",");
       setShowImageData(
-        arrayHinhAnh.map(
-          (img) => `${json_config.url_connect}/can-ho/${item.id}/${img}`
-        )
+        arrayHinhAnh.map((img) => `${ketNoi.url}/can-ho/${item.id}/${img}`)
       );
     } else {
       setShowImageData([]);
@@ -118,7 +116,7 @@ export default function CanHo() {
         status,
         data: { response, type },
       } = await axios.post(
-        `${json_config.url_connect}/yeu-cau/gui-yeu-cau`,
+        `${ketNoi.url}/yeu-cau/gui-yeu-cau`,
         { can_ho: id },
         {
           headers: {
@@ -150,15 +148,12 @@ export default function CanHo() {
       const {
         status,
         data: { response, role, totalPages },
-      } = await axios.get(
-        `${json_config.url_connect}/can-ho?page=${page}&limit=${limit}`,
-        {
-          headers: {
-            Authorization: getRoleNguoiDung(),
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      } = await axios.get(`${ketNoi.url}/can-ho?page=${page}&limit=${limit}`, {
+        headers: {
+          Authorization: getRoleNguoiDung(),
+          "Content-Type": "application/json",
+        },
+      });
 
       if (status === 200) {
         setLoading(false);
@@ -187,17 +182,15 @@ export default function CanHo() {
       gia_tu: giaBanTuState.replace(/,/g, ""),
       gia_den: giaBanDenState.replace(/,/g, ""),
     };
+
     setLoading(true);
-    const { status, data } = await axios.get(
-      `${json_config.url_connect}/tim-kiem`,
-      {
-        params: dataTimKiem,
-        headers: {
-          Authorization: getRoleNguoiDung(),
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const { status, data } = await axios.get(`${ketNoi.url}/tim-kiem`, {
+      params: dataTimKiem,
+      headers: {
+        Authorization: getRoleNguoiDung(),
+        "Content-Type": "application/json",
+      },
+    });
 
     if (status === 200) {
       setLoading(false);
@@ -237,19 +230,13 @@ export default function CanHo() {
       const {
         status,
         data: { response: message, data: images, type },
-      } = await axios.post(
-        `${json_config.url_connect}/can-ho/them-anh-can-ho`,
-        formData
-      );
+      } = await axios.post(`${ketNoi.url}/can-ho/them-anh-can-ho`, formData);
 
       if (status === 200) {
         toast.success(message);
         if (type) {
           setShowImageData(
-            images.map(
-              (img) =>
-                `${json_config.url_connect}/can-ho/${dataUpdate.id}/${img}`
-            )
+            images.map((img) => `${ketNoi.url}/can-ho/${dataUpdate.id}/${img}`)
           );
           setData((prevData) =>
             prevData.map((item) =>
@@ -278,7 +265,7 @@ export default function CanHo() {
       const {
         status,
         data: { response: message, data: images, type },
-      } = await axios.post(`${json_config.url_connect}/can-ho/xoa-anh-can-ho`, {
+      } = await axios.post(`${ketNoi.url}/can-ho/xoa-anh-can-ho`, {
         id: dataUpdate.id,
         filename: imgPath,
       });
@@ -287,10 +274,7 @@ export default function CanHo() {
         toast.success(message);
         if (type) {
           setShowImageData(
-            images.map(
-              (img) =>
-                `${json_config.url_connect}/can-ho/${dataUpdate.id}/${img}`
-            )
+            images.map((img) => `${ketNoi.url}/can-ho/${dataUpdate.id}/${img}`)
           );
           setData((prevData) =>
             prevData.map((item) =>
@@ -350,16 +334,12 @@ export default function CanHo() {
       const {
         data: { response: message, type, id, nguoi_cap_nhat },
         status,
-      } = await axios.post(
-        `${json_config.url_connect}/can-ho/them-can-ho`,
-        data,
-        {
-          headers: {
-            Authorization: getRoleNguoiDung(),
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      } = await axios.post(`${ketNoi.url}/can-ho/them-can-ho`, data, {
+        headers: {
+          Authorization: getRoleNguoiDung(),
+          "Content-Type": "application/json",
+        },
+      });
 
       if (status === 200) {
         toast.success(message);
@@ -414,16 +394,12 @@ export default function CanHo() {
       const {
         data: { response: message, type, nguoi_cap_nhat },
         status,
-      } = await axios.post(
-        `${json_config.url_connect}/can-ho/cap-nhat-can-ho`,
-        dataPost,
-        {
-          headers: {
-            Authorization: getRoleNguoiDung(),
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      } = await axios.post(`${ketNoi.url}/can-ho/cap-nhat-can-ho`, dataPost, {
+        headers: {
+          Authorization: getRoleNguoiDung(),
+          "Content-Type": "application/json",
+        },
+      });
 
       if (status === 200) {
         toast.success(message);
@@ -481,7 +457,7 @@ export default function CanHo() {
         status,
         data: { response, type },
       } = await axios.post(
-        `${json_config.url_connect}/can-ho/cap-nhat-trang-thai`,
+        `${ketNoi.url}/can-ho/cap-nhat-trang-thai`,
         dataPost
       );
       if (status === 200) {
@@ -496,7 +472,30 @@ export default function CanHo() {
       console.error(error);
     }
   }
-
+  const styles = {
+    yellow_notice: {
+      backgroundColor: "yellow",
+      padding: 2,
+      width: 50,
+      textAlign: "center",
+      marginRight: 3,
+    },
+    red_notice: {
+      backgroundColor: "red",
+      padding: 2,
+      width: 50,
+      textAlign: "center",
+      marginRight: 3,
+    },
+    orange_notice: {
+      backgroundColor: "orange",
+      padding: 2,
+      width: 50,
+      textAlign: "center",
+      marginRight: 3,
+    },
+    w_100: { width: 100 },
+  };
   return (
     <div>
       <ToastContainer
@@ -506,81 +505,50 @@ export default function CanHo() {
       />
       <div className="d-flex justify-content-start m-2">
         <div className="d-flex justify-content-between align-items-center w-100">
-          <div className="d-flex align-items-center">
-            {role === "Admin" && (
-              <div>
-                <button
-                  type="button"
-                  className="btn btn-success"
-                  onClick={() => setShowModal(true)}
-                >
-                  Thêm mới
-                </button>
-                <input
-                  ref={uploadFileExcelRef}
-                  onChange={uploadFileExcel}
-                  type="file"
-                  hidden
-                />
-                <button
-                  type="button"
-                  className="btn btn-outline-primary mx-1"
-                  onClick={() => uploadFileExcelRef.current.click()}
-                >
-                  Upload file excel
-                </button>
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={() => exportFileExcel(itemChecked)}
-              className="btn btn-secondary mx-1"
-            >
-              Export file excel
-            </button>
-          </div>
+          {role === modulePhanQuyen.admin && (
+            <div className="d-flex align-items-center">
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={() => setShowModal(true)}
+              >
+                Thêm mới
+              </button>
+              <input
+                ref={uploadFileExcelRef}
+                onChange={uploadFileExcel}
+                type="file"
+                hidden
+              />
+              <button
+                type="button"
+                className="btn btn-outline-primary mx-1"
+                onClick={() => uploadFileExcelRef.current.click()}
+              >
+                Upload file excel
+              </button>
+
+              <button
+                type="button"
+                onClick={() => exportFileExcel(itemChecked)}
+                className="btn btn-secondary mx-1"
+              >
+                Export file excel
+              </button>
+            </div>
+          )}
 
           <div className="text-start">
             <div className="d-flex flex-row">
-              <div
-                style={{
-                  backgroundColor: "yellow",
-                  padding: 2,
-                  width: 50,
-                  textAlign: "center",
-                  marginRight: 3,
-                }}
-              >
-                Vàng
-              </div>
+              <div style={styles.yellow_notice}>Vàng</div>
               <div> Căn giá rẻ</div>
             </div>
             <div className="d-flex flex-row my-2">
-              <div
-                style={{
-                  backgroundColor: "red",
-                  padding: 2,
-                  width: 50,
-                  textAlign: "center",
-                  marginRight: 3,
-                }}
-              >
-                Đỏ
-              </div>
+              <div style={styles.red_notice}>Đỏ</div>
               <div> Căn ngoại giao(Không gọi trực tiếp chủ nhà)</div>
             </div>
             <div className="d-flex flex-row">
-              <div
-                style={{
-                  backgroundColor: "orange",
-                  padding: 2,
-                  width: 50,
-                  textAlign: "center",
-                  marginRight: 3,
-                }}
-              >
-                Cam
-              </div>
+              <div style={styles.orange_notice}>Cam</div>
               <div> Căn kết hợp</div>
             </div>
           </div>
@@ -1124,7 +1092,7 @@ export default function CanHo() {
             </Button>
             <Button
               variant="primary"
-              onClick={async () => downloadImages(showImageData)}
+              onClick={async () => downloadImages(showImageData, dataUpdate)}
             >
               Tải ảnh xuống
             </Button>
@@ -1273,7 +1241,7 @@ export default function CanHo() {
           </button>
         </div>
       </div>
-      <table className="table table-light ">
+      <table className="table table-striped table-bordered">
         <thead>
           <tr>
             <th scope="col">
@@ -1307,6 +1275,7 @@ export default function CanHo() {
                 padding: "1px 5px",
                 borderRadius: "5px",
               },
+              w_10: { width: "10%" },
             };
             let onChecked = itemChecked.includes(item);
 
@@ -1337,10 +1306,10 @@ export default function CanHo() {
                     {item.truc_can_ho}
                   </div>
                 </td>
-                <td className="align-middle" style={{ width: "10%" }}>
+                <td className="align-middle" style={styles.w_10}>
                   {item.chu_can_ho ?? "x"}
                 </td>
-                <td className="align-middle" style={{ width: "10%" }}>
+                <td className="align-middle" style={styles.w_10}>
                   {item.so_dien_thoai ?? "x"}
                 </td>
                 <td className="align-middle">
@@ -1359,16 +1328,16 @@ export default function CanHo() {
                   <br />- <strong>{item.nguoi_cap_nhat}</strong>
                 </td>
                 <td className="align-middle">
-                  {role === "Admin" && (
+                  {role === modulePhanQuyen.admin && (
                     <Form.Check
                       style={{ transform: "scale(1.3)" }}
-                      defaultChecked={item.trang_thai === 0}
+                      checked={item.trang_thai == 0}
                       onChange={async (e) => await capNhatTrangThai(item.id, e)}
                       type="switch"
                       id="custom-switch"
                     />
                   )}
-                  {role === "Admin" && (
+                  {role === modulePhanQuyen.admin && (
                     <button
                       type="button"
                       onClick={() => {
@@ -1407,7 +1376,7 @@ export default function CanHo() {
       <div className="mb-3">
         <button
           className="btn btn-primary mx-1"
-          style={{ width: 100 }}
+          style={styles.w_100}
           onClick={handlePrevPage}
           disabled={page === 1}
         >
@@ -1415,7 +1384,7 @@ export default function CanHo() {
         </button>
         <button
           disabled={page === totalPage}
-          style={{ width: 100 }}
+          style={styles.w_100}
           className="btn btn-primary mx-1"
           onClick={handleNextPage}
         >

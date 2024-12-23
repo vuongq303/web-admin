@@ -1,9 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
-import json_config from "../config.json";
 import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
 import Loading from "./components/loading";
+import { ketNoi } from "../data/module";
 
 export default function DuAn() {
   const [data, setData] = useState([]);
@@ -17,29 +17,32 @@ export default function DuAn() {
     (async function getData() {
       try {
         const { data } = await axios.get(
-          json_config.url_connect + "/thong-tin-du-an/noi-that"
+          `${ketNoi.url}/thong-tin-du-an/noi-that`
         );
-        setData(data);
         setLoading(false);
+        setData(data);
       } catch (error) {
-        console.log(error);
+        setLoading(false);
+        toast.error("Lỗi khi lấy dữ liệu");
       }
     })();
   }, []);
 
   async function themNoiThat() {
     const dataPost = { loai_noi_that: noiThatRef.current.value };
+
+    if (dataPost.loai_noi_that === "") {
+      toast.error("Dữ liệu trống");
+      return;
+    }
+
+    setLoading(true);
     try {
-      if (dataPost.loai_noi_that === "") {
-        toast.error("Dữ liệu trống");
-        return;
-      }
-      setLoading(true);
       const {
         status,
         data: { response, type, id },
       } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/them-noi-that`,
+        `${ketNoi.url}/thong-tin-du-an/them-noi-that`,
         dataPost
       );
 
@@ -52,7 +55,8 @@ export default function DuAn() {
         }
       }
     } catch (error) {
-      console.log(error);
+      setLoading(false);
+      toast.error("Lỗi khi thêm nội thất");
     }
   }
 
@@ -61,22 +65,19 @@ export default function DuAn() {
       loai_noi_that: noiThatRef.current.value,
       id: dataUpdate.id,
     };
+
     if (dataPost.loai_noi_that === "") {
       toast.error("Dữ liệu trống");
       return;
     }
     setLoading(true);
-    try {
-      if (dataPost.id === "") {
-        toast.error("Dữ liệu trống");
-        return;
-      }
 
+    try {
       const {
         status,
         data: { response, type },
       } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/cap-nhat-noi-that`,
+        `${ketNoi.url}/thong-tin-du-an/cap-nhat-noi-that`,
         dataPost
       );
 
@@ -91,15 +92,21 @@ export default function DuAn() {
         }
       }
     } catch (error) {
-      console.error(error);
+      setLoading(false);
+      toast.error("Lỗi khi cập nhật nội thất");
     }
+  }
+
+  function openModalUpdate(item) {
+    setDataUpdate(item);
+    setShowModalUpdate(true);
   }
 
   return (
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={200}
+        autoClose={500}
         hideProgressBar={false}
       />
       <Loading loading={loading} />
@@ -111,7 +118,6 @@ export default function DuAn() {
         >
           Thêm mới
         </button>
-        {/*  */}
         <Modal show={showModal} backdrop="static" keyboard={false}>
           <Modal.Header>
             <Modal.Title>Thêm nội thất mới</Modal.Title>
@@ -142,7 +148,6 @@ export default function DuAn() {
             </Button>
           </Modal.Footer>
         </Modal>
-        {/*  */}
         <Modal show={showModalUpdate} backdrop="static" keyboard={false}>
           <Modal.Header>
             <Modal.Title>Cập nhật nội thất</Modal.Title>
@@ -178,7 +183,6 @@ export default function DuAn() {
           </Modal.Footer>
         </Modal>
       </div>
-      {/*  */}
       <table className="table">
         <thead>
           <tr>
@@ -195,10 +199,7 @@ export default function DuAn() {
               <td>
                 <button
                   type="button"
-                  onClick={() => {
-                    setDataUpdate(item);
-                    setShowModalUpdate(true);
-                  }}
+                  onClick={() => openModalUpdate(item)}
                   className="btn btn-primary"
                 >
                   Chi tiết

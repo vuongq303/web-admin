@@ -1,6 +1,5 @@
 import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
-import json_config from "../config.json";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import Loading from "./components/loading";
@@ -9,6 +8,7 @@ import {
   getRoleNguoiDung,
   loaiGiaoDichKhachHang,
 } from "../services/utils";
+import { ketNoi } from "../data/module";
 
 export default function KhachHang() {
   const [data, setData] = useState([]);
@@ -29,15 +29,12 @@ export default function KhachHang() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await axios.get(
-          json_config.url_connect + "/khach-hang",
-          {
-            headers: {
-              Authorization: getRoleNguoiDung(),
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const { data } = await axios.get(`${ketNoi.url}/khach-hang`, {
+          headers: {
+            Authorization: getRoleNguoiDung(),
+            "Content-Type": "application/json",
+          },
+        });
         setLoading(false);
         setData(data);
       } catch (error) {
@@ -78,7 +75,7 @@ export default function KhachHang() {
         status,
         data: { response, type, id },
       } = await axios.post(
-        `${json_config.url_connect}/khach-hang/them-khach-hang`,
+        `${ketNoi.url}/khach-hang/them-khach-hang`,
         dataPost
       );
 
@@ -129,7 +126,7 @@ export default function KhachHang() {
         status,
         data: { response, type },
       } = await axios.post(
-        `${json_config.url_connect}/khach-hang/cap-nhat-khach-hang`,
+        `${ketNoi.url}/khach-hang/cap-nhat-khach-hang`,
         dataPost
       );
 
@@ -149,6 +146,10 @@ export default function KhachHang() {
     }
   }
 
+  function openModalUpdate(item) {
+    setDataUpdate(item);
+    setShowModalUpdate(true);
+  }
   return (
     <div>
       <ToastContainer
@@ -469,10 +470,7 @@ export default function KhachHang() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => {
-                    setDataUpdate(item);
-                    setShowModalUpdate(true);
-                  }}
+                  onClick={() => openModalUpdate(item)}
                 >
                   Chi tiết
                 </button>

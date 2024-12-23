@@ -1,9 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
-import json_config from "../config.json";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import Loading from "./components/loading";
+import { ketNoi } from "../data/module";
 
 export default function DuAn() {
   const [data, setData] = useState([]);
@@ -16,9 +16,7 @@ export default function DuAn() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await axios.get(
-          json_config.url_connect + "/thong-tin-du-an/du-an"
-        );
+        const { data } = await axios.get(`${ketNoi.url}/thong-tin-du-an/du-an`);
         setLoading(false);
         setData(data);
       } catch (error) {
@@ -27,9 +25,13 @@ export default function DuAn() {
     })();
   }, []);
 
+  function openModalUpdate(item) {
+    setDataUpdate(item);
+    setShowModalUpdate(true);
+  }
+
   async function themduAn() {
     try {
-     
       const dataPost = {
         ten_du_an: duAnRef.current.value,
       };
@@ -43,7 +45,7 @@ export default function DuAn() {
         status,
         data: { response, type, id },
       } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/them-du-an`,
+        `${ketNoi.url}/thong-tin-du-an/them-du-an`,
         dataPost
       );
 
@@ -62,7 +64,6 @@ export default function DuAn() {
 
   async function capNhatduAn() {
     try {
-      
       const dataPost = {
         ten_du_an: duAnRef.current.value,
         id: dataUpdate.id,
@@ -77,7 +78,7 @@ export default function DuAn() {
         status,
         data: { response, type },
       } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/cap-nhat-du-an`,
+        `${ketNoi.url}/thong-tin-du-an/cap-nhat-du-an`,
         dataPost
       );
 
@@ -197,10 +198,7 @@ export default function DuAn() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => {
-                    setDataUpdate(item);
-                    setShowModalUpdate(true);
-                  }}
+                  onClick={() => openModalUpdate(item)}
                 >
                   Chi tiết
                 </button>

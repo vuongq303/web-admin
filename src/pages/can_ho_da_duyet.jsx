@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import json_config from "../config.json";
 import { getRoleNguoiDung } from "../services/utils";
 import Loading from "./components/loading";
 import { Button, Modal } from "react-bootstrap";
 import PreviewImage from "./components/preview_image";
 import { downloadImages } from "./controllers/function";
 import { toast, ToastContainer } from "react-toastify";
+import { ketNoi } from "../data/module";
 
 export default function CanHoDaDuyet() {
   const [data, setData] = useState([]);
@@ -30,18 +30,14 @@ export default function CanHoDaDuyet() {
       const {
         status,
         data: { response: message, data: images, type },
-      } = await axios.post(
-        `${json_config.url_connect}/can-ho/them-anh-can-ho`,
-        formData
-      );
+      } = await axios.post(`${ketNoi.url}/can-ho/them-anh-can-ho`, formData);
 
       if (status === 200) {
         toast.success(message);
         if (type) {
           setShowImageData(
             images.map(
-              (img) =>
-                `${json_config.url_connect}/can-ho/${dataUpdate.can_ho}/${img}`
+              (img) => `${ketNoi.url}/can-ho/${dataUpdate.can_ho}/${img}`
             )
           );
           setData((prevData) =>
@@ -62,9 +58,7 @@ export default function CanHoDaDuyet() {
     if (item.hinh_anh) {
       let arrayHinhAnh = item.hinh_anh.split(",");
       setShowImageData(
-        arrayHinhAnh.map(
-          (img) => `${json_config.url_connect}/can-ho/${item.can_ho}/${img}`
-        )
+        arrayHinhAnh.map((img) => `${ketNoi.url}/can-ho/${item.can_ho}/${img}`)
       );
     } else {
       setShowImageData([]);
@@ -77,7 +71,7 @@ export default function CanHoDaDuyet() {
     (async function getData() {
       try {
         const { data } = await axios.get(
-          `${json_config.url_connect}/yeu-cau/danh-sach-duyet-yeu-cau`,
+          `${ketNoi.url}/yeu-cau/danh-sach-duyet-yeu-cau`,
           {
             headers: {
               Authorization: getRoleNguoiDung(),
@@ -198,13 +192,14 @@ export default function CanHoDaDuyet() {
                 <br />- {item.noi_that}
                 <br />- {item.ghi_chu}
               </td>
-              <td className="align-middle">
+              <td className="align-middle" style={{ width: "15%" }}>
                 Trạng thái:
                 <strong>
                   {item.trang_thai === 0 ? " Đang chờ" : " Đã duyệt"}
                 </strong>
                 <br />
-                Đã gửi bởi: <strong>{item.nguoi_gui}</strong>
+                Đã gửi bởi: <strong>{item.nguoi_gui}</strong> <br />
+                <strong>{item.thong_tin}</strong>
               </td>
               <td className="align-middle">
                 <button

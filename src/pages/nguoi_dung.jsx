@@ -1,6 +1,5 @@
 import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
-import json_config from "../config.json";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import {
@@ -11,6 +10,7 @@ import {
   trangThaiLamViec,
 } from "../services/utils";
 import Loading from "./components/loading";
+import { ketNoi, moduleDanhDau, moduleTrangThaiLamViec } from "../data/module";
 
 export default function NguoiDung() {
   const [data, setData] = useState([]);
@@ -36,19 +36,18 @@ export default function NguoiDung() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await axios.get(
-          json_config.url_connect + "/nguoi-dung",
-          {
-            headers: {
-              Authorization: getRoleNguoiDung(),
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        setData(data);
+        const { data } = await axios.get(`${ketNoi.url}/nguoi-dung`, {
+          headers: {
+            Authorization: getRoleNguoiDung(),
+            "Content-Type": "application/json",
+          },
+        });
+
         setLoading(false);
+        setData(data);
       } catch (error) {
-        console.error(error);
+        setLoading(false);
+        toast.error("Lỗi khi lấy dữ liệu");
       }
     })();
   }, []);
@@ -95,11 +94,12 @@ export default function NguoiDung() {
         return;
       }
       setLoading(true);
+
       const {
         status,
         data: { response, type, id },
       } = await axios.post(
-        `${json_config.url_connect}/nguoi-dung/them-nguoi-dung`,
+        `${ketNoi.url}/nguoi-dung/them-nguoi-dung`,
         formData,
         {
           headers: {
@@ -119,7 +119,8 @@ export default function NguoiDung() {
         }
       }
     } catch (error) {
-      console.log(error);
+      setLoading(false);
+      toast.error("Lỗi khi thêm người dùng");
     }
   }
 
@@ -164,11 +165,12 @@ export default function NguoiDung() {
         return;
       }
       setLoading(true);
+
       const {
         status,
         data: { response, type },
       } = await axios.post(
-        `${json_config.url_connect}/nguoi-dung/cap-nhat-nguoi-dung`,
+        `${ketNoi.url}/nguoi-dung/cap-nhat-nguoi-dung`,
         formData,
         {
           headers: {
@@ -190,15 +192,40 @@ export default function NguoiDung() {
         }
       }
     } catch (error) {
-      console.log(error);
+      setLoading(false);
+      toast.error("Lỗi khi cập nhật người dùng");
     }
+  }
+
+  function themAnhNguoiDung(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setShowImage(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function capNhatAnhNguoiDung(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setShowImageUpdate(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function openModalUpdate(item) {
+    setShowImageUpdate(item.hinh_anh);
+    setDataUpdate(item);
+    setShowModalUpdate(true);
   }
 
   return (
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={200}
+        autoClose={500}
         hideProgressBar={false}
       />
       <Loading loading={loading} />
@@ -210,7 +237,6 @@ export default function NguoiDung() {
         >
           Thêm mới
         </button>
-        {/*  */}
         <Modal show={showModal} scrollable backdrop="static" keyboard={false}>
           <Modal.Header>
             <Modal.Title>Thêm người dùng mới</Modal.Title>
@@ -233,7 +259,6 @@ export default function NguoiDung() {
                 <label htmlFor="floatingInputGrid">Tài khoản</label>
               </div>
             </div>
-
             <div className="input-group mb-3">
               <div className="form-floating">
                 <input
@@ -246,7 +271,6 @@ export default function NguoiDung() {
                 <label htmlFor="floatingInputGrid">Mật khẩu</label>
               </div>
             </div>
-
             <div className="input-group mb-3">
               <div className="form-floating">
                 <input
@@ -269,7 +293,6 @@ export default function NguoiDung() {
                 <label htmlFor="floatingInputGrid">Ngày bắt đầu</label>
               </div>
             </div>
-
             <div className="input-group mb-3">
               <div className="form-floating">
                 <input
@@ -292,7 +315,6 @@ export default function NguoiDung() {
                 <label htmlFor="floatingInputGrid">Ngày sinh</label>
               </div>
             </div>
-
             <div className="input-group mb-3">
               <div className="form-floating">
                 <input
@@ -319,7 +341,6 @@ export default function NguoiDung() {
                 <label htmlFor="floatingInputGrid">Giới tính</label>
               </div>
             </div>
-
             <div className="input-group mb-3">
               <div className="form-floating">
                 <select
@@ -350,7 +371,6 @@ export default function NguoiDung() {
                 <label htmlFor="floatingInputGrid">Trạng thái</label>
               </div>
             </div>
-
             <div className="input-group mb-3">
               <div className="form-floating">
                 <input
@@ -358,14 +378,7 @@ export default function NguoiDung() {
                   className="form-control"
                   type="file"
                   id="fileInput"
-                  onChange={(event) => {
-                    const file = event.target.files[0];
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                      setShowImage(e.target.result);
-                    };
-                    reader.readAsDataURL(file);
-                  }}
+                  onChange={themAnhNguoiDung}
                   ref={hinhAnhRef}
                 />
                 <label htmlFor="fileInput">Thông tin ảnh</label>
@@ -382,7 +395,6 @@ export default function NguoiDung() {
             </Button>
           </Modal.Footer>
         </Modal>
-        {/*  */}
         <Modal
           show={showModalUpdate}
           scrollable
@@ -412,7 +424,6 @@ export default function NguoiDung() {
                 <label htmlFor="floatingInputGrid">Tài khoản</label>
               </div>
             </div>
-
             <div className="input-group mb-3">
               <div className="form-floating">
                 <input
@@ -425,7 +436,6 @@ export default function NguoiDung() {
                 />
                 <label htmlFor="floatingInputGrid">Họ và tên</label>
               </div>
-
               <div className="form-floating">
                 <input
                   ref={ngayBatDauRef}
@@ -441,7 +451,6 @@ export default function NguoiDung() {
                 <label htmlFor="floatingInputGrid">Ngày bắt đầu</label>
               </div>
             </div>
-
             <div className="input-group mb-3">
               <div className="form-floating">
                 <input
@@ -454,7 +463,6 @@ export default function NguoiDung() {
                 />
                 <label htmlFor="floatingInputGrid">Số điện thoại</label>
               </div>
-
               <div className="form-floating">
                 <input
                   ref={ngaySinhRef}
@@ -530,7 +538,6 @@ export default function NguoiDung() {
                 <label htmlFor="floatingInputGrid">Trạng thái</label>
               </div>
             </div>
-
             <div className="input-group mb-3">
               <div className="form-floating">
                 <input
@@ -539,14 +546,7 @@ export default function NguoiDung() {
                   type="file"
                   id="fileInput"
                   ref={hinhAnhRef}
-                  onChange={(event) => {
-                    const file = event.target.files[0];
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                      setShowImageUpdate(e.target.result);
-                    };
-                    reader.readAsDataURL(file);
-                  }}
+                  onChange={capNhatAnhNguoiDung}
                 />
                 <label htmlFor="fileInput">Thông tin ảnh</label>
               </div>
@@ -566,7 +566,6 @@ export default function NguoiDung() {
           </Modal.Footer>
         </Modal>
       </div>
-      {/*  */}
       <table className="table">
         <thead>
           <tr>
@@ -583,32 +582,46 @@ export default function NguoiDung() {
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => (
-            <tr key={item.id}>
-              <td>{item.id}</td>
-              <td>{item.ho_ten}</td>
-              <td>{item.tai_khoan}</td>
-              <td>{dateToText(item.ngay_bat_dau)}</td>
-              <td>{item.so_dien_thoai}</td>
-              <td>{item.email}</td>
-              <td>{dateToText(item.ngay_sinh)}</td>
-              <td>{item.trang_thai}</td>
-              <td>{item.phan_quyen}</td>
-              <td>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => {
-                    setShowImageUpdate(item.hinh_anh);
-                    setDataUpdate(item);
-                    setShowModalUpdate(true);
-                  }}
-                >
-                  Chi tiết
-                </button>
-              </td>
-            </tr>
-          ))}
+          {data.map((item, index) => {
+            const styles = {
+              danh_dau: {
+                display: "inline-block",
+                backgroundColor:
+                  item.trang_thai === moduleTrangThaiLamViec.daNghiLam
+                    ? moduleDanhDau.gray
+                    : moduleDanhDau.transparent,
+                padding: "1px 5px",
+                borderRadius: "5px",
+              },
+            };
+
+            return (
+              <tr key={index}>
+                <td className="align-middle">{index + 1}</td>
+                <td className="align-middle">
+                  <div style={styles.danh_dau}>{item.ho_ten}</div>
+                </td>
+                <td className="align-middle">{item.tai_khoan}</td>
+                <td className="align-middle">
+                  {dateToText(item.ngay_bat_dau)}
+                </td>
+                <td className="align-middle">{item.so_dien_thoai}</td>
+                <td className="align-middle">{item.email}</td>
+                <td className="align-middle">{dateToText(item.ngay_sinh)}</td>
+                <td className="align-middle">{item.trang_thai}</td>
+                <td className="align-middle">{item.phan_quyen}</td>
+                <td className="align-middle">
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => openModalUpdate(item)}
+                  >
+                    Chi tiết
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -1,10 +1,10 @@
 import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
-import json_config from "../config.json";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import { dateToText, getRoleNguoiDung } from "../services/utils";
 import Loading from "./components/loading";
+import { ketNoi } from "../data/module";
 
 export default function KhachHangNguon() {
   const [data, setData] = useState([]);
@@ -22,15 +22,12 @@ export default function KhachHangNguon() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await axios.get(
-          json_config.url_connect + "/khach-hang-nguon",
-          {
-            headers: {
-              Authorization: getRoleNguoiDung(),
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const { data } = await axios.get(`${ketNoi.url}/khach-hang-nguon`, {
+          headers: {
+            Authorization: getRoleNguoiDung(),
+            "Content-Type": "application/json",
+          },
+        });
         setLoading(false);
         setData(data);
       } catch (error) {
@@ -64,7 +61,7 @@ export default function KhachHangNguon() {
         status,
         data: { response, type, id },
       } = await axios.post(
-        `${json_config.url_connect}/khach-hang-nguon/them-khach-hang`,
+        `${ketNoi.url}/khach-hang-nguon/them-khach-hang`,
         dataPost
       );
 
@@ -107,7 +104,7 @@ export default function KhachHangNguon() {
         status,
         data: { response, type },
       } = await axios.post(
-        `${json_config.url_connect}/khach-hang-nguon/cap-nhat-khach-hang`,
+        `${ketNoi.url}/khach-hang-nguon/cap-nhat-khach-hang`,
         dataPost
       );
 
@@ -126,6 +123,10 @@ export default function KhachHangNguon() {
     }
   }
 
+  function openModalUpdate(item) {
+    setDataUpdate(item);
+    setShowModalUpdate(true);
+  }
   return (
     <div>
       <ToastContainer
@@ -345,10 +346,7 @@ export default function KhachHangNguon() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => {
-                    setDataUpdate(item);
-                    setShowModalUpdate(true);
-                  }}
+                  onClick={() => openModalUpdate(item)}
                 >
                   Chi tiết
                 </button>

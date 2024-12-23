@@ -1,9 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
-import json_config from "../config.json";
 import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
 import Loading from "./components/loading";
+import { ketNoi } from "../data/module";
 
 export default function LoaiCanHo() {
   const [data, setData] = useState([]);
@@ -17,10 +17,10 @@ export default function LoaiCanHo() {
     (async function getData() {
       try {
         const { data } = await axios.get(
-          json_config.url_connect + "/thong-tin-du-an/loai-can-ho"
+          `${ketNoi.url}/thong-tin-du-an/loai-can-ho`
         );
-        setData(data);
         setLoading(false);
+        setData(data);
       } catch (error) {
         console.log(error);
       }
@@ -28,7 +28,6 @@ export default function LoaiCanHo() {
   }, []);
 
   async function themloaiCanHo() {
-    
     try {
       const dataPost = {
         loai_can_ho: loaiCanHoRef.current.value,
@@ -39,11 +38,12 @@ export default function LoaiCanHo() {
         return;
       }
       setLoading(true);
+
       const {
         status,
         data: { response, id, type },
       } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/them-loai-can-ho`,
+        `${ketNoi.url}/thong-tin-du-an/them-loai-can-ho`,
         dataPost
       );
 
@@ -61,7 +61,6 @@ export default function LoaiCanHo() {
   }
 
   async function capNhatloaiCanHo() {
- 
     try {
       const dataPost = {
         loai_can_ho: loaiCanHoRef.current.value,
@@ -73,11 +72,12 @@ export default function LoaiCanHo() {
         return;
       }
       setLoading(true);
+
       const {
         status,
         data: { response, type },
       } = await axios.post(
-        `${json_config.url_connect}/thong-tin-du-an/cap-nhat-loai-can-ho`,
+        `${ketNoi.url}/thong-tin-du-an/cap-nhat-loai-can-ho`,
         dataPost
       );
 
@@ -96,6 +96,10 @@ export default function LoaiCanHo() {
     }
   }
 
+  function openModalUpdate(item) {
+    setDataUpdate(item);
+    setShowModalUpdate(true);
+  }
   return (
     <div>
       <ToastContainer
@@ -197,10 +201,7 @@ export default function LoaiCanHo() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => {
-                    setDataUpdate(item);
-                    setShowModalUpdate(true);
-                  }}
+                  onClick={() => openModalUpdate(item)}
                 >
                   Chi tiết
                 </button>

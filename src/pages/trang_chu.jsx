@@ -1,6 +1,4 @@
-import axios from "axios";
 import React, { useEffect } from "react";
-import json_config from "../config.json";
 
 export default function TrangChu() {
   return (

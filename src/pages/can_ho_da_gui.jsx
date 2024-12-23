@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import json_config from "../config.json";
-import { getRoleNguoiDung, phanQuyenNguoiDung } from "../services/utils";
+import { getRoleNguoiDung } from "../services/utils";
 import { toast, ToastContainer } from "react-toastify";
 import Loading from "./components/loading";
 import { downloadImages } from "./controllers/function";
 import PreviewImage from "./components/preview_image";
 import { Button, Modal } from "react-bootstrap";
+import { ketNoi, modulePhanQuyen } from "../data/module";
 
 export default function CanHoDaGui() {
   const [data, setData] = useState([]);
@@ -31,18 +31,14 @@ export default function CanHoDaGui() {
       const {
         status,
         data: { response: message, data: images, type },
-      } = await axios.post(
-        `${json_config.url_connect}/can-ho/them-anh-can-ho`,
-        formData
-      );
+      } = await axios.post(`${ketNoi.url}/can-ho/them-anh-can-ho`, formData);
 
       if (status === 200) {
         toast.success(message);
         if (type) {
           setShowImageData(
             images.map(
-              (img) =>
-                `${json_config.url_connect}/can-ho/${dataUpdate.can_ho}/${img}`
+              (img) => `${ketNoi.url}/can-ho/${dataUpdate.can_ho}/${img}`
             )
           );
           setData((prevData) =>
@@ -60,7 +56,7 @@ export default function CanHoDaGui() {
   }
 
   const xoaAnhCanHo = async (index) => {
-    if (role !== phanQuyenNguoiDung[0] && role !== phanQuyenNguoiDung[2]) {
+    if (role !== modulePhanQuyen.admin && role !== modulePhanQuyen.quanLy) {
       toast.error("Bạn không thể xóa ảnh");
       return;
     }
@@ -72,7 +68,7 @@ export default function CanHoDaGui() {
       const {
         status,
         data: { response: message, data: images, type },
-      } = await axios.post(`${json_config.url_connect}/can-ho/xoa-anh-can-ho`, {
+      } = await axios.post(`${ketNoi.url}/can-ho/xoa-anh-can-ho`, {
         id: dataUpdate.can_ho,
         filename: imgPath,
       });
@@ -82,8 +78,7 @@ export default function CanHoDaGui() {
         if (type) {
           setShowImageData(
             images.map(
-              (img) =>
-                `${json_config.url_connect}/can-ho/${dataUpdate.can_ho}/${img}`
+              (img) => `${ketNoi.url}/can-ho/${dataUpdate.can_ho}/${img}`
             )
           );
           setData((prevData) =>
@@ -104,9 +99,7 @@ export default function CanHoDaGui() {
     if (item.hinh_anh) {
       let arrayHinhAnh = item.hinh_anh.split(",");
       setShowImageData(
-        arrayHinhAnh.map(
-          (img) => `${json_config.url_connect}/can-ho/${item.can_ho}/${img}`
-        )
+        arrayHinhAnh.map((img) => `${ketNoi.url}/can-ho/${item.can_ho}/${img}`)
       );
     } else {
       setShowImageData([]);
@@ -122,7 +115,7 @@ export default function CanHoDaGui() {
         status,
         data: { response, type },
       } = await axios.post(
-        `${json_config.url_connect}/yeu-cau/duyet-yeu-cau`,
+        `${ketNoi.url}/yeu-cau/duyet-yeu-cau`,
         { id: id },
         {
           headers: {
@@ -148,15 +141,12 @@ export default function CanHoDaGui() {
       try {
         const {
           data: { response, role },
-        } = await axios.get(
-          `${json_config.url_connect}/yeu-cau/danh-sach-gui-yeu-cau`,
-          {
-            headers: {
-              Authorization: getRoleNguoiDung(),
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        } = await axios.get(`${ketNoi.url}/yeu-cau/danh-sach-gui-yeu-cau`, {
+          headers: {
+            Authorization: getRoleNguoiDung(),
+            "Content-Type": "application/json",
+          },
+        });
         setLoading(false);
         setData(response);
         setRole(role);
@@ -271,13 +261,14 @@ export default function CanHoDaGui() {
                 <br />- {item.noi_that}
                 <br />- {item.ghi_chu}
               </td>
-              <td className="align-middle">
+              <td className="align-middle" style={{ width: "15%" }}>
                 Trạng thái:
                 <strong>
                   {item.trang_thai === 0 ? " Đang chờ" : " Đã duyệt"}
                 </strong>
                 <br />
-                Đã gửi bởi: <strong>{item.nguoi_gui}</strong>
+                Đã gửi bởi: <strong>{item.nguoi_gui}</strong> <br />
+                <strong>{item.thong_tin}</strong>
               </td>
               <td className="align-middle">
                 <button
@@ -290,7 +281,7 @@ export default function CanHoDaGui() {
                   Hình ảnh
                 </button>
                 <br />
-                {role !== "Nhân viên" && (
+                {role !== modulePhanQuyen.nhanVien && (
                   <button
                     type="button"
                     onClick={() => duyetYeuCau(item.id)}

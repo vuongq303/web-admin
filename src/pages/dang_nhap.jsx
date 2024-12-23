@@ -2,9 +2,8 @@ import axios from "axios";
 import "./css/css.css";
 import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import url_config from "../config.json";
 import { ToastContainer, toast } from "react-toastify";
-import { phanQuyenNguoiDung } from "../services/utils";
+import { ketNoi, modulePhanQuyen } from "../data/module";
 
 export default function DangNhap() {
   const navigation = useNavigate();
@@ -27,26 +26,23 @@ export default function DangNhap() {
       const {
         status,
         data: { response, type, data, role },
-      } = await axios.post(
-        url_config.url_connect + "/nguoi-dung/dang-nhap",
-        user
-      );
+      } = await axios.post(`${ketNoi.url}/nguoi-dung/dang-nhap`, user);
       if (status == 200) {
         if (type) {
           localStorage.setItem("role", data);
           if (
-            role === phanQuyenNguoiDung[0] ||
-            role === phanQuyenNguoiDung[2]
+            role === modulePhanQuyen.admin ||
+            role === modulePhanQuyen.quanLy
           ) {
             navigation("/nguoi-dung");
             return;
           }
 
-          if (role === phanQuyenNguoiDung[1]) {
+          if (role === modulePhanQuyen.nhanVien) {
             navigation("/can-ho");
             return;
           }
-          if (role === phanQuyenNguoiDung[3]) {
+          if (role === modulePhanQuyen.cskh) {
             navigation("/cham-soc-khach-hang");
             return;
           }
