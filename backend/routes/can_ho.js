@@ -18,11 +18,11 @@ router.get("/", async function (req, res) {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
-    // const resultCount = await executeQuery(
-    //   "SELECT COUNT(*) AS total FROM can_ho"
-    // );
-    // const totalItems = resultCount[0].total;
-    // const totalPages = Math.ceil(totalItems / limit);
+    const resultCount = await executeQuery(
+      "SELECT COUNT(*) AS total FROM can_ho"
+    );
+    const totalItems = resultCount[0].total;
+    const totalPages = Math.ceil(totalItems / limit);
 
     var sql = `SELECT id, danh_dau,
     gia_ban, gia_thue,
@@ -43,9 +43,7 @@ router.get("/", async function (req, res) {
     res.status(200).send({
       response: results,
       role: data.phan_quyen,
-      // currentPage: page,
-      // totalPages,
-      // totalItems,
+      totalPages,
     });
   } catch (error) {
     console.error(error.message);

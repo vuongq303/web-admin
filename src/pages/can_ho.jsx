@@ -17,6 +17,7 @@ import { downloadImages, exportFileExcel } from "./controllers/function";
 export default function CanHo() {
   const [data, setData] = useState([]);
   const [role, setRole] = useState("");
+  const [totalPage, setTotalPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
@@ -53,8 +54,6 @@ export default function CanHo() {
   const trucCanHoRef = useRef(null);
 
   const locGiaCanHoRef = useRef(null);
-  const giaTuRef = useRef(null);
-  const giaDenRef = useRef(null);
   const danhDauCanHoRef = useRef(null);
   const tenDuAnTimKiemRef = useRef(null);
   const tenToaNhaTimKiemRef = useRef(null);
@@ -64,6 +63,9 @@ export default function CanHo() {
   const soPhongNguTimKiemRef = useRef(null);
   const trucCanHoTimKiemRef = useRef(null);
   const uploadFileExcelRef = useRef(null);
+
+  const [giaBanTuState, setGiaBanTuState] = useState("");
+  const [giaBanDenState, setGiaBanDenState] = useState("");
 
   useEffect(() => {
     (async function () {
@@ -88,7 +90,6 @@ export default function CanHo() {
           setDataNoiThat(noi_that);
           setDataTrucCanHo(truc_can_ho);
         }
-        await getData(page, limit);
       } catch (error) {
         console.log(error);
       }
@@ -148,7 +149,7 @@ export default function CanHo() {
     try {
       const {
         status,
-        data: { response, role },
+        data: { response, role, totalPages },
       } = await axios.get(
         `${json_config.url_connect}/can-ho?page=${page}&limit=${limit}`,
         {
@@ -163,6 +164,7 @@ export default function CanHo() {
         setLoading(false);
         setRole(role);
         setData(response);
+        setTotalPage(totalPage);
       }
     } catch (error) {
       console.log(error);
@@ -183,8 +185,8 @@ export default function CanHo() {
       so_phong_ngu: soPhongNguTimKiemRef.current.value,
       truc_can_ho: trucCanHoTimKiemRef.current.value,
       loc_gia: locGiaCanHoRef.current.value,
-      gia_tu: giaTuRef.current.value,
-      gia_den: giaDenRef.current.value,
+      gia_tu: giaBanTuState.replace(/,/g, ""),
+      gia_den: giaBanDenState.replace(/,/g, ""),
     };
 
     const { status, data } = await axios.get(
@@ -201,6 +203,8 @@ export default function CanHo() {
     if (status === 200) {
       setLoading(false);
       setData(data);
+      setPage(1);
+      setTotalPage(0);
     }
   }
 
@@ -214,8 +218,8 @@ export default function CanHo() {
     soPhongNguTimKiemRef.current.value = "";
     trucCanHoTimKiemRef.current.value = "";
     locGiaCanHoRef.current.value = "";
-    giaTuRef.current.value = "";
-    giaDenRef.current.value = "";
+    setGiaBanTuState("");
+    setGiaBanDenState("");
     setDataToaNha([]);
     await getData();
     setLoading(false);
@@ -1202,16 +1206,32 @@ export default function CanHo() {
           ))}
         </select>
         <input
-          ref={giaTuRef}
-          type="number"
+          type="text"
+          value={giaBanTuState}
+          onChange={(e) => {
+            let inputValue = e.target.value.replace(/[^\d]/g, "");
+            if (inputValue) {
+              setGiaBanTuState(Number(inputValue).toLocaleString());
+            } else {
+              setGiaBanTuState("");
+            }
+          }}
           placeholder="Giá từ"
           className="form-control w-auto"
           aria-label="Sizing example input"
           aria-describedby="inputGroup-sizing-default"
         />
         <input
-          ref={giaDenRef}
-          type="number"
+          value={giaBanDenState}
+          onChange={(e) => {
+            let inputValue = e.target.value.replace(/[^\d]/g, "");
+            if (inputValue) {
+              setGiaBanDenState(Number(inputValue).toLocaleString());
+            } else {
+              setGiaBanDenState("");
+            }
+          }}
+          type="text"
           placeholder="Đến giá"
           className="form-control w-auto"
           aria-label="Sizing example input"
@@ -1296,8 +1316,12 @@ export default function CanHo() {
                 <td className="align-middle" style={{ width: "10%" }}>
                   {item.so_dien_thoai ?? "*"}
                 </td>
-                <td className="align-middle">{item.gia_ban}</td>
-                <td className="align-middle">{item.gia_thue}</td>
+                <td className="align-middle">
+                  {item.gia_ban.toLocaleString("en-US")}
+                </td>
+                <td className="align-middle">
+                  {item.gia_thue.toLocaleString("en-US")}
+                </td>
                 <td className="w-25 text-start align-middle">
                   - {item.ten_du_an} - {item.dien_tich}m² - {item.so_phong_ngu}
                   PN
@@ -1353,7 +1377,7 @@ export default function CanHo() {
           })}
         </tbody>
       </table>
-      <div class="mb-3">
+      <div className="mb-3">
         <button
           className="btn btn-primary mx-1"
           style={{ width: 100 }}
@@ -1363,6 +1387,7 @@ export default function CanHo() {
           Previous
         </button>
         <button
+          disabled={page === totalPage + 1}
           style={{ width: 100 }}
           className="btn btn-primary mx-1"
           onClick={handleNextPage}

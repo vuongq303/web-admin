@@ -159,6 +159,7 @@ router.post("/dang-nhap", async function (req, res) {
         response: "Đăng nhập thành công",
         type: true,
         data: jwt.sign(JSON.stringify(result[0]), env.JWT_KEY),
+        role: result[0].phan_quyen,
       });
     }
 

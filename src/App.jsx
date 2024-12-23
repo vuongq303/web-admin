@@ -16,7 +16,6 @@ import TrangChu from "./pages/trang_chu";
 import KhachHangNguon from "./pages/khach_hang_nguon";
 import CanHoDaGui from "./pages/can_ho_da_gui";
 import CanHoDaDuyet from "./pages/can_ho_da_duyet";
-import GioiThieu from "./pages/gioi_thieu";
 
 function App() {
   return (
@@ -30,7 +29,6 @@ function App() {
             element={
               <NavigationPage>
                 <Routes>
-                  <Route path="/gioi-thieu" element={<GioiThieu />} />
                   <Route path="/can-ho" element={<CanHo />} />
                   <Route path="/du-an" element={<DuAn />} />
                   <Route path="/huong-can-ho" element={<HuongCanHo />} />
