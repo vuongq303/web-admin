@@ -284,7 +284,7 @@ export default function CanHoDaGui() {
                   onClick={() => showImage(item)}
                   type="button"
                   className={`btn w-75 ${
-                    item.hinh_anh ? "btn-primary" : "btn-secondary"
+                    item.hinh_anh ? "btn-warning" : "btn-secondary"
                   }`}
                 >
                   Hình ảnh

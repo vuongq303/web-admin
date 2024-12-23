@@ -511,7 +511,7 @@ export default function CanHo() {
               <div>
                 <button
                   type="button"
-                  className="btn btn-primary"
+                  className="btn btn-success"
                   onClick={() => setShowModal(true)}
                 >
                   Thêm mới
@@ -1375,7 +1375,7 @@ export default function CanHo() {
                         setDataUpdate(item);
                         setShowModalUpdate(true);
                       }}
-                      className="btn btn-danger my-2 w-75"
+                      className="btn btn-primary my-2 w-75"
                     >
                       Chi tiết
                     </button>
@@ -1385,7 +1385,7 @@ export default function CanHo() {
                     onClick={() => showImage(item)}
                     type="button"
                     className={`btn w-75 ${
-                      item.hinh_anh ? "btn-primary" : "btn-secondary"
+                      item.hinh_anh ? "btn-warning" : "btn-secondary"
                     }`}
                   >
                     Hình ảnh
@@ -1394,7 +1394,7 @@ export default function CanHo() {
                   <button
                     onClick={() => guiYeuCau(item.id)}
                     type="button"
-                    className="btn w-75 btn-success my-2"
+                    className="btn w-75 btn-info my-2"
                   >
                     Yêu cầu
                   </button>
