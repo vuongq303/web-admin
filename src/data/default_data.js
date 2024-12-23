@@ -24,7 +24,7 @@ export const dataCanHoDefault = {
 };
 
 export const columnMapping = {
-  id: "Mã",
+  id: "Mã số",
   ten_du_an: "Dự án",
   ten_toa_nha: "Tên tòa nhà",
   ma_can_ho: "Mã căn hộ",
@@ -46,6 +46,23 @@ export const columnMapping = {
   danh_dau: "Đánh dấu",
 };
 
+export const excelImportFormat = [
+  "ten_du_an",
+  "ten_toa_nha",
+  "ma_can_ho",
+  "truc_can_ho",
+  "chu_can_ho",
+  "so_dien_thoai",
+  "loai_can_ho",
+  "dien_tich",
+  "so_phong_ngu",
+  "so_phong_tam",
+  "gia_ban",
+  "gia_thue",
+  "noi_that",
+  "huong_can_ho",
+  "ghi_chu",
+];
 
 export const excelExportFormat = [
   "id",

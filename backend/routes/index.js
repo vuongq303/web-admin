@@ -3,8 +3,8 @@ const env = require("../env/get_env");
 var router = express.Router();
 const jwt = require("jsonwebtoken");
 
-router.get("/", function (_, res) {
-  res.status(200).send("Index");
+router.get("/", async function (_, res) {
+  res.status(200).send(``);
 });
 
 router.get("/phan-quyen", function (req, res) {
@@ -12,11 +12,10 @@ router.get("/phan-quyen", function (req, res) {
     const jwt_token = req.headers["authorization"];
     const data = jwt.verify(jwt_token, env.JWT_KEY);
     res.status(200).json(data);
-
   } catch (error) {
     console.error(error.message);
     res.status(500).json({});
   }
-})
+});
 
 module.exports = router;

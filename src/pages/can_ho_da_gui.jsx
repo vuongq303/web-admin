@@ -252,8 +252,10 @@ export default function CanHoDaGui() {
                   {item.truc_can_ho}
                 </div>
               </td>
-              <td className="align-middle">{item.chu_can_ho ?? "*"}</td>
-              <td className="align-middle">{item.so_dien_thoai ?? "*"}</td>
+              <td className="align-middle" style={{ width: "10%" }}>{item.chu_can_ho ?? "*"}</td>
+              <td className="align-middle" style={{ width: "10%" }}>
+                {item.so_dien_thoai ?? "*"}
+              </td>
               <td className="align-middle">{item.gia_ban}</td>
               <td className="align-middle">{item.gia_thue}</td>
               <td className="w-25 text-start align-middle">

@@ -17,13 +17,15 @@ import { downloadImages, exportFileExcel } from "./controllers/function";
 export default function CanHo() {
   const [data, setData] = useState([]);
   const [role, setRole] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [showModalHinhAnh, setShowModalHinhAnh] = useState(false);
   const [dataUpdate, setDataUpdate] = useState(dataCanHoDefault);
   const [showImageData, setShowImageData] = useState([]);
   const [dataToaNhaDuAn, setDataToaNhaDuAn] = useState([]);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
 
   const [dataDuAn, setDataDuAn] = useState([]);
   const [dataHuongCanHo, setDataHuongCanHo] = useState([]);
@@ -65,6 +67,7 @@ export default function CanHo() {
 
   useEffect(() => {
     (async function () {
+      setLoading(true);
       try {
         const { status, data: response } = await axios.get(
           `${json_config.url_connect}/thong-tin-du-an`
@@ -85,8 +88,7 @@ export default function CanHo() {
           setDataNoiThat(noi_that);
           setDataTrucCanHo(truc_can_ho);
         }
-        await getData();
-        setLoading(false);
+        await getData(page, limit);
       } catch (error) {
         console.log(error);
       }
@@ -138,19 +140,27 @@ export default function CanHo() {
     }
   }
 
-  async function getData() {
+  useEffect(() => {
+    getData(page, limit);
+  }, [page, limit]);
+
+  async function getData(page, limit) {
     try {
       const {
         status,
         data: { response, role },
-      } = await axios.get(`${json_config.url_connect}/can-ho`, {
-        headers: {
-          Authorization: getRoleNguoiDung(),
-          "Content-Type": "application/json",
-        },
-      });
+      } = await axios.get(
+        `${json_config.url_connect}/can-ho?page=${page}&limit=${limit}`,
+        {
+          headers: {
+            Authorization: getRoleNguoiDung(),
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (status === 200) {
+        setLoading(false);
         setRole(role);
         setData(response);
       }
@@ -158,6 +168,9 @@ export default function CanHo() {
       console.log(error);
     }
   }
+
+  const handleNextPage = () => setPage((prevPage) => prevPage + 1);
+  const handlePrevPage = () => setPage((prevPage) => Math.max(prevPage - 1, 1));
 
   async function timKiem() {
     setLoading(true);
@@ -258,7 +271,7 @@ export default function CanHo() {
 
     const listImgPath = showImageData[index].split("/");
     const imgPath = listImgPath[listImgPath.length - 1];
-    
+
     try {
       const {
         status,
@@ -1068,10 +1081,7 @@ export default function CanHo() {
               <label htmlFor="fileInput">Thêm ảnh mới</label>
             </div>
             <div className="form-floating image-container">
-              <PreviewImage
-                props={showImageData}
-                onRemoveImage={xoaAnhCanHo}
-              />
+              <PreviewImage props={showImageData} onRemoveImage={xoaAnhCanHo} />
             </div>
           </Modal.Body>
           <Modal.Footer>
@@ -1280,8 +1290,12 @@ export default function CanHo() {
                     {item.truc_can_ho}
                   </div>
                 </td>
-                <td className="align-middle">{item.chu_can_ho ?? "*"}</td>
-                <td className="align-middle">{item.so_dien_thoai ?? "*"}</td>
+                <td className="align-middle" style={{ width: "10%" }}>
+                  {item.chu_can_ho ?? "*"}
+                </td>
+                <td className="align-middle" style={{ width: "10%" }}>
+                  {item.so_dien_thoai ?? "*"}
+                </td>
                 <td className="align-middle">{item.gia_ban}</td>
                 <td className="align-middle">{item.gia_thue}</td>
                 <td className="w-25 text-start align-middle">
@@ -1339,6 +1353,23 @@ export default function CanHo() {
           })}
         </tbody>
       </table>
+      <div class="mb-3">
+        <button
+          className="btn btn-primary mx-1"
+          style={{ width: 100 }}
+          onClick={handlePrevPage}
+          disabled={page === 1}
+        >
+          Previous
+        </button>
+        <button
+          style={{ width: 100 }}
+          className="btn btn-primary mx-1"
+          onClick={handleNextPage}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }

@@ -151,7 +151,7 @@ router.post("/dang-nhap", async function (req, res) {
   try {
     const { username, password } = req.body;
     const sql =
-      "select tai_khoan, ho_ten, phan_quyen from nguoi_dung where tai_khoan = ? and mat_khau = ?";
+      "select tai_khoan, ho_ten, phan_quyen from nguoi_dung where tai_khoan = ? and mat_khau = ? and trang_thai = 'Đang làm việc'";
     const result = await executeQuery(sql, [username, password]);
 
     if (result.length > 0) {

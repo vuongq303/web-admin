@@ -14,6 +14,16 @@ router.get("/", async function (req, res) {
     const jwt_token = req.headers["authorization"];
     const data = jwt.verify(jwt_token, env.JWT_KEY);
 
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    // const resultCount = await executeQuery(
+    //   "SELECT COUNT(*) AS total FROM can_ho"
+    // );
+    // const totalItems = resultCount[0].total;
+    // const totalPages = Math.ceil(totalItems / limit);
+
     var sql = `SELECT id, danh_dau,
     gia_ban, gia_thue,
     trang_thai, ten_du_an,
@@ -23,14 +33,20 @@ router.get("/", async function (req, res) {
     ghi_chu, nguoi_cap_nhat,
     hinh_anh, ten_toa_nha,
     truc_can_ho FROM can_ho
-    WHERE trang_thai = '0'`;
+    WHERE trang_thai = '0' LIMIT ? OFFSET ?`;
 
     if (data.phan_quyen === "Admin") {
-      sql = `SELECT * FROM can_ho ORDER BY trang_thai ASC`;
+      sql = `SELECT * FROM can_ho ORDER BY trang_thai ASC LIMIT ? OFFSET ?`;
     }
 
-    const result = await executeQuery(sql);
-    res.status(200).send({ response: result, role: data.phan_quyen });
+    const results = await executeQuery(sql, [limit, offset]);
+    res.status(200).send({
+      response: results,
+      role: data.phan_quyen,
+      // currentPage: page,
+      // totalPages,
+      // totalItems,
+    });
   } catch (error) {
     console.error(error.message);
     res.status(500).send({ response: [], type: false });
@@ -273,6 +289,43 @@ router.post("/cap-nhat-trang-thai", async function (req, res) {
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ response: "Error", type: false });
+  }
+});
+
+router.post("/upload-excel", async (req, res) => {
+  try {
+    const listData = req.body;
+    const result = listData.map((item) => [
+      item.ten_du_an || "",
+      item.ten_toa_nha || "",
+      item.ma_can_ho || "",
+      item.truc_can_ho || "",
+      item.chu_can_ho || "",
+      item.so_dien_thoai || "",
+      item.loai_can_ho || "",
+      item.dien_tich || "",
+      item.so_phong_ngu || 0,
+      item.so_phong_tam || 0,
+      item.gia_ban || 0,
+      item.gia_thue || 0,
+      item.noi_that || "",
+      item.huong_can_ho || "",
+      item.ghi_chu || "",
+      0,
+    ]);
+
+    await executeQuery(
+      `INSERT INTO can_ho (ten_du_an, ten_toa_nha,
+      ma_can_ho, truc_can_ho, chu_can_ho,
+      so_dien_thoai, loai_can_ho, dien_tich,
+      so_phong_ngu, so_phong_tam, gia_ban, gia_thue,
+      noi_that, huong_can_ho, ghi_chu, trang_thai) VALUES ?`,
+      [result]
+    );
+    res.status(200).json("Tải dữ liệu lên thành công");
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json("Error");
   }
 });
 

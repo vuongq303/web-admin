@@ -6,7 +6,7 @@ var user = process.env.USER || "";
 var database_name = process.env.DATABASE || "";
 var database_port = process.env.DATABASE_PORT || "";
 
-var connect = mysql.createConnection({
+var connect = mysql.createPool({
   host: host,
   user: user,
   password: "",

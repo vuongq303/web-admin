@@ -33,7 +33,7 @@ export default function DangNhap() {
       if (status == 200) {
         if (type) {
           localStorage.setItem("role", data);
-          navigation("/can-ho");
+          navigation("/gioi-thieu");
           return;
         }
         toast.error(response);
