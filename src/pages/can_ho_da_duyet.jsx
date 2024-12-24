@@ -142,7 +142,7 @@ export default function CanHoDaDuyet() {
           </Button>
         </Modal.Footer>
       </Modal>
-      <table className="table table-light table-sm">
+      <table className="table table-striped table-bordered">
         <thead>
           <tr>
             <th scope="col">STT</th>

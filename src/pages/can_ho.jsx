@@ -2,12 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Button, Modal, Form } from "react-bootstrap";
 import * as xlsx from "xlsx";
-import {
-  danhDauCanHo,
-  getRoleNguoiDung,
-  locGiaCanHo,
-  phanQuyenNguoiDung,
-} from "../services/utils";
+import { danhDauCanHo, getRoleNguoiDung, locGiaCanHo } from "../services/utils";
 import PreviewImage from "./components/preview_image";
 import { toast, ToastContainer } from "react-toastify";
 import { dataCanHoDefault } from "../data/default_data";
@@ -253,7 +248,7 @@ export default function CanHo() {
   }
 
   const xoaAnhCanHo = async (index) => {
-    if (role !== phanQuyenNguoiDung[0] && role !== phanQuyenNguoiDung[2]) {
+    if (role !== modulePhanQuyen.admin && role !== modulePhanQuyen.quanLy) {
       toast.error("Bạn không thể xóa ảnh");
       return;
     }

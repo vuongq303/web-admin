@@ -184,7 +184,7 @@ export default function LoaiCanHo() {
         </Modal>
       </div>
       {/*  */}
-      <table className="table">
+      <table className="table table-striped table-bordered">
         <thead>
           <tr>
             <th scope="col">STT</th>
