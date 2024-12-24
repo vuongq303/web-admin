@@ -35,7 +35,7 @@ router.get("/", async function (req, res) {
     truc_can_ho FROM can_ho
     WHERE trang_thai = '0' LIMIT ? OFFSET ?`;
 
-    if (data.phan_quyen === "Admin") {
+    if (data.phan_quyen === env.admin) {
       sql = `SELECT * FROM can_ho ORDER BY trang_thai ASC LIMIT ? OFFSET ?`;
     }
 
