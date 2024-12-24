@@ -433,7 +433,7 @@ export default function KhachHang() {
       {/*  */}
       <table className="table table-striped table-bordered">
         <thead>
-          <tr>
+          <tr className="table-primary">
             <th scope="col">STT</th>
             <th scope="col">Mã căn hộ</th>
             <th scope="col">Họ tên khách hàng</th>

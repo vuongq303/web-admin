@@ -38,7 +38,7 @@ export default function DangNhap() {
             return;
           }
 
-          if (role === modulePhanQuyen.nhanVien) {
+          if (role === modulePhanQuyen.sale) {
             navigation("/can-ho");
             return;
           }

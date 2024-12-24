@@ -180,7 +180,7 @@ export default function CanHoDaGui() {
           ></Button>
         </Modal.Header>
         <Modal.Body>
-          <div className="form-floating mb-3">
+          <div className="form-floating mb-3" style={{ zIndex: 1 }}>
             <input
               aria-label="123"
               className="form-control"
@@ -205,7 +205,7 @@ export default function CanHoDaGui() {
           </Button>
           <Button
             variant="primary"
-            onClick={async () => downloadImages(showImageData)}
+            onClick={async () => downloadImages(showImageData, dataUpdate)}
           >
             Tải ảnh xuống
           </Button>
@@ -213,7 +213,7 @@ export default function CanHoDaGui() {
       </Modal>
       <table className="table table-striped table-bordered">
         <thead>
-          <tr>
+          <tr className="table-primary" >
             <th scope="col">STT</th>
             <th scope="col">Căn hộ</th>
             <th scope="col">Chủ căn hộ</th>
@@ -281,7 +281,7 @@ export default function CanHoDaGui() {
                   Hình ảnh
                 </button>
                 <br />
-                {role !== modulePhanQuyen.nhanVien && (
+                {role !== modulePhanQuyen.sale && (
                   <button
                     type="button"
                     onClick={() => duyetYeuCau(item.id)}

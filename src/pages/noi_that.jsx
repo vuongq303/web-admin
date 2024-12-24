@@ -185,7 +185,7 @@ export default function DuAn() {
       </div>
       <table className="table table-striped table-bordered">
         <thead>
-          <tr>
+          <tr className="table-primary">
             <th scope="col">STT</th>
             <th scope="col">Nội thất</th>
             <th scope="col">Hành động</th>

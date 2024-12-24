@@ -4,7 +4,7 @@ export const gioiTinhNguoiDung = ["Nam", "Nữ"];
 
 export const loaiGiaoDichKhachHang = ["Bán", "Thuê", "Bán và Thuê"];
 
-export const dataPhanQuyen = ["Quản lý", "Nhân viên", "CSKH"];
+export const dataPhanQuyen = ["Quản lý", "Sale", "CSKH"];
 
 export const trangThaiDuAn = ["Đang giao dịch", "Ngừng giao dịch"];
 

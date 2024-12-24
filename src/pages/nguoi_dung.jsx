@@ -568,7 +568,7 @@ export default function NguoiDung() {
       </div>
       <table className="table table-striped table-bordered">
         <thead>
-          <tr>
+          <tr className="table-primary">
             <th scope="col">STT</th>
             <th scope="col">Họ tên</th>
             <th scope="col">Tài khoản</th>

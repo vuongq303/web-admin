@@ -143,7 +143,6 @@ export default function KhachHangNguon() {
         >
           Thêm mới
         </button>
-        {/*  */}
         <Modal show={showModal} scrollable backdrop="static" keyboard={false}>
           <Modal.Header>
             <Modal.Title>Thêm khách hàng mới</Modal.Title>
@@ -222,7 +221,6 @@ export default function KhachHangNguon() {
             </Button>
           </Modal.Footer>
         </Modal>
-        {/*  */}
         <Modal
           show={showModalUpdate}
           scrollable
@@ -318,10 +316,9 @@ export default function KhachHangNguon() {
           </Modal.Footer>
         </Modal>
       </div>
-      {/*  */}
       <table className="table table-striped table-bordered">
         <thead>
-          <tr>
+          <tr className="table-primary">
             <th scope="col">STT</th>
             <th scope="col">Họ tên</th>
             <th scope="col">Số điện thoại</th>

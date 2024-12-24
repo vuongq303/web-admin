@@ -16,7 +16,7 @@ export default function PreviewImage({ props, onRemoveImage }) {
   };
 
   return (
-    <div className="image-container" style={{ zIndex: 2 }}>
+    <div className="image-container" style={{ zIndex: 1000 }}>
       {props.map((src, index) => (
         <div
           key={index}

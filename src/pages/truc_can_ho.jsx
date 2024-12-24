@@ -186,7 +186,7 @@ export default function () {
       </div>
       <table className="table table-striped table-bordered">
         <thead>
-          <tr>
+          <tr className="table-primary">
             <th scope="col">STT</th>
             <th scope="col">Trục căn hộ</th>
             <th scope="col">Hành động</th>

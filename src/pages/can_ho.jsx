@@ -5,7 +5,7 @@ import * as xlsx from "xlsx";
 import { danhDauCanHo, getRoleNguoiDung, locGiaCanHo } from "../services/utils";
 import PreviewImage from "./components/preview_image";
 import { toast, ToastContainer } from "react-toastify";
-import { dataCanHoDefault } from "../data/default_data";
+import { dataCanHoDefault, excelImportFormat } from "../data/default_data";
 import { downloadImages, exportFileExcel } from "./controllers/function";
 import { ketNoi, modulePhanQuyen } from "../data/module";
 
@@ -424,17 +424,49 @@ export default function CanHo() {
       }
 
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         const data = event.target.result;
         const workbook = xlsx.read(data, { type: "array" });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const json = xlsx.utils.sheet_to_json(worksheet);
-        console.log(json);
+        const json = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+
+        const headers = json[0];
+        if (!headers) {
+          toast.error("The uploaded Excel file is empty!");
+          return;
+        }
+
+        const incorrectColumns = headers.filter(
+          (header) => !excelImportFormat.includes(header)
+        );
+
+        if (incorrectColumns.length > 0) {
+          toast(`Kiểm tra lại các cột: ${incorrectColumns.join(", ")}`);
+          return;
+        }
+
+        const dataRows = xlsx.utils.sheet_to_json(worksheet, { raw: false });
+        setLoading(true);
+        const response = await axios.post(
+          `${ketNoi.url}/can-ho/upload-excel`,
+          dataRows
+        );
+
+        if (response.status === 200) {
+          setLoading(false);
+          toast.success(response.data);
+          setData((pre) => [...pre, ...dataRows]);
+        }
+      };
+
+      reader.onloadend = () => {
+        uploadFileExcelRef.current.value = "";
       };
 
       reader.readAsArrayBuffer(fileExcel);
     } catch (error) {
+      setLoading(false);
       console.error("Error while uploading Excel file:", error);
     }
   };
@@ -495,12 +527,13 @@ export default function CanHo() {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={200}
+        autoClose={500}
         hideProgressBar={false}
       />
       <div className="d-flex justify-content-start m-2">
         <div className="d-flex justify-content-between align-items-center w-100">
-          {role === modulePhanQuyen.admin && (
+          {(role === modulePhanQuyen.admin ||
+            role === modulePhanQuyen.quanLy) && (
             <div className="d-flex align-items-center">
               <button
                 type="button"
@@ -1062,7 +1095,7 @@ export default function CanHo() {
             ></Button>
           </Modal.Header>
           <Modal.Body>
-            <div className="form-floating mb-3">
+            <div className="form-floating mb-3" style={{ zIndex: 1 }}>
               <input
                 aria-label="123"
                 className="form-control"
@@ -1238,7 +1271,7 @@ export default function CanHo() {
       </div>
       <table className="table table-striped table-bordered">
         <thead>
-          <tr>
+          <tr className="table-primary">
             <th scope="col">
               <input
                 className="form-check-input"
@@ -1323,16 +1356,18 @@ export default function CanHo() {
                   <br />- <strong>{item.nguoi_cap_nhat}</strong>
                 </td>
                 <td className="align-middle">
-                  {role === modulePhanQuyen.admin && (
+                  {(role === modulePhanQuyen.admin ||
+                    role === modulePhanQuyen.quanLy) && (
                     <Form.Check
                       style={{ transform: "scale(1.3)" }}
-                      checked={item.trang_thai == 0}
+                      checked={item.trang_thai === 0}
                       onChange={async (e) => await capNhatTrangThai(item.id, e)}
                       type="switch"
                       id="custom-switch"
                     />
                   )}
-                  {role === modulePhanQuyen.admin && (
+                  {(role === modulePhanQuyen.admin ||
+                    role === modulePhanQuyen.quanLy) && (
                     <button
                       type="button"
                       onClick={() => {

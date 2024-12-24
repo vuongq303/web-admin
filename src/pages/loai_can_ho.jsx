@@ -186,7 +186,7 @@ export default function LoaiCanHo() {
       {/*  */}
       <table className="table table-striped table-bordered">
         <thead>
-          <tr>
+          <tr className="table-primary">
             <th scope="col">STT</th>
             <th scope="col">Loại căn hộ</th>
             <th scope="col">Hành động</th>

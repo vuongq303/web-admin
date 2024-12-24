@@ -10,9 +10,9 @@ export const moduleTrangThaiDuAn = {
 
 export const modulePhanQuyen = {
   admin: "Admin",
-  nhanVien: "Nhân viên",
   quanLy: "Quản lý",
   cskh: "CSKH",
+  sale: "Sale"
 };
 
 export const moduleDanhDau = {

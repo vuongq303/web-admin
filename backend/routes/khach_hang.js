@@ -3,6 +3,7 @@ var router = express.Router();
 const env = require("../env/get_env");
 const jwt = require("jsonwebtoken");
 const executeQuery = require("../sql/promise");
+const config = require("../config/config");
 
 router.get("/", async function (req, res) {
   try {
@@ -10,9 +11,9 @@ router.get("/", async function (req, res) {
     const data = jwt.verify(jwt_token, env.JWT_KEY);
 
     if (
-      data.phan_quyen !== env.admin &&
-      data.phan_quyen !== env.quan_ly &&
-      data.phan_quyen !== env.cskh
+      data.phan_quyen !== config.admin &&
+      data.phan_quyen !== config.quanLy &&
+      data.phan_quyen !== config.cskh
     ) {
       return res.status(401).send([]);
     }

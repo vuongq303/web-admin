@@ -7,6 +7,7 @@ const executeQuery = require("../sql/promise");
 const moment = require("moment");
 const { join } = require("path");
 const fs = require("fs");
+const config = require("../config/config");
 
 router.get("/danh-sach-gui-yeu-cau", async function (req, res) {
   try {
@@ -24,7 +25,7 @@ router.get("/danh-sach-gui-yeu-cau", async function (req, res) {
     ON yeu_cau.can_ho = can_ho.id 
     WHERE yeu_cau.trang_thai = '0' AND yeu_cau.nguoi_gui = '${data.tai_khoan}'`;
 
-    if (data.phan_quyen === env.admin || data.phan_quyen === env.quan_ly) {
+    if (data.phan_quyen === config.admin || data.phan_quyen === config.quanLy) {
       sql = `SELECT can_ho.danh_dau, can_ho.chu_can_ho,
       can_ho.so_dien_thoai, can_ho.gia_ban, can_ho.gia_thue,
       can_ho.ten_du_an, can_ho.dien_tich, can_ho.so_phong_ngu,
@@ -58,7 +59,7 @@ router.get("/danh-sach-duyet-yeu-cau", async function (req, res) {
     JOIN yeu_cau ON yeu_cau.can_ho = can_ho.id 
     WHERE yeu_cau.trang_thai = '1' AND yeu_cau.nguoi_gui = '${data.tai_khoan}'`;
 
-    if (data.phan_quyen === env.admin || data.phan_quyen === env.quan_ly) {
+    if (data.phan_quyen === config.admin || data.phan_quyen === config.quanLy) {
       sql = `SELECT can_ho.danh_dau, can_ho.chu_can_ho,
       can_ho.so_dien_thoai, can_ho.gia_ban, can_ho.gia_thue,
       can_ho.ten_du_an, can_ho.dien_tich, can_ho.so_phong_ngu,
@@ -81,7 +82,7 @@ router.get("/danh-sach-duyet-yeu-cau", async function (req, res) {
 router.post("/gui-yeu-cau", async function (req, res) {
   try {
     const { can_ho } = req.body;
-    const jsonPath = join(__dirname, "..", "config", "yeu_cau.json");
+    const jsonPath = join(__dirname, "..", "temp", "yeu_cau.json");
     let now = moment();
     const start = now.format("HH:mm DD-MM-YYYY");
     const end = now.add(60, "minute").format("HH:mm DD-MM-YYYY");

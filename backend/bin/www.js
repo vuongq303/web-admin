@@ -18,7 +18,7 @@ mysql.getConnection(function (err, connection) {
 });
 
 async function performTask() {
-  const jsonPath = join(__dirname, "..", "config", "yeu_cau.json");
+  const jsonPath = join(__dirname, "..", "temp", "yeu_cau.json");
   const now = moment();
 
   if (!fs.existsSync(jsonPath)) {
@@ -49,7 +49,7 @@ async function performTask() {
   fs.writeFileSync(jsonPath, JSON.stringify(yeuCauConLai, null, 2));
 }
 
-schedule.scheduleJob("*/10 * * * *", performTask);
+schedule.scheduleJob("*/60 * * * *", performTask);
 
 var server = http.createServer(app);
 

@@ -6,6 +6,7 @@ const momnet = require("moment");
 const env = require("../env/get_env");
 const upload = require("../middleware/upload_can_ho");
 const executeQuery = require("../sql/promise");
+const config = require("../config/config");
 const now = momnet();
 var router = express.Router();
 
@@ -35,7 +36,7 @@ router.get("/", async function (req, res) {
     truc_can_ho FROM can_ho
     WHERE trang_thai = '0' LIMIT ? OFFSET ?`;
 
-    if (data.phan_quyen === env.admin) {
+    if (data.phan_quyen === config.admin || data.phan_quyen === config.quanLy) {
       sql = `SELECT * FROM can_ho ORDER BY trang_thai ASC LIMIT ? OFFSET ?`;
     }
 

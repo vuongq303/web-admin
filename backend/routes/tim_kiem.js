@@ -3,6 +3,7 @@ var router = express.Router();
 const jwt = require("jsonwebtoken");
 const env = require("../env/get_env");
 const executeQuery = require("../sql/promise");
+const config = require("../config/config");
 
 router.get("/", async function (req, res) {
   try {
@@ -13,7 +14,7 @@ router.get("/", async function (req, res) {
     const data = jwt.verify(jwt_token, env.JWT_KEY);
     var sql =
       "SELECT id, danh_dau, gia_ban, gia_thue, trang_thai, ten_du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho FROM can_ho";
-    if (data.phan_quyen === env.admin || data.phan_quyen === env.quan_ly) {
+    if (data.phan_quyen === config.admin || data.phan_quyen === config.quanLy) {
       sql = `SELECT * FROM can_ho`;
     }
 

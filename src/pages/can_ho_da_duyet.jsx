@@ -111,7 +111,7 @@ export default function CanHoDaDuyet() {
           ></Button>
         </Modal.Header>
         <Modal.Body>
-          <div className="form-floating mb-3">
+          <div className="form-floating mb-3" style={{ zIndex: 1 }}>
             <input
               aria-label="123"
               className="form-control"
@@ -136,7 +136,7 @@ export default function CanHoDaDuyet() {
           </Button>
           <Button
             variant="primary"
-            onClick={async () => downloadImages(showImageData)}
+            onClick={async () => downloadImages(showImageData, dataUpdate)}
           >
             Tải ảnh xuống
           </Button>
@@ -144,7 +144,7 @@ export default function CanHoDaDuyet() {
       </Modal>
       <table className="table table-striped table-bordered">
         <thead>
-          <tr>
+          <tr className="table-primary">
             <th scope="col">STT</th>
             <th scope="col">Căn hộ</th>
             <th scope="col">Chủ căn hộ</th>

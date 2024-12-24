@@ -1,17 +1,17 @@
 var express = require("express");
 var router = express.Router();
-const ip = require("../config/ipconfig.json");
 const jwt = require("jsonwebtoken");
 const upload = require("../middleware/upload_nguoi_dung");
 const executeQuery = require("../sql/promise");
 const env = require("../env/get_env");
+const config = require("../config/config");
 
 router.get("/", async function (req, res) {
   try {
     const jwt_token = req.headers["authorization"];
     const data = jwt.verify(jwt_token, env.JWT_KEY);
 
-    if (data.phan_quyen !== env.admin && data.phan_quyen !== env.quan_ly) {
+    if (data.phan_quyen !== config.admin && data.phan_quyen !== config.quanLy) {
       return res.status(401).send([]);
     }
 
@@ -58,7 +58,7 @@ router.post(
         });
       }
 
-      const hinh_anh = `http://${ip.ip}:8080/nguoi-dung/${tai_khoan}.png`;
+      const hinh_anh = `http://${config.ip}:8080/nguoi-dung/${tai_khoan}.png`;
 
       const sql = `
     INSERT INTO nguoi_dung 
@@ -108,7 +108,7 @@ router.post(
         trang_thai,
       } = req.body;
 
-      const hinh_anh = `http://${ip.ip}:8080/nguoi-dung/${tai_khoan}.png`;
+      const hinh_anh = `http://${config.ip}:8080/nguoi-dung/${tai_khoan}.png`;
 
       const sql = `
       UPDATE nguoi_dung SET ho_ten =? ,

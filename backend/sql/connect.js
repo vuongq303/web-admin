@@ -1,17 +1,13 @@
 var mysql = require("mysql");
 require("dotenv").config();
-
-var host = process.env.HOSTNAME || "";
-var user = process.env.USER || "";
-var database_name = process.env.DATABASE || "";
-var database_port = process.env.DATABASE_PORT || "";
+const env = require("../env/get_env");
 
 var connect = mysql.createPool({
-  host: host,
-  user: user,
-  password: "",
-  port: database_port,
-  database: database_name,
+  host: env.HOSTNAME,
+  user: env.DATABASE_USER,
+  password: env.DATABASE_PASSWORD,
+  port: env.DATABASE_PORT,
+  database: env.DATABASE,
 });
 
 module.exports = connect;

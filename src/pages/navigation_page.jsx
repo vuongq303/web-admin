@@ -15,7 +15,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { getRoleNguoiDung, phanQuyenNguoiDung } from "../services/utils";
+import { getRoleNguoiDung } from "../services/utils";
 import { ketNoi, modulePhanQuyen } from "../data/module";
 
 export default function NavigationPage({ children }) {
@@ -172,7 +172,7 @@ function SizeBar() {
 
         {(role === modulePhanQuyen.admin ||
           role === modulePhanQuyen.quanLy ||
-          role === modulePhanQuyen.nhanVien) && (
+          role === modulePhanQuyen.sale) && (
           <SubMenu
             icon={<FontAwesomeIcon icon={faBuilding} />}
             label="Sale"

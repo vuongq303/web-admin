@@ -218,10 +218,9 @@ export default function DuAn() {
           </Modal.Footer>
         </Modal>
       </div>
-      {/*  */}
       <table className="table table-striped table-bordered">
         <thead>
-          <tr>
+          <tr className="table-primary">
             <th scope="col">STT</th>
             <th scope="col">Tên tòa nhà</th>
             <th scope="col">Tên dự án</th>
