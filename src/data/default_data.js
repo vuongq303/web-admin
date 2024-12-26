@@ -47,21 +47,21 @@ export const columnMapping = {
 };
 
 export const excelImportFormat = [
-  "ten_du_an",
-  "ten_toa_nha",
-  "ma_can_ho",
-  "truc_can_ho",
-  "chu_can_ho",
-  "so_dien_thoai",
-  "loai_can_ho",
-  "dien_tich",
-  "so_phong_ngu",
-  "so_phong_tam",
-  "gia_ban",
-  "gia_thue",
-  "noi_that",
-  "huong_can_ho",
-  "ghi_chu",
+  { ten_du_an: "Dự án" },
+  { ten_toa_nha: "Tên tòa nhà" },
+  { ma_can_ho: "Số tầng" },
+  { truc_can_ho: "Trục căn hộ" },
+  { chu_can_ho: "Chủ căn hộ" },
+  { so_dien_thoai: "Số điện thoại" },
+  { loai_can_ho: "Loại căn hộ" },
+  { dien_tich: "Diện tích" },
+  { so_phong_ngu: "Số phòng ngủ" },
+  { so_phong_tam: "Số phòng tắm" },
+  { gia_ban: "Giá bán" },
+  { gia_thue: "Giá thuê" },
+  { noi_that: "Nội thất" },
+  { huong_can_ho: "Hướng căn hộ" },
+  { ghi_chu: "Ghi chú" },
 ];
 
 export const excelExportFormat = [

@@ -1,10 +1,10 @@
 var express = require("express");
 var router = express.Router();
 const jwt = require("jsonwebtoken");
-const upload = require("../middleware/upload_nguoi_dung");
 const executeQuery = require("../sql/promise");
 const env = require("../env/get_env");
 const config = require("../config/config");
+const upload = require("../middleware/upload_nguoi_dung");
 
 router.get("/", async function (req, res) {
   try {
@@ -58,7 +58,7 @@ router.post(
         });
       }
 
-      const hinh_anh = `http://${config.ip}:8080/nguoi-dung/${tai_khoan}.png`;
+      const hinh_anh = `${config.url}/nguoi-dung/${tai_khoan}.png`;
 
       const sql = `
     INSERT INTO nguoi_dung 
@@ -90,6 +90,7 @@ router.post(
   }
 );
 
+
 router.post(
   "/cap-nhat-nguoi-dung",
   upload.single("hinh_anh"),
@@ -108,8 +109,8 @@ router.post(
         trang_thai,
       } = req.body;
 
-      const hinh_anh = `http://${config.ip}:8080/nguoi-dung/${tai_khoan}.png`;
-
+      const hinh_anh = `${config.url}/nguoi-dung/${tai_khoan}.png`;
+      
       const sql = `
       UPDATE nguoi_dung SET ho_ten =? ,
       ngay_bat_dau = ?, gioi_tinh = ?,

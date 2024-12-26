@@ -10,6 +10,8 @@ router.get("/", async function (req, res) {
     var value = [];
     var condition = [];
     const jwt_token = req.headers["authorization"];
+    const limit = req.query.limit || 10;
+    const offset = req.query.offset || 0;
 
     const data = jwt.verify(jwt_token, env.JWT_KEY);
     var sql =
@@ -119,9 +121,10 @@ router.get("/", async function (req, res) {
       default:
         break;
     }
+    console.log(`(${limit},${offset})`);
 
-    console.log(sql);
-    const result = await executeQuery(sql, value);
+    const result = await executeQuery(sql + ` LIMIT ${limit} OFFSET ${offset}`, value);
+
     res.status(200).send(result);
   } catch (error) {
     console.error(error.message);

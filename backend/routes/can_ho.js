@@ -14,16 +14,8 @@ router.get("/", async function (req, res) {
   try {
     const jwt_token = req.headers["authorization"];
     const data = jwt.verify(jwt_token, env.JWT_KEY);
-
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
-
-    const resultCount = await executeQuery(
-      "SELECT COUNT(*) AS total FROM can_ho"
-    );
-    const totalItems = resultCount[0].total;
-    const totalPages = Math.ceil(totalItems / limit);
+    const limit = req.query.limit || 10;
+    const offset = req.query.offset || 0;
 
     var sql = `SELECT id, danh_dau,
     gia_ban, gia_thue,
@@ -40,11 +32,10 @@ router.get("/", async function (req, res) {
       sql = `SELECT * FROM can_ho ORDER BY trang_thai ASC LIMIT ? OFFSET ?`;
     }
 
-    const results = await executeQuery(sql, [limit, offset]);
+    const results = await executeQuery(sql, [Number.parseInt(limit), Number.parseInt(offset)]);
     res.status(200).send({
       response: results,
       role: data.phan_quyen,
-      totalPages,
     });
   } catch (error) {
     console.error(error.message);
@@ -312,7 +303,7 @@ router.post("/upload-excel", async (req, res) => {
       item.ghi_chu || "",
       0,
     ]);
-
+    
     await executeQuery(
       `INSERT INTO can_ho (ten_du_an, ten_toa_nha,
       ma_can_ho, truc_can_ho, chu_can_ho,

@@ -8,21 +8,26 @@ import { toast, ToastContainer } from "react-toastify";
 import { dataCanHoDefault, excelImportFormat } from "../data/default_data";
 import { downloadImages, exportFileExcel } from "./controllers/function";
 import { ketNoi, modulePhanQuyen } from "../data/module";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
 export default function CanHo() {
+  const limitRow = 10;
   const [data, setData] = useState([]);
   const [role, setRole] = useState("");
-  const [totalPage, setTotalPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [timKiemPages, setTimeKiemPages] = useState(1);
+  const [isTimKiem, setIsTimKiem] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [giaBanTuState, setGiaBanTuState] = useState("");
+  const [giaBanDenState, setGiaBanDenState] = useState("");
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [showModalHinhAnh, setShowModalHinhAnh] = useState(false);
   const [dataUpdate, setDataUpdate] = useState(dataCanHoDefault);
+  const [isDisableLoadMore, setIsDisableLoadMore] = useState(false);
   const [showImageData, setShowImageData] = useState([]);
   const [dataToaNhaDuAn, setDataToaNhaDuAn] = useState([]);
-  const [page, setPage] = useState(1);
-  const [limit] = useState(20);
-
   const [dataDuAn, setDataDuAn] = useState([]);
   const [dataHuongCanHo, setDataHuongCanHo] = useState([]);
   const [dataLoaiCanHo, setDataLoaiCanHo] = useState([]);
@@ -30,7 +35,6 @@ export default function CanHo() {
   const [dataToaNha, setDataToaNha] = useState([]);
   const [dataTrucCanHo, setDataTrucCanHo] = useState([]);
   const [itemChecked, setItemChecked] = useState([]);
-
   const tenToaNhaRef = useRef(null);
   const maCanHoRef = useRef(null);
   const hoTenChuCanHoRef = useRef(null);
@@ -47,7 +51,6 @@ export default function CanHo() {
   const ghiChuRef = useRef(null);
   const hinhAnhRef = useRef(null);
   const trucCanHoRef = useRef(null);
-
   const locGiaCanHoRef = useRef(null);
   const danhDauCanHoRef = useRef(null);
   const tenDuAnTimKiemRef = useRef(null);
@@ -58,38 +61,6 @@ export default function CanHo() {
   const soPhongNguTimKiemRef = useRef(null);
   const trucCanHoTimKiemRef = useRef(null);
   const uploadFileExcelRef = useRef(null);
-
-  const [giaBanTuState, setGiaBanTuState] = useState("");
-  const [giaBanDenState, setGiaBanDenState] = useState("");
-
-  useEffect(() => {
-    (async function () {
-      setLoading(true);
-      try {
-        const { status, data: response } = await axios.get(
-          `${ketNoi.url}/thong-tin-du-an`
-        );
-
-        if (status === 200) {
-          const { toa_nha, huong_can_ho, loai_can_ho, noi_that, truc_can_ho } =
-            response;
-
-          const listDuAn = [...new Set(toa_nha.map((item) => item.ten_du_an))];
-          const listToaNha = toa_nha.map((item) => item.ten_toa_nha);
-
-          setDataDuAn(listDuAn);
-          setDataToaNha(listToaNha);
-          setDataToaNhaDuAn(toa_nha);
-          setDataHuongCanHo(huong_can_ho);
-          setDataLoaiCanHo(loai_can_ho);
-          setDataNoiThat(noi_that);
-          setDataTrucCanHo(truc_can_ho);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    })();
-  }, []);
 
   function showImage(item) {
     if (item.hinh_anh) {
@@ -134,37 +105,33 @@ export default function CanHo() {
     }
   }
 
-  useEffect(() => {
-    getData(page, limit);
-  }, [page, limit]);
-
-  async function getData(page, limit) {
+  async function getData(page) {
     try {
       const {
         status,
-        data: { response, role, totalPages },
-      } = await axios.get(`${ketNoi.url}/can-ho?page=${page}&limit=${limit}`, {
+        data: { response, role },
+      } = await axios.get(`${ketNoi.url}/can-ho`, {
         headers: {
           Authorization: getRoleNguoiDung(),
           "Content-Type": "application/json",
         },
+        params: {
+          limit: limitRow,
+          offset: (page - 1) * limitRow,
+        },
       });
 
       if (status === 200) {
-        setLoading(false);
         setRole(role);
-        setData(response);
-        setTotalPage(totalPages);
+        return response;
       }
+      return [];
     } catch (error) {
       console.log(error);
     }
   }
 
-  const handleNextPage = () => setPage((prevPage) => prevPage + 1);
-  const handlePrevPage = () => setPage((prevPage) => Math.max(prevPage - 1, 1));
-
-  async function timKiem() {
+  async function timKiem(page) {
     let dataTimKiem = {
       ten_du_an: tenDuAnTimKiemRef.current.value,
       ten_toa_nha: tenToaNhaTimKiemRef.current.value,
@@ -176,9 +143,12 @@ export default function CanHo() {
       loc_gia: locGiaCanHoRef.current.value,
       gia_tu: giaBanTuState.replace(/,/g, ""),
       gia_den: giaBanDenState.replace(/,/g, ""),
+      limit: limitRow,
+      offset: (page - 1) * limitRow,
     };
 
     setLoading(true);
+    setIsTimKiem(true);
     const { status, data } = await axios.get(`${ketNoi.url}/tim-kiem`, {
       params: dataTimKiem,
       headers: {
@@ -189,10 +159,9 @@ export default function CanHo() {
 
     if (status === 200) {
       setLoading(false);
-      setData(data);
-      setPage(1);
-      setTotalPage(1);
+      return data;
     }
+    return [];
   }
 
   async function lamMoi() {
@@ -208,7 +177,12 @@ export default function CanHo() {
     setGiaBanTuState("");
     setGiaBanDenState("");
     setDataToaNha([]);
-    await getData();
+    setPages(1);
+    setTimeKiemPages(1);
+    setIsDisableLoadMore(false);
+    const data = await getData(1);
+    setLoading(false);
+    setData(data);
   }
 
   async function capNhatAnhCanHo(event) {
@@ -350,6 +324,65 @@ export default function CanHo() {
     }
   }
 
+  useEffect(() => {
+    (async function () {
+      setLoading(true);
+      try {
+        const { status, data: response } = await axios.get(
+          `${ketNoi.url}/thong-tin-du-an`
+        );
+
+        if (status === 200) {
+          const { toa_nha, huong_can_ho, loai_can_ho, noi_that, truc_can_ho } =
+            response;
+
+          const listDuAn = [...new Set(toa_nha.map((item) => item.ten_du_an))];
+          const listToaNha = toa_nha.map((item) => item.ten_toa_nha);
+
+          setDataDuAn(listDuAn);
+          setDataToaNha(listToaNha);
+          setDataToaNhaDuAn(toa_nha);
+          setDataHuongCanHo(huong_can_ho);
+          setDataLoaiCanHo(loai_can_ho);
+          setDataNoiThat(noi_that);
+          setDataTrucCanHo(truc_can_ho);
+
+          const data = await getData(pages);
+          setLoading(false);
+          setData(data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async function () {
+      if (pages !== 1) {
+        setLoading(true);
+        const data = await getData(pages);
+        setLoading(false);
+        if (data.length < limitRow) {
+          setIsDisableLoadMore(true);
+        }
+        setData((pre) => [...pre, ...data]);
+      }
+    })();
+  }, [pages]);
+
+  useEffect(() => {
+    (async function () {
+      if (timKiemPages !== 1) {
+        const dataTimKiem = await timKiem(timKiemPages);
+        if (dataTimKiem.length < limitRow) {
+          setIsDisableLoadMore(true);
+        }
+        setData((pre) => [...pre, ...dataTimKiem]);
+      }
+    })();
+  }, [timKiemPages]);
+
   async function capNhatCanHo() {
     try {
       const dataPost = {
@@ -422,49 +455,59 @@ export default function CanHo() {
         console.error("No file selected!");
         return;
       }
-
       const reader = new FileReader();
-      reader.onload = async (event) => {
-        const data = event.target.result;
-        const workbook = xlsx.read(data, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const json = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+      reader.onload = async (e) => {
+        const data = e.target.result;
+        const workbook = xlsx.read(data, { type: "binary" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
-        const headers = json[0];
-        if (!headers) {
-          toast.error("The uploaded Excel file is empty!");
-          return;
-        }
+        const header = rows[0];
 
-        const incorrectColumns = headers.filter(
-          (header) => !excelImportFormat.includes(header)
+        const invalidColumns = header.filter(
+          (column) =>
+            !excelImportFormat.some((item) => Object.values(item)[0] === column)
         );
-
-        if (incorrectColumns.length > 0) {
-          toast(`Kiểm tra lại các cột: ${incorrectColumns.join(", ")}`);
+        if (invalidColumns.length > 0) {
+          toast.error(`Cột không hợp lệ: ${invalidColumns.toString()}`);
           return;
         }
+        const validData = rows
+          .slice(1)
+          .filter((row) => row.some((cell) => cell !== "" && cell !== null))
+          .map((row) => {
+            let result = {};
+            header.forEach((column, index) => {
+              const match = excelImportFormat.find(
+                (item) => Object.values(item)[0] === column
+              );
+              if (match) {
+                const key = Object.keys(match)[0];
+                result[key] = row[index];
+              }
+            });
+            return result;
+          })
+          .filter((item) => item !== null);
 
-        const dataRows = xlsx.utils.sheet_to_json(worksheet, { raw: false });
         setLoading(true);
         const response = await axios.post(
           `${ketNoi.url}/can-ho/upload-excel`,
-          dataRows
+          validData
         );
 
         if (response.status === 200) {
           setLoading(false);
+          setIsDisableLoadMore(true);
           toast.success(response.data);
-          setData((pre) => [...pre, ...dataRows]);
+          setData((pre) => [...pre, ...validData]);
         }
       };
 
+      reader.readAsArrayBuffer(fileExcel);
       reader.onloadend = () => {
         uploadFileExcelRef.current.value = "";
       };
-
-      reader.readAsArrayBuffer(fileExcel);
     } catch (error) {
       setLoading(false);
       console.error("Error while uploading Excel file:", error);
@@ -1261,7 +1304,15 @@ export default function CanHo() {
           aria-describedby="inputGroup-sizing-default"
         />
         <div>
-          <button className="btn btn-primary" onClick={timKiem}>
+          <button
+            className="btn btn-primary"
+            onClick={async () => {
+              setIsDisableLoadMore(false);
+              setTimeKiemPages(1)
+              let data = await timKiem(1);
+              setData(data);
+            }}
+          >
             Tìm kiếm
           </button>
           <button className="btn btn-outline-primary mx-2" onClick={lamMoi}>
@@ -1405,20 +1456,17 @@ export default function CanHo() {
       </table>
       <div className="mb-3">
         <button
-          className="btn btn-primary mx-1"
-          style={styles.w_100}
-          onClick={handlePrevPage}
-          disabled={page === 1}
+          onClick={() => {
+            if (isTimKiem) {
+              setTimeKiemPages((pre) => pre + 1);
+              return;
+            }
+            setPages((pre) => pre + 1);
+          }}
+          className="btn btn-warning"
+          disabled={loading || isDisableLoadMore}
         >
-          Previous
-        </button>
-        <button
-          disabled={page === totalPage}
-          style={styles.w_100}
-          className="btn btn-primary mx-1"
-          onClick={handleNextPage}
-        >
-          Next
+          <FontAwesomeIcon icon={faChevronDown} /> Xem thêm
         </button>
       </div>
     </div>

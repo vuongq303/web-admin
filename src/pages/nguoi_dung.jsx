@@ -65,7 +65,6 @@ export default function NguoiDung() {
         phan_quyen: viTriRef.current.value,
         gioi_tinh: gioiTinhRef.current.value,
         trang_thai: trangThaiRef.current.value,
-        hinh_anh: hinhAnhRef.current.files[0],
       };
 
       const formData = new FormData();
@@ -79,7 +78,7 @@ export default function NguoiDung() {
       formData.append("phan_quyen", dataPost.phan_quyen);
       formData.append("gioi_tinh", dataPost.gioi_tinh);
       formData.append("trang_thai", dataPost.trang_thai);
-      formData.append("hinh_anh", dataPost.hinh_anh);
+      formData.append("hinh_anh", hinhAnhRef.current.files[0]);
 
       if (
         dataPost.tai_khoan === "" ||
@@ -136,7 +135,6 @@ export default function NguoiDung() {
         phan_quyen: viTriRef.current.value,
         gioi_tinh: gioiTinhRef.current.value,
         trang_thai: trangThaiRef.current.value,
-        hinh_anh: hinhAnhRef.current.files[0],
         id: dataUpdate.id,
       };
 
@@ -151,7 +149,7 @@ export default function NguoiDung() {
       formData.append("phan_quyen", dataPost.phan_quyen);
       formData.append("gioi_tinh", dataPost.gioi_tinh);
       formData.append("trang_thai", dataPost.trang_thai);
-      formData.append("hinh_anh", dataPost.hinh_anh);
+      formData.append("hinh_anh", hinhAnhRef.current.files[0]);
 
       if (
         dataPost.tai_khoan === "" ||
@@ -175,7 +173,6 @@ export default function NguoiDung() {
         {
           headers: {
             Authorization: getRoleNguoiDung(),
-            "Content-Type": "application/json",
           },
         }
       );
@@ -186,7 +183,9 @@ export default function NguoiDung() {
           setLoading(false);
           setShowModalUpdate(false);
           setData((pre) =>
-            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+            pre.map((item) =>
+              item.id === dataPost.id ? { ...item, ...dataPost } : item
+            )
           );
           return;
         }
