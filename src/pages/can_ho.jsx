@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
 export default function CanHo() {
-  const limitRow = 10;
+  const limitRow = 50;
   const [data, setData] = useState([]);
   const [role, setRole] = useState("");
   const [pages, setPages] = useState(1);
@@ -1308,7 +1308,7 @@ export default function CanHo() {
             className="btn btn-primary"
             onClick={async () => {
               setIsDisableLoadMore(false);
-              setTimeKiemPages(1)
+              setTimeKiemPages(1);
               let data = await timKiem(1);
               setData(data);
             }}
@@ -1392,10 +1392,10 @@ export default function CanHo() {
                   {item.so_dien_thoai ?? "x"}
                 </td>
                 <td className="align-middle">
-                  {item.gia_ban.toLocaleString("en-US")}
+                  {item.gia_ban ? item.gia_ban.toLocaleString("en-US") : 0}
                 </td>
                 <td className="align-middle">
-                  {item.gia_thue.toLocaleString("en-US")}
+                  {item.gia_thue ? item.gia_thue.toLocaleString("en-US") : 0}
                 </td>
                 <td className="w-25 text-start align-middle">
                   - {item.ten_du_an} - {item.dien_tich}m² - {item.so_phong_ngu}

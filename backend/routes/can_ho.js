@@ -300,16 +300,26 @@ router.post("/upload-excel", async (req, res) => {
       item.gia_thue || 0,
       item.noi_that || "",
       item.huong_can_ho || "",
-      item.ghi_chu || "",
-      0,
+      item.ghi_chu || ""
     ]);
-    
     await executeQuery(
-      `INSERT INTO can_ho (ten_du_an, ten_toa_nha,
-      ma_can_ho, truc_can_ho, chu_can_ho,
-      so_dien_thoai, loai_can_ho, dien_tich,
-      so_phong_ngu, so_phong_tam, gia_ban, gia_thue,
-      noi_that, huong_can_ho, ghi_chu, trang_thai) VALUES ?`,
+      `INSERT INTO can_ho (
+      ten_du_an, ten_toa_nha, ma_can_ho, truc_can_ho, chu_can_ho, 
+      so_dien_thoai, loai_can_ho, dien_tich, so_phong_ngu, so_phong_tam, 
+      gia_ban, gia_thue, noi_that, huong_can_ho, ghi_chu) VALUES ?
+      ON DUPLICATE KEY UPDATE
+      ten_du_an = CASE WHEN VALUES(ten_du_an) <> '' THEN VALUES(ten_du_an) ELSE ten_du_an END,
+      chu_can_ho = CASE WHEN VALUES(chu_can_ho) <> '' THEN VALUES(chu_can_ho) ELSE chu_can_ho END,
+      so_dien_thoai = CASE WHEN VALUES(so_dien_thoai) <> '' THEN VALUES(so_dien_thoai) ELSE so_dien_thoai END,
+      loai_can_ho = CASE WHEN VALUES(loai_can_ho) <> '' THEN VALUES(loai_can_ho) ELSE loai_can_ho END,
+      dien_tich = CASE WHEN VALUES(dien_tich) <> '' THEN VALUES(dien_tich) ELSE dien_tich END,
+      so_phong_ngu = CASE WHEN VALUES(so_phong_ngu) <> 0 THEN VALUES(so_phong_ngu) ELSE so_phong_ngu END,
+      so_phong_tam = CASE WHEN VALUES(so_phong_tam) <> 0 THEN VALUES(so_phong_tam) ELSE so_phong_tam END,
+      gia_ban = CASE WHEN VALUES(gia_ban) <> 0 THEN VALUES(gia_ban) ELSE gia_ban END,
+      gia_thue = CASE WHEN VALUES(gia_thue) <> 0 THEN VALUES(gia_thue) ELSE gia_thue END,
+      noi_that = CASE WHEN VALUES(noi_that) <> '' THEN VALUES(noi_that) ELSE noi_that END,
+      huong_can_ho = CASE WHEN VALUES(huong_can_ho) <> '' THEN VALUES(huong_can_ho) ELSE huong_can_ho END,
+      ghi_chu = CASE WHEN VALUES(ghi_chu) <> '' THEN VALUES(ghi_chu) ELSE ghi_chu END`,
       [result]
     );
     res.status(200).json("Tải dữ liệu lên thành công");
