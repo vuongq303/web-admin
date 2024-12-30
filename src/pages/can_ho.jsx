@@ -489,19 +489,19 @@ export default function CanHo() {
             return result;
           })
           .filter((item) => item !== null);
+          
+          setLoading(true);
+          const response = await axios.post(
+            `${ketNoi.url}/can-ho/upload-excel`,
+            validData
+          );
 
-        setLoading(true);
-        const response = await axios.post(
-          `${ketNoi.url}/can-ho/upload-excel`,
-          validData
-        );
-
-        if (response.status === 200) {
-          setLoading(false);
-          setIsDisableLoadMore(true);
-          toast.success(response.data);
-          setData((pre) => [...pre, ...validData]);
-        }
+          if (response.status === 200) {
+            setLoading(false);
+            setIsDisableLoadMore(true);
+            toast.success(response.data);
+            setData((pre) => [...pre, ...validData]);
+          }
       };
 
       reader.readAsArrayBuffer(fileExcel);

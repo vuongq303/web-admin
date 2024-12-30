@@ -1,6 +1,5 @@
 module.exports = {
-    ip: "192.168.127.55",
-    url: "http://192.168.127.55:8080",
+    url: "http://192.168.1.155:8080",
     gray: "gray",
     yellow: "yellow",
     orange: "orange",

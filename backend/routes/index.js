@@ -2,9 +2,12 @@ var express = require("express");
 const env = require("../env/get_env");
 var router = express.Router();
 const jwt = require("jsonwebtoken");
+const { join } = require("path");
 
-router.get("/", async function (_, res) {
-  res.status(200).send(``);
+router.get("/", (req, res) => {
+  res
+    .status(200)
+    .sendFile(join(__dirname, "..", "views", "build", "index.html"));
 });
 
 router.get("/phan-quyen", function (req, res) {

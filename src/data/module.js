@@ -25,5 +25,5 @@ export const moduleDanhDau = {
 
 export const ketNoi = {
   ip: "192.168.127.55",
-  url: "http://192.168.1.118:8080"
+  url: "http://192.168.127.55:8080"
 }

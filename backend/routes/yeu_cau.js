@@ -85,7 +85,7 @@ router.post("/gui-yeu-cau", async function (req, res) {
     const jsonPath = join(__dirname, "..", "temp", "yeu_cau.json");
     let now = moment();
     const start = now.format("HH:mm DD-MM-YYYY");
-    const end = now.add(60, "minute").format("HH:mm DD-MM-YYYY");
+    const end = now.add(12, "hour").format("HH:mm DD-MM-YYYY");
 
     const id = uuid.v4();
     const jwt_token = req.headers["authorization"];
