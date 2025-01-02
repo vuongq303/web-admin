@@ -12,10 +12,10 @@ import ToaNha from "./pages/toa_nha";
 import TrucCanHo from "./pages/truc_can_ho";
 import KhachHang from "./pages/khach_hang";
 import NguoiDung from "./pages/nguoi_dung";
-import TrangChu from "./pages/trang_chu";
 import KhachHangNguon from "./pages/khach_hang_nguon";
 import CanHoDaGui from "./pages/can_ho_da_gui";
 import CanHoDaDuyet from "./pages/can_ho_da_duyet";
+import TrangChu from "./pages/trang_chu";
 
 function App() {
   return (

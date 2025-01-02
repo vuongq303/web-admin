@@ -3,7 +3,6 @@ require("dotenv").config();
 const env = {
   JWT_KEY: process.env.JWT_KEY || "19dmfafaf?kajijorrra224578;'rawoBHBNK8u**n0204jqlohwfkklmamafanflnv??kkf*&T()JJ(njjflafn6t66vgvkfaNNNFA6gy3683rgq",
   PORT: process.env.PORT || "8080",
-  IP: process.env.IP || "127.0.0.1",
   HOSTNAME: process.env.HOSTNAME || "localhost",
   DATABASE_USER: process.env.DATABASE_USER || "root",
   DATABASE: process.env.DATABASE || "connect_home",

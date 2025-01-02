@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./css/css.css";
 import { Menu, Sidebar, MenuItem, SubMenu } from "react-pro-sidebar";
 import { faUserTie } from "@fortawesome/free-solid-svg-icons/faUserTie";
@@ -33,7 +33,7 @@ function SizeBar() {
   const [role, setRole] = useState("");
   const [collapsed, setCollapsed] = useState(false);
 
-  useMemo(() => {
+  useEffect(() => {
     (async function () {
       try {
         const {

@@ -36,7 +36,7 @@ export default function DuAn() {
         ten_du_an: duAnRef.current.value,
       };
 
-      if (dataPost.ten_du_an == "") {
+      if (dataPost.ten_du_an === "") {
         toast.error("Dữ liệu trống");
         return;
       }
@@ -49,7 +49,7 @@ export default function DuAn() {
         dataPost
       );
 
-      if (status == 200) {
+      if (status === 200) {
         toast.success(response);
         if (type) {
           setLoading(false);
@@ -82,7 +82,7 @@ export default function DuAn() {
         dataPost
       );
 
-      if (status == 200) {
+      if (status === 200) {
         toast.success(response);
         if (type) {
           setLoading(false);

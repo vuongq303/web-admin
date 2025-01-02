@@ -26,8 +26,10 @@ export default function DangNhap() {
       const {
         status,
         data: { response, type, data, role },
-      } = await axios.post(`${ketNoi.url}/nguoi-dung/dang-nhap`, user);
-      if (status == 200) {
+      } = await axios.post(`${ketNoi.url}/nguoi-dung/dang-nhap`, user, {
+        withCredentials: true,
+      });
+      if (status === 200) {
         if (type) {
           localStorage.setItem("role", data);
           if (

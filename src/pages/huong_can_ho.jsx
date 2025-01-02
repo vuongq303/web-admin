@@ -50,7 +50,7 @@ export default function HuongCanHo() {
         dataPost
       );
 
-      if (status == 200) {
+      if (status === 200) {
         toast.success(response);
         if (type) {
           setLoading(false);
@@ -83,7 +83,7 @@ export default function HuongCanHo() {
         dataPost
       );
 
-      if (status == 200) {
+      if (status === 200) {
         toast.success(response);
         if (type) {
           setLoading(false);

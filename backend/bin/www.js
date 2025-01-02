@@ -41,7 +41,7 @@ async function performTask() {
 
   if (yeuCauHetHan.length > 0) {
     const taiKhoanArray = yeuCauHetHan.map((item) => item.tai_khoan);
-    await executeQuery("DELETE FROM yeu_cau WHERE nguoi_gui IN (?) and trang_thai = 1", [
+    await executeQuery("DELETE FROM yeu_cau WHERE nguoi_gui IN (?)", [
       taiKhoanArray,
     ]);
   }

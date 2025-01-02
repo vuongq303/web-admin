@@ -18,7 +18,7 @@ router.get("/", async function (req, res) {
     const sql = `SELECT id, ho_ten, ngay_bat_dau,
     tai_khoan,gioi_tinh, so_dien_thoai, email,
     ngay_sinh, hinh_anh, trang_thai, phan_quyen
-    FROM nguoi_dung ORDER BY trang_thai DESC, phan_quyen ASC`
+    FROM nguoi_dung ORDER BY trang_thai DESC, phan_quyen ASC`;
 
     const result = await executeQuery(sql);
     res.status(200).send(result);
@@ -90,7 +90,6 @@ router.post(
   }
 );
 
-
 router.post(
   "/cap-nhat-nguoi-dung",
   upload.single("hinh_anh"),
@@ -110,9 +109,9 @@ router.post(
       } = req.body;
 
       const hinh_anh = `${config.url}/nguoi-dung/${tai_khoan}.png`;
-      
+
       const sql = `
-      UPDATE nguoi_dung SET ho_ten =? ,
+      UPDATE nguoi_dung SET ho_ten = ? ,
       ngay_bat_dau = ?, gioi_tinh = ?,
       so_dien_thoai = ?, email = ?,
       ngay_sinh = ?, hinh_anh = ?,
@@ -142,8 +141,10 @@ router.post(
 router.post("/dang-nhap", async function (req, res) {
   try {
     const { username, password } = req.body;
-    const sql =
-      "select tai_khoan, ho_ten, phan_quyen from nguoi_dung where tai_khoan = ? and mat_khau = ? and trang_thai = 'Đang làm việc'";
+
+    const sql = `SELECT tai_khoan, ho_ten, phan_quyen FROM
+      nguoi_dung WHERE tai_khoan = ? and mat_khau = ? AND
+      trang_thai = '${config.dangLamViec}'`;
     const result = await executeQuery(sql, [username, password]);
 
     if (result.length > 0) {
@@ -161,7 +162,7 @@ router.post("/dang-nhap", async function (req, res) {
     });
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({});
+    res.status(500).json({ response: "Error", type: false });
   }
 });
 

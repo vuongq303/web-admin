@@ -10,7 +10,12 @@ import {
   trangThaiLamViec,
 } from "../services/utils";
 import Loading from "./components/loading";
-import { ketNoi, moduleDanhDau, moduleTrangThaiLamViec } from "../data/module";
+import {
+  ketNoi,
+  moduleDanhDau,
+  modulePhanQuyen,
+  moduleTrangThaiLamViec,
+} from "../data/module";
 
 export default function NguoiDung() {
   const [data, setData] = useState([]);
@@ -99,13 +104,7 @@ export default function NguoiDung() {
         data: { response, type, id },
       } = await axios.post(
         `${ketNoi.url}/nguoi-dung/them-nguoi-dung`,
-        formData,
-        {
-          headers: {
-            Authorization: getRoleNguoiDung(),
-            "Content-Type": "application/json",
-          },
-        }
+        formData
       );
 
       if (status === 200) {
@@ -162,25 +161,20 @@ export default function NguoiDung() {
         toast.error("Không được để trống thông tin");
         return;
       }
-      setLoading(true);
 
+      setLoading(true);
       const {
         status,
         data: { response, type },
       } = await axios.post(
         `${ketNoi.url}/nguoi-dung/cap-nhat-nguoi-dung`,
-        formData,
-        {
-          headers: {
-            Authorization: getRoleNguoiDung(),
-          },
-        }
+        formData
       );
 
       if (status === 200) {
+        setLoading(false);
         toast.success(response);
         if (type) {
-          setLoading(false);
           setShowModalUpdate(false);
           setData((pre) =>
             pre.map((item) =>
@@ -559,7 +553,11 @@ export default function NguoiDung() {
             >
               Close
             </Button>
-            <Button variant="primary" onClick={capNhatNguoiDung}>
+            <Button
+              variant="primary"
+              disabled={dataUpdate.phan_quyen === modulePhanQuyen.admin}
+              onClick={capNhatNguoiDung}
+            >
               Cập nhật
             </Button>
           </Modal.Footer>

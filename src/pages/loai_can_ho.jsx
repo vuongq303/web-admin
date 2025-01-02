@@ -33,7 +33,7 @@ export default function LoaiCanHo() {
         loai_can_ho: loaiCanHoRef.current.value,
       };
 
-      if (dataPost.loai_can_ho == "") {
+      if (dataPost.loai_can_ho === "") {
         toast.error("Dữ liệu trống");
         return;
       }
@@ -47,7 +47,7 @@ export default function LoaiCanHo() {
         dataPost
       );
 
-      if (status == 200) {
+      if (status === 200) {
         toast.success(response);
         if (type) {
           setLoading(false);
@@ -81,7 +81,7 @@ export default function LoaiCanHo() {
         dataPost
       );
 
-      if (status == 200) {
+      if (status === 200) {
         toast.success(response);
         if (type) {
           setLoading(false);

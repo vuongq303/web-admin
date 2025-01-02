@@ -12,7 +12,7 @@ export const modulePhanQuyen = {
   admin: "Admin",
   quanLy: "Quản lý",
   cskh: "CSKH",
-  sale: "Sale"
+  sale: "Sale",
 };
 
 export const moduleDanhDau = {
@@ -20,10 +20,9 @@ export const moduleDanhDau = {
   yellow: "yellow",
   orange: "orange",
   red: "red",
-  transparent: ""
+  transparent: "",
 };
 
 export const ketNoi = {
-  ip: "192.168.127.55",
-  url: "http://192.168.127.55:8080"
-}
+  url: "http://192.168.1.203:8080/api",
+};
