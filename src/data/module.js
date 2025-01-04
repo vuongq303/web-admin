@@ -24,5 +24,5 @@ export const moduleDanhDau = {
 };
 
 export const ketNoi = {
-  url: "http://192.168.1.203:8080/api",
+  url: "http://192.168.1.50:8080/api",
 };

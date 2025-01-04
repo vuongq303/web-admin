@@ -1,5 +1,5 @@
 module.exports = {
-  url: "https://api.quan67.id.vn",
+  url: "http://192.168.1.232:8080",
   client: "http://localhost:3000",
   gray: "gray",
   yellow: "yellow",

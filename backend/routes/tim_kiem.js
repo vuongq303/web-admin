@@ -121,8 +121,6 @@ router.get("/", async function (req, res) {
       default:
         break;
     }
-    console.log(`(${limit},${offset})`);
-
     const result = await executeQuery(sql + ` LIMIT ${limit} OFFSET ${offset}`, value);
 
     res.status(200).send(result);

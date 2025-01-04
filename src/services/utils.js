@@ -8,6 +8,8 @@ export const dataPhanQuyen = ["Quản lý", "Sale", "CSKH"];
 
 export const trangThaiDuAn = ["Đang giao dịch", "Ngừng giao dịch"];
 
+export const phiMoiGioi = ["Đủ phí", "Chưa đủ phí"];
+
 export const danhDauCanHo = [
   { mau_sac: "", noi_dung: "Mặc định" },
   { mau_sac: "yellow", noi_dung: "Vàng (Căn giá rẻ)" },
