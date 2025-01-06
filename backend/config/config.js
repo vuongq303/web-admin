@@ -1,5 +1,5 @@
 module.exports = {
-  url: "http://192.168.1.232:8080",
+  url: "http://192.168.127.55:8080",
   client: "http://localhost:3000",
   gray: "gray",
   yellow: "yellow",

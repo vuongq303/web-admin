@@ -2,7 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Button, Modal, Form } from "react-bootstrap";
 import * as xlsx from "xlsx";
-import { danhDauCanHo, getRoleNguoiDung, locGiaCanHo } from "../services/utils";
+import {
+  danhDauCanHo,
+  dateToText,
+  getRoleNguoiDung,
+  locGiaCanHo,
+} from "../services/utils";
 import PreviewImage from "./components/preview_image";
 import { toast, ToastContainer } from "react-toastify";
 import { dataCanHoDefault, excelImportFormat } from "../data/default_data";
@@ -10,6 +15,7 @@ import { downloadImages, exportFileExcel } from "./controllers/function";
 import { ketNoi, modulePhanQuyen } from "../data/module";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { GET } from "../api/method";
 
 export default function CanHo() {
   const limitRow = 50;
@@ -66,7 +72,7 @@ export default function CanHo() {
     if (item.hinh_anh) {
       let arrayHinhAnh = item.hinh_anh.split(",");
       setShowImageData(
-        arrayHinhAnh.map((img) => `${ketNoi.url}/can-ho/${item.id}/${img}`)
+        arrayHinhAnh.map((img) => `${ketNoi.backend}/can-ho/${item.id}/${img}`)
       );
     } else {
       setShowImageData([]);
@@ -205,7 +211,9 @@ export default function CanHo() {
         toast.success(message);
         if (type) {
           setShowImageData(
-            images.map((img) => `${ketNoi.url}/can-ho/${dataUpdate.id}/${img}`)
+            images.map(
+              (img) => `${ketNoi.backend}/can-ho/${dataUpdate.id}/${img}`
+            )
           );
           setData((prevData) =>
             prevData.map((item) =>
@@ -243,7 +251,9 @@ export default function CanHo() {
         toast.success(message);
         if (type) {
           setShowImageData(
-            images.map((img) => `${ketNoi.url}/can-ho/${dataUpdate.id}/${img}`)
+            images.map(
+              (img) => `${ketNoi.backend}/can-ho/${dataUpdate.id}/${img}`
+            )
           );
           setData((prevData) =>
             prevData.map((item) =>
@@ -418,7 +428,6 @@ export default function CanHo() {
         toast.error("Kiểm tra lại dữ liệu");
         return;
       }
-
       const {
         data: { response: message, type, nguoi_cap_nhat },
         status,
@@ -489,19 +498,19 @@ export default function CanHo() {
             return result;
           })
           .filter((item) => item !== null);
-          
-          setLoading(true);
-          const response = await axios.post(
-            `${ketNoi.url}/can-ho/upload-excel`,
-            validData
-          );
 
-          if (response.status === 200) {
-            setLoading(false);
-            setIsDisableLoadMore(true);
-            toast.success(response.data);
-            setData((pre) => [...pre, ...validData]);
-          }
+        setLoading(true);
+        const response = await axios.post(
+          `${ketNoi.url}/can-ho/upload-excel`,
+          validData
+        );
+
+        if (response.status === 200) {
+          setLoading(false);
+          setIsDisableLoadMore(true);
+          toast.success(response.data);
+          setData((pre) => [...pre, ...validData]);
+        }
       };
 
       reader.readAsArrayBuffer(fileExcel);
@@ -542,6 +551,7 @@ export default function CanHo() {
       console.error(error);
     }
   }
+
   const styles = {
     yellow_notice: {
       backgroundColor: "yellow",
@@ -566,7 +576,15 @@ export default function CanHo() {
     },
     w_100: { width: 100 },
   };
-  
+
+  function loadMore() {
+    if (isTimKiem) {
+      setTimeKiemPages((pre) => pre + 1);
+      return;
+    }
+    setPages((pre) => pre + 1);
+  }
+
   return (
     <div>
       <ToastContainer
@@ -1117,7 +1135,11 @@ export default function CanHo() {
             >
               Close
             </Button>
-            <Button onClick={capNhatCanHo} variant="primary">
+            <Button
+              disabled={dataUpdate.trang_thai === 1}
+              onClick={capNhatCanHo}
+              variant="primary"
+            >
               Xác nhận
             </Button>
           </Modal.Footer>
@@ -1321,7 +1343,7 @@ export default function CanHo() {
           </button>
         </div>
       </div>
-      <table className="table table-striped table-bordered">
+      <table className="table table-bordered">
         <thead>
           <tr className="table-primary">
             <th scope="col">
@@ -1356,8 +1378,26 @@ export default function CanHo() {
                 borderRadius: "5px",
               },
               w_10: { width: "10%" },
+              f_: {
+                fontSize: 14,
+              },
+              s_: { transform: "scale(1.3)" },
             };
+
             let onChecked = itemChecked.includes(item);
+
+            function saveItemChecked() {
+              if (onChecked) {
+                setItemChecked((pre) => pre.filter((i) => i.id !== item.id));
+                return;
+              }
+              setItemChecked((pre) => [...pre, item]);
+            }
+
+            function _infor() {
+              setDataUpdate(item);
+              setShowModalUpdate(true);
+            }
 
             return (
               <tr key={index} className={onChecked ? "table-primary" : ""}>
@@ -1366,21 +1406,13 @@ export default function CanHo() {
                     className="form-check-input"
                     type="checkbox"
                     onChange={() => {}}
-                    onClick={() => {
-                      if (onChecked) {
-                        setItemChecked((pre) =>
-                          pre.filter((i) => i.id !== item.id)
-                        );
-                        return;
-                      }
-                      setItemChecked((pre) => [...pre, item]);
-                    }}
+                    onClick={saveItemChecked}
                     checked={onChecked}
                     id="flexCheckDefault"
                   />
                 </td>
                 <td className="align-middle">{index + 1}</td>
-                <td className="align-middle">
+                <td className="align-middle" style={styles.w_10}>
                   <div style={styles.danh_dau}>
                     {item.ten_toa_nha}-{item.ma_can_ho ?? "x"}
                     {item.truc_can_ho}
@@ -1392,10 +1424,10 @@ export default function CanHo() {
                 <td className="align-middle" style={styles.w_10}>
                   {item.so_dien_thoai ?? "x"}
                 </td>
-                <td className="align-middle">
+                <td className="align-middle" style={styles.w_10}>
                   {item.gia_ban ? item.gia_ban.toLocaleString("en-US") : 0}
                 </td>
-                <td className="align-middle">
+                <td className="align-middle" style={styles.w_10}>
                   {item.gia_thue ? item.gia_thue.toLocaleString("en-US") : 0}
                 </td>
                 <td className="w-25 text-start align-middle">
@@ -1405,13 +1437,19 @@ export default function CanHo() {
                   <br />- {item.loai_can_ho}
                   <br />- {item.noi_that}
                   <br />- {item.ghi_chu}
-                  <br />- <strong>{item.nguoi_cap_nhat}</strong>
+                  <br />-
+                  <strong>
+                    {item.ngay_cap_nhat &&
+                      ` ${item.nguoi_cap_nhat} đã cập nhật ngày ${dateToText(
+                        item.ngay_cap_nhat
+                      )}`}
+                  </strong>
                 </td>
                 <td className="align-middle">
                   {(role === modulePhanQuyen.admin ||
                     role === modulePhanQuyen.quanLy) && (
                     <Form.Check
-                      style={{ transform: "scale(1.3)" }}
+                      style={styles.s_}
                       checked={item.trang_thai === 0}
                       onChange={async (e) => await capNhatTrangThai(item.id, e)}
                       type="switch"
@@ -1422,10 +1460,8 @@ export default function CanHo() {
                     role === modulePhanQuyen.quanLy) && (
                     <button
                       type="button"
-                      onClick={() => {
-                        setDataUpdate(item);
-                        setShowModalUpdate(true);
-                      }}
+                      style={styles.f_}
+                      onClick={_infor}
                       className="btn btn-primary my-2 w-75"
                     >
                       Chi tiết
@@ -1435,6 +1471,7 @@ export default function CanHo() {
                   <button
                     onClick={() => showImage(item)}
                     type="button"
+                    style={styles.f_}
                     className={`btn w-75 ${
                       item.hinh_anh ? "btn-warning" : "btn-secondary"
                     }`}
@@ -1443,6 +1480,7 @@ export default function CanHo() {
                   </button>
                   <br />
                   <button
+                    style={styles.f_}
                     onClick={() => guiYeuCau(item.id)}
                     type="button"
                     className="btn w-75 btn-info my-2"
@@ -1457,13 +1495,7 @@ export default function CanHo() {
       </table>
       <div className="mb-3">
         <button
-          onClick={() => {
-            if (isTimKiem) {
-              setTimeKiemPages((pre) => pre + 1);
-              return;
-            }
-            setPages((pre) => pre + 1);
-          }}
+          onClick={loadMore}
           className="btn btn-warning"
           disabled={loading || isDisableLoadMore}
         >

@@ -7,32 +7,29 @@ const env = require("../env/get_env");
 const upload = require("../middleware/upload_can_ho");
 const executeQuery = require("../sql/promise");
 const config = require("../config/config");
-const now = momnet();
+const authentication = require("../middleware/authentication");
 var router = express.Router();
+const now = momnet()
 
-router.get("/", async function (req, res) {
+router.get("/", authentication, async function (req, res) {
   try {
-    const jwt_token = req.headers["authorization"];
-    const data = jwt.verify(jwt_token, env.JWT_KEY);
+    const data = req.user;
     const limit = req.query.limit || 10;
     const offset = req.query.offset || 0;
 
-    var sql = `SELECT id, danh_dau,
-    gia_ban, gia_thue,
-    trang_thai, ten_du_an,
-    dien_tich, so_phong_ngu,
-    so_phong_tam, huong_can_ho,
-    loai_can_ho, noi_that,
-    ghi_chu, nguoi_cap_nhat,
-    hinh_anh, ten_toa_nha,
-    truc_can_ho FROM can_ho
+    var sql = `SELECT id, danh_dau, gia_ban, gia_thue, trang_thai, ten_du_an,
+    dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that,
+    ghi_chu, nguoi_cap_nhat, ngay_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho FROM can_ho
     WHERE trang_thai = '0' LIMIT ? OFFSET ?`;
 
     if (data.phan_quyen === config.admin || data.phan_quyen === config.quanLy) {
       sql = `SELECT * FROM can_ho ORDER BY trang_thai ASC LIMIT ? OFFSET ?`;
     }
 
-    const results = await executeQuery(sql, [Number.parseInt(limit), Number.parseInt(offset)]);
+    const results = await executeQuery(sql, [
+      Number.parseInt(limit),
+      Number.parseInt(offset),
+    ]);
     res.status(200).send({
       response: results,
       role: data.phan_quyen,
@@ -122,10 +119,9 @@ router.post("/xoa-anh-can-ho", async function (req, res) {
   }
 });
 
-router.post("/them-can-ho", async (req, res) => {
+router.post("/them-can-ho", authentication, async (req, res) => {
   try {
-    const jwt_token = req.headers["authorization"];
-    const data = jwt.verify(jwt_token, env.JWT_KEY);
+    const data = req.user;
 
     var {
       chu_can_ho,
@@ -166,13 +162,13 @@ router.post("/them-can-ho", async (req, res) => {
         (ma_can_ho, chu_can_ho, so_dien_thoai, gia_ban,
         gia_thue, ten_du_an, dien_tich, so_phong_ngu,
         so_phong_tam, huong_can_ho, loai_can_ho,
-        noi_that, ghi_chu, nguoi_cap_nhat,
-        trang_thai, ten_toa_nha,truc_can_ho, danh_dau) 
-        VALUES (?, ? ,? ,? ,? ,? , ?, ?, ? ,? ,? ,? , ?, ?, ?, ?, ?, ?)`;
+        noi_that, ghi_chu, nguoi_cap_nhat, ngay_cap_nhat,
+        trang_thai, ten_toa_nha, truc_can_ho, danh_dau) 
+        VALUES (?, ? ,? ,? ,? ,? , ?, ?, ? ,? ,? , ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    const nguoi_cap_nhat = `${data.ho_ten} đã cập nhật ngày ${now.format(
-      "DD/MM/YYYY"
-    )}`;
+    const nguoi_cap_nhat = data.ho_ten;
+    const ngay_cap_nhat = now.format("YYYY-MM-DD");
+
     const result = await executeQuery(sqlCanHo, [
       ma_can_ho,
       chu_can_ho,
@@ -188,6 +184,7 @@ router.post("/them-can-ho", async (req, res) => {
       noi_that,
       ghi_chu,
       nguoi_cap_nhat,
+      ngay_cap_nhat,
       trang_thai,
       ten_toa_nha,
       truc_can_ho,
@@ -206,10 +203,9 @@ router.post("/them-can-ho", async (req, res) => {
   }
 });
 
-router.post("/cap-nhat-can-ho", async (req, res) => {
+router.post("/cap-nhat-can-ho",authentication ,async (req, res) => {
   try {
-    const jwt_token = req.headers["authorization"];
-    const data = jwt.verify(jwt_token, env.JWT_KEY);
+    const data = req.user
 
     var {
       chu_can_ho,
@@ -228,17 +224,14 @@ router.post("/cap-nhat-can-ho", async (req, res) => {
     } = req.body;
 
     const sqlCanHo = `
-        UPDATE can_ho SET chu_can_ho = ?,
-        so_dien_thoai = ?, gia_ban = ?,
-        gia_thue = ?, dien_tich = ?, so_phong_ngu = ?,
-        so_phong_tam = ?, huong_can_ho = ?,
-        loai_can_ho = ?, noi_that = ?,
-        ghi_chu = ?, nguoi_cap_nhat = ?,
-        danh_dau = ? WHERE id = ?`;
+        UPDATE can_ho SET chu_can_ho = ?, so_dien_thoai = ?, gia_ban = ?,
+        gia_thue = ?, dien_tich = ?, so_phong_ngu = ?, so_phong_tam = ?,
+        huong_can_ho = ?,loai_can_ho = ?, noi_that = ?, ghi_chu = ?,
+        nguoi_cap_nhat = ?, ngay_cap_nhat = ?, danh_dau = ? WHERE id = ?`;
 
-    const nguoi_cap_nhat = `${data.ho_ten} đã cập nhật ngày ${now.format(
-      "DD/MM/YYYY"
-    )}`;
+    const nguoi_cap_nhat = data.ho_ten;
+    const ngay_cap_nhat = now.format("YYYY-MM-DD");
+
     await executeQuery(sqlCanHo, [
       chu_can_ho,
       so_dien_thoai,
@@ -252,6 +245,7 @@ router.post("/cap-nhat-can-ho", async (req, res) => {
       noi_that,
       ghi_chu,
       nguoi_cap_nhat,
+      ngay_cap_nhat,
       danh_dau,
       id,
     ]);
@@ -300,7 +294,7 @@ router.post("/upload-excel", async (req, res) => {
       item.gia_thue || 0,
       item.noi_that || "",
       item.huong_can_ho || "",
-      item.ghi_chu || ""
+      item.ghi_chu || "",
     ]);
     await executeQuery(
       `INSERT INTO can_ho (

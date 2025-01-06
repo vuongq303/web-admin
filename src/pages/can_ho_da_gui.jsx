@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { getRoleNguoiDung } from "../services/utils";
+import { getRoleNguoiDung, trangThaiYeuCau } from "../services/utils";
 import { toast, ToastContainer } from "react-toastify";
 import Loading from "./components/loading";
 import { downloadImages } from "./controllers/function";
@@ -38,7 +38,7 @@ export default function CanHoDaGui() {
         if (type) {
           setShowImageData(
             images.map(
-              (img) => `${ketNoi.url}/can-ho/${dataUpdate.can_ho}/${img}`
+              (img) => `${ketNoi.backend}/can-ho/${dataUpdate.can_ho}/${img}`
             )
           );
           setData((prevData) =>
@@ -99,7 +99,7 @@ export default function CanHoDaGui() {
     if (item.hinh_anh) {
       let arrayHinhAnh = item.hinh_anh.split(",");
       setShowImageData(
-        arrayHinhAnh.map((img) => `${ketNoi.url}/can-ho/${item.can_ho}/${img}`)
+        arrayHinhAnh.map((img) => `${ketNoi.backend}/can-ho/${item.can_ho}/${img}`)
       );
     } else {
       setShowImageData([]);
@@ -213,7 +213,7 @@ export default function CanHoDaGui() {
       </Modal>
       <table className="table table-striped table-bordered">
         <thead>
-          <tr className="table-primary" >
+          <tr className="table-primary">
             <th scope="col">STT</th>
             <th scope="col">Căn hộ</th>
             <th scope="col">Chủ căn hộ</th>
@@ -226,73 +226,79 @@ export default function CanHoDaGui() {
           </tr>
         </thead>
         <tbody>
-          {data.map((item, index) => (
-            <tr key={item.id}>
-              <td className="align-middle">{index + 1}</td>
-              <td className="align-middle">
-                <div
-                  style={{
-                    display: "inline-block",
-                    backgroundColor: item.danh_dau,
-                    padding: "1px 5px",
-                    borderRadius: "5px",
-                  }}
-                >
-                  {item.ten_toa_nha}-{item.ma_can_ho ?? "x"}
-                  {item.truc_can_ho}
-                </div>
-              </td>
-              <td className="align-middle" style={{ width: "10%" }}>
-                {item.chu_can_ho ?? "x"}
-              </td>
-              <td className="align-middle" style={{ width: "10%" }}>
-                {item.so_dien_thoai ?? "x"}
-              </td>
-              <td className="align-middle">
-                {item.gia_ban.toLocaleString("en-US")}
-              </td>
-              <td className="align-middle">
-                {item.gia_thue.toLocaleString("en-US")}
-              </td>
-              <td className="w-25 text-start align-middle">
-                - {item.ten_du_an} - {item.dien_tich}m² - {item.so_phong_ngu}PN
-                {item.so_phong_tam}WC - {item.huong_can_ho}
-                <br />- {item.loai_can_ho}
-                <br />- {item.noi_that}
-                <br />- {item.ghi_chu}
-              </td>
-              <td className="align-middle" style={{ width: "15%" }}>
-                Trạng thái:
-                <strong>
-                  {item.trang_thai === 0 ? " Đang chờ" : " Đã duyệt"}
-                </strong>
-                <br />
-                Đã gửi bởi: <strong>{item.nguoi_gui}</strong> <br />
-                <strong>{item.thong_tin}</strong>
-              </td>
-              <td className="align-middle">
-                <button
-                  onClick={() => showImage(item)}
-                  type="button"
-                  className={`btn w-75 ${
-                    item.hinh_anh ? "btn-warning" : "btn-secondary"
-                  }`}
-                >
-                  Hình ảnh
-                </button>
-                <br />
-                {role !== modulePhanQuyen.sale && (
+          {data.map((item, index) => {
+            const styles = {
+              ma_can_ho: {
+                display: "inline-block",
+                backgroundColor: item.danh_dau,
+                padding: "1px 5px",
+                borderRadius: "5px",
+              },
+              w_10: { width: "10%" },
+              w_15: { width: "15%" },
+            };
+            return (
+              <tr key={item.id}>
+                <td className="align-middle">{index + 1}</td>
+                <td className="align-middle">
+                  <div style={styles.ma_can_ho}>
+                    {item.ten_toa_nha}-{item.ma_can_ho ?? "x"}
+                    {item.truc_can_ho}
+                  </div>
+                </td>
+                <td className="align-middle" style={styles.w_10}>
+                  {item.chu_can_ho ?? "x"}
+                </td>
+                <td className="align-middle" style={styles.w_10}>
+                  {item.so_dien_thoai ?? "x"}
+                </td>
+                <td className="align-middle">
+                  {item.gia_ban.toLocaleString("en-US")}
+                </td>
+                <td className="align-middle">
+                  {item.gia_thue.toLocaleString("en-US")}
+                </td>
+                <td className="w-25 text-start align-middle">
+                  - {item.ten_du_an} - {item.dien_tich}m² - {item.so_phong_ngu}
+                  PN
+                  {item.so_phong_tam}WC - {item.huong_can_ho}
+                  <br />- {item.loai_can_ho}
+                  <br />- {item.noi_that}
+                  <br />- {item.ghi_chu}
+                </td>
+                <td className="align-middle" style={styles.w_15}>
+                  Trạng thái:
+                  <strong>{trangThaiYeuCau[item.trang_thai]}</strong>
+                  <br />
+                  Đã gửi bởi: <strong>{item.nguoi_gui}</strong> <br />
+                  <strong>{item.thong_tin}</strong>
+                </td>
+                <td className="align-middle">
                   <button
+                    onClick={() => showImage(item)}
                     type="button"
-                    onClick={() => duyetYeuCau(item.id)}
-                    className="btn w-75 btn-primary my-2"
+                    style={{ fontSize: 10 }}
+                    className={`btn w-75 ${
+                      item.hinh_anh ? "btn-warning" : "btn-secondary"
+                    }`}
                   >
-                    Duyệt
+                    Hình ảnh
                   </button>
-                )}
-              </td>
-            </tr>
-          ))}
+                  <br />
+                  {role !== modulePhanQuyen.sale && (
+                    <button
+                      style={{ fontSize: 12 }}
+                      type="button"
+                      onClick={() => duyetYeuCau(item.id)}
+                      className="btn w-75 btn-primary my-2"
+                    >
+                      Duyệt
+                    </button>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

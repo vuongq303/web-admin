@@ -598,14 +598,14 @@ export default function KhachHang() {
                 </td>
                 <td className="align-middle">{item.loai_giao_dich}</td>
                 <td className="align-middle">
-                  {dateToText(item.ngay_ki_hop_dong)}
+                  {item.ngay_ki_hop_dong && dateToText(item.ngay_ki_hop_dong)}
                 </td>
                 <td className="align-middle">{item.ho_ten_chu_nha}</td>
                 <td className="align-middle" style={styles.w_10}>
                   {item.so_dien_thoai_chu_nha}
                 </td>
                 <td className="align-middle" style={styles.w_10}>
-                  {dateToText(item.ngay_sinh)}
+                  {item.ngay_sinh && dateToText(item.ngay_sinh)}
                 </td>
                 <td className="align-middle" style={styles.w_10}>
                   {phiMoiGioi[item.phi_moi_gioi]}
