@@ -1,12 +1,10 @@
 var express = require("express");
-const env = require("../env/get_env");
 var router = express.Router();
-const jwt = require("jsonwebtoken");
+const authentication = require("../middleware/authentication");
 
-router.get("/phan-quyen", function (req, res) {
+router.get("/phan-quyen", authentication, function (req, res) {
   try {
-    const jwt_token = req.headers["authorization"];
-    const data = jwt.verify(jwt_token, env.JWT_KEY);
+    const data = req.user;
     res.status(200).json(data);
   } catch (error) {
     console.error(error.message);

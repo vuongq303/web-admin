@@ -24,6 +24,6 @@ export const moduleDanhDau = {
 };
 
 export const ketNoi = {
-  url: "http://192.168.1.104:8080/api",
-  backend: "http://192.168.1.104:8080",
+  url: "https://api.quan67.id.vn/api",
+  backend: "https://api.quan67.id.vn",
 };

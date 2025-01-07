@@ -1,15 +1,13 @@
 var express = require("express");
 const { join } = require("path");
-const jwt = require("jsonwebtoken");
 const fs = require("fs");
-const momnet = require("moment");
-const env = require("../env/get_env");
+const momnet = require("moment-timezone");
 const upload = require("../middleware/upload_can_ho");
 const executeQuery = require("../sql/promise");
 const config = require("../config/config");
 const authentication = require("../middleware/authentication");
 var router = express.Router();
-const now = momnet()
+const now = momnet().tz('Asia/Ho_Chi_Minh');
 
 router.get("/", authentication, async function (req, res) {
   try {
@@ -196,6 +194,7 @@ router.post("/them-can-ho", authentication, async (req, res) => {
       type: true,
       id: result.insertId,
       nguoi_cap_nhat: nguoi_cap_nhat,
+      ngay_cap_nhat: ngay_cap_nhat,
     });
   } catch (error) {
     console.error(error.message);
@@ -203,9 +202,9 @@ router.post("/them-can-ho", authentication, async (req, res) => {
   }
 });
 
-router.post("/cap-nhat-can-ho",authentication ,async (req, res) => {
+router.post("/cap-nhat-can-ho", authentication, async (req, res) => {
   try {
-    const data = req.user
+    const data = req.user;
 
     var {
       chu_can_ho,
@@ -254,6 +253,7 @@ router.post("/cap-nhat-can-ho",authentication ,async (req, res) => {
       response: "Cập nhật căn hộ thành công",
       type: true,
       nguoi_cap_nhat: nguoi_cap_nhat,
+      ngay_cap_nhat: ngay_cap_nhat,
     });
   } catch (error) {
     console.error(error.message);
@@ -296,6 +296,7 @@ router.post("/upload-excel", async (req, res) => {
       item.huong_can_ho || "",
       item.ghi_chu || "",
     ]);
+
     await executeQuery(
       `INSERT INTO can_ho (
       ten_du_an, ten_toa_nha, ma_can_ho, truc_can_ho, chu_can_ho, 

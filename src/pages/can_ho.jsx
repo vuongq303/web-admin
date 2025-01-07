@@ -15,7 +15,6 @@ import { downloadImages, exportFileExcel } from "./controllers/function";
 import { ketNoi, modulePhanQuyen } from "../data/module";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
-import { GET } from "../api/method";
 
 export default function CanHo() {
   const limitRow = 50;
@@ -155,13 +154,20 @@ export default function CanHo() {
 
     setLoading(true);
     setIsTimKiem(true);
-    const { status, data } = await axios.get(`${ketNoi.url}/tim-kiem`, {
-      params: dataTimKiem,
-      headers: {
-        Authorization: getRoleNguoiDung(),
-        "Content-Type": "application/json",
-      },
-    });
+    const { status, data } = await axios.get(
+      `${ketNoi.url}/tim-kiem/${
+        role === modulePhanQuyen.admin || role === modulePhanQuyen.quanLy
+          ? "admin"
+          : "sale"
+      }`,
+      {
+        params: dataTimKiem,
+        headers: {
+          Authorization: getRoleNguoiDung(),
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (status === 200) {
       setLoading(false);
@@ -225,6 +231,7 @@ export default function CanHo() {
         }
       }
     } catch (error) {
+      setLoading(false);
       console.error(error);
     }
   }
@@ -271,7 +278,7 @@ export default function CanHo() {
 
   async function themCanHo() {
     try {
-      const data = {
+      const dataPost = {
         ten_toa_nha: tenToaNhaRef.current.value,
         ma_can_ho: maCanHoRef.current.value,
         chu_can_ho: hoTenChuCanHoRef.current.value,
@@ -291,29 +298,25 @@ export default function CanHo() {
         trang_thai: 0,
       };
 
-      const isInvalidInput = (value, allowNegative = false) =>
-        value === "" || (!allowNegative && Number(value) < 0);
-
       if (
-        isInvalidInput(data.ten_khach_hang) ||
-        isInvalidInput(data.so_dien_thoai) ||
-        isInvalidInput(data.ma_can_ho) ||
-        isInvalidInput(data.ten_du_an) ||
-        isInvalidInput(data.so_phong_ngu) ||
-        isInvalidInput(data.so_phong_tam) ||
-        isInvalidInput(data.dien_tich) ||
-        isInvalidInput(data.gia_ban) ||
-        isInvalidInput(data.gia_thue) ||
-        isInvalidInput(data.mo_ta)
+        dataPost.ten_toa_nha === "" ||
+        dataPost.ma_can_ho === "" ||
+        dataPost.truc_can_ho === "" ||
+        dataPost.so_phong_ngu === "" ||
+        dataPost.so_phong_tam === "" ||
+        dataPost.dien_tich === "" ||
+        dataPost.gia_ban === "" ||
+        dataPost.gia_thue === ""
       ) {
         toast.error("Kiểm tra lại dữ liệu");
         return;
       }
+
       setLoading(true);
       const {
-        data: { response: message, type, id, nguoi_cap_nhat },
+        data: { response, type, id, nguoi_cap_nhat, ngay_cap_nhat },
         status,
-      } = await axios.post(`${ketNoi.url}/can-ho/them-can-ho`, data, {
+      } = await axios.post(`${ketNoi.url}/can-ho/them-can-ho`, dataPost, {
         headers: {
           Authorization: getRoleNguoiDung(),
           "Content-Type": "application/json",
@@ -321,16 +324,20 @@ export default function CanHo() {
       });
 
       if (status === 200) {
-        toast.success(message);
+        toast.success(response);
+        setLoading(false);
         if (type) {
-          setLoading(false);
           setShowModal(false);
-          setData((pre) => [{ id, nguoi_cap_nhat, ...data }, ...pre]);
+          setData((pre) => [
+            { id, nguoi_cap_nhat, ngay_cap_nhat, ...dataPost },
+            ...pre,
+          ]);
         }
       }
     } catch (error) {
-      console.error("Lỗi khi thêm căn hộ:", error);
+      setLoading(false);
       toast.error("Đã xảy ra lỗi. Vui lòng thử lại!");
+      console.error("Lỗi khi thêm căn hộ:", error);
     }
   }
 
@@ -362,6 +369,7 @@ export default function CanHo() {
           setData(data);
         }
       } catch (error) {
+        setLoading(false);
         console.log(error);
       }
     })();
@@ -411,25 +419,19 @@ export default function CanHo() {
         id: dataUpdate.id,
       };
 
-      const isInvalidInput = (value, allowNegative = false) =>
-        value === "" || (!allowNegative && Number(value) < 0);
-
       if (
-        isInvalidInput(data.ten_khach_hang) ||
-        isInvalidInput(data.so_dien_thoai) ||
-        isInvalidInput(data.ten_du_an) ||
-        isInvalidInput(data.so_phong_ngu) ||
-        isInvalidInput(data.so_phong_tam) ||
-        isInvalidInput(data.dien_tich) ||
-        isInvalidInput(data.gia_ban) ||
-        isInvalidInput(data.gia_thue) ||
-        isInvalidInput(data.mo_ta)
+        dataPost.so_phong_ngu === "" ||
+        dataPost.so_phong_tam === "" ||
+        dataPost.dien_tich === "" ||
+        dataPost.gia_ban === "" ||
+        dataPost.gia_thue === ""
       ) {
         toast.error("Kiểm tra lại dữ liệu");
         return;
       }
+      setLoading(true);
       const {
-        data: { response: message, type, nguoi_cap_nhat },
+        data: { response: message, type, nguoi_cap_nhat, ngay_cap_nhat },
         status,
       } = await axios.post(`${ketNoi.url}/can-ho/cap-nhat-can-ho`, dataPost, {
         headers: {
@@ -440,12 +442,13 @@ export default function CanHo() {
 
       if (status === 200) {
         toast.success(message);
+        setLoading(false);
         if (type) {
           setShowModalUpdate(false);
           setData((prev) =>
             prev.map((item) =>
               item.id === dataPost.id
-                ? { ...item, ...dataPost, nguoi_cap_nhat }
+                ? { ...item, ...dataPost, nguoi_cap_nhat, ngay_cap_nhat }
                 : item
             )
           );

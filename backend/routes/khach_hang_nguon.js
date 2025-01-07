@@ -1,14 +1,12 @@
 var express = require("express");
 var router = express.Router();
-const jwt = require("jsonwebtoken");
 const executeQuery = require("../sql/promise");
-const env = require("../env/get_env");
 const config = require("../config/config");
+const authentication = require("../middleware/authentication");
 
-router.get("/", async function (req, res) {
+router.get("/", authentication, async function (req, res) {
   try {
-    const jwt_token = req.headers["authorization"];
-    const data = jwt.verify(jwt_token, env.JWT_KEY);
+    const data = req.user;
 
     if (data.phan_quyen !== config.admin && data.phan_quyen !== config.quanLy) {
       return res.status(401).send([]);

@@ -1,18 +1,16 @@
 var express = require("express");
 var router = express.Router();
 const uuid = require("uuid");
-const env = require("../env/get_env");
-const jwt = require("jsonwebtoken");
 const executeQuery = require("../sql/promise");
 const moment = require("moment");
 const { join } = require("path");
 const fs = require("fs");
 const config = require("../config/config");
+const authentication = require("../middleware/authentication");
 
-router.get("/danh-sach-gui-yeu-cau", async function (req, res) {
+router.get("/danh-sach-gui-yeu-cau", authentication, async function (req, res) {
   try {
-    const jwt_token = req.headers["authorization"];
-    const data = jwt.verify(jwt_token, env.JWT_KEY);
+    const data = req.user;
 
     var sql = `SELECT can_ho.danh_dau,
     can_ho.gia_ban, can_ho.gia_thue, can_ho.ten_du_an,
@@ -44,12 +42,14 @@ router.get("/danh-sach-gui-yeu-cau", async function (req, res) {
   }
 });
 
-router.get("/danh-sach-duyet-yeu-cau", async function (req, res) {
-  try {
-    const jwt_token = req.headers["authorization"];
-    const data = jwt.verify(jwt_token, env.JWT_KEY);
+router.get(
+  "/danh-sach-duyet-yeu-cau",
+  authentication,
+  async function (req, res) {
+    try {
+      const data = req.user;
 
-    var sql = `SELECT can_ho.danh_dau,
+      var sql = `SELECT can_ho.danh_dau,
     can_ho.gia_ban, can_ho.gia_thue, can_ho.ten_du_an,
     can_ho.dien_tich, can_ho.so_phong_ngu, can_ho.chu_can_ho,
     can_ho.so_phong_tam, can_ho.huong_can_ho,can_ho.so_dien_thoai,
@@ -59,8 +59,11 @@ router.get("/danh-sach-duyet-yeu-cau", async function (req, res) {
     JOIN yeu_cau ON yeu_cau.can_ho = can_ho.id 
     WHERE yeu_cau.trang_thai = '1' AND yeu_cau.nguoi_gui = '${data.tai_khoan}'`;
 
-    if (data.phan_quyen === config.admin || data.phan_quyen === config.quanLy) {
-      sql = `SELECT can_ho.danh_dau, can_ho.chu_can_ho,
+      if (
+        data.phan_quyen === config.admin ||
+        data.phan_quyen === config.quanLy
+      ) {
+        sql = `SELECT can_ho.danh_dau, can_ho.chu_can_ho,
       can_ho.so_dien_thoai, can_ho.gia_ban, can_ho.gia_thue,
       can_ho.ten_du_an, can_ho.dien_tich, can_ho.so_phong_ngu,
       can_ho.so_phong_tam, can_ho.huong_can_ho,
@@ -69,17 +72,18 @@ router.get("/danh-sach-duyet-yeu-cau", async function (req, res) {
       can_ho.truc_can_ho, can_ho.hinh_anh ,yeu_cau.*
       FROM can_ho JOIN yeu_cau ON yeu_cau.can_ho = can_ho.id 
       WHERE yeu_cau.trang_thai = '1'`;
+      }
+
+      const result = await executeQuery(sql);
+      res.status(200).send(result);
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).send({ response: [], type: false });
     }
-
-    const result = await executeQuery(sql);
-    res.status(200).send(result);
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).send({ response: [], type: false });
   }
-});
+);
 
-router.post("/gui-yeu-cau", async function (req, res) {
+router.post("/gui-yeu-cau", authentication, async function (req, res) {
   try {
     const { can_ho } = req.body;
     const jsonPath = join(__dirname, "..", "temp", "yeu_cau.json");
@@ -88,8 +92,7 @@ router.post("/gui-yeu-cau", async function (req, res) {
     const end = now.add(12, "hour").format("HH:mm DD-MM-YYYY");
 
     const id = uuid.v4();
-    const jwt_token = req.headers["authorization"];
-    const data = jwt.verify(jwt_token, env.JWT_KEY);
+    const data = req.user;
 
     const schedule = {
       tai_khoan: data.tai_khoan,
@@ -118,7 +121,13 @@ router.post("/gui-yeu-cau", async function (req, res) {
     const sql = `INSERT INTO yeu_cau (id, can_ho, trang_thai, nguoi_gui, thong_tin) 
     VALUE(?, ?, ?, ?, ?)`;
 
-    await executeQuery(sql, [id, can_ho, 0, data.tai_khoan, `${data.tai_khoan} đã gửi lúc ${start}`]);
+    await executeQuery(sql, [
+      id,
+      can_ho,
+      0,
+      data.tai_khoan,
+      `${data.tai_khoan} đã gửi lúc ${start}`,
+    ]);
     const fileData = fs.readFileSync(jsonPath, "utf8");
     const yeuCauArray = JSON.parse(fileData);
     const isDuplicate = yeuCauArray.some(
@@ -136,12 +145,10 @@ router.post("/gui-yeu-cau", async function (req, res) {
   }
 });
 
-router.post("/duyet-yeu-cau", async function (req, res) {
+router.post("/duyet-yeu-cau", authentication, async function (req, res) {
   try {
     const { id } = req.body;
-
-    const jwt_token = req.headers["authorization"];
-    const data = jwt.verify(jwt_token, env.JWT_KEY);
+    const data = req.user;
 
     let now = moment();
     const start = now.format("HH:mm DD-MM-YYYY");
@@ -155,6 +162,5 @@ router.post("/duyet-yeu-cau", async function (req, res) {
     res.status(500).json({ response: "Error", type: false });
   }
 });
-
 
 module.exports = router;

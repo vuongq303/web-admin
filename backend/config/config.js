@@ -1,6 +1,6 @@
 module.exports = {
-  url: "http://192.168.127.55:8080",
-  client: "http://localhost:3000",
+  url: "https://api.quan67.id.vn",
+  client: "https://quan67.id.vn",
   gray: "gray",
   yellow: "yellow",
   orange: "orange",
@@ -14,4 +14,8 @@ module.exports = {
   ngungGiaoDich: "Ngừng giao dịch",
   dangLamViec: "Đang làm việc",
   daNghiLam: "Đã nghỉ làm",
+  giaBanTangDan: "Giá bán tăng dần",
+  giaBanGiamDan: "Giá bán giảm dần",
+  giaThueTangDan: "Giá thuê tăng dần",
+  giaThueGiamDan: "Giá thuê giảm dần",
 };
