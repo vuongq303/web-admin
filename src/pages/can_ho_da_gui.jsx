@@ -99,7 +99,9 @@ export default function CanHoDaGui() {
     if (item.hinh_anh) {
       let arrayHinhAnh = item.hinh_anh.split(",");
       setShowImageData(
-        arrayHinhAnh.map((img) => `${ketNoi.backend}/can-ho/${item.can_ho}/${img}`)
+        arrayHinhAnh.map(
+          (img) => `${ketNoi.backend}/can-ho/${item.can_ho}/${img}`
+        )
       );
     } else {
       setShowImageData([]);
@@ -236,6 +238,7 @@ export default function CanHoDaGui() {
               },
               w_10: { width: "10%" },
               w_15: { width: "15%" },
+              f_: { fontSize: 14 },
             };
             return (
               <tr key={item.id}>
@@ -277,7 +280,7 @@ export default function CanHoDaGui() {
                   <button
                     onClick={() => showImage(item)}
                     type="button"
-                    style={{ fontSize: 10 }}
+                    style={styles.f_}
                     className={`btn w-75 ${
                       item.hinh_anh ? "btn-warning" : "btn-secondary"
                     }`}
@@ -287,7 +290,7 @@ export default function CanHoDaGui() {
                   <br />
                   {role !== modulePhanQuyen.sale && (
                     <button
-                      style={{ fontSize: 12 }}
+                      style={styles.f_}
                       type="button"
                       onClick={() => duyetYeuCau(item.id)}
                       className="btn w-75 btn-primary my-2"

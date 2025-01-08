@@ -164,7 +164,7 @@ export default function CanHoDaDuyet() {
               w_15: { width: "15%" },
               w_5: { width: "5%" },
               f_: {
-                fontSize: 12,
+                fontSize: 14,
               },
             };
             return (

@@ -208,19 +208,18 @@ router.get("/sale", authentication, async function (req, res) {
       sql += ` AND ${filter}`;
     }
 
-    sql += " ORDER BY ";
     switch (loc_gia) {
       case config.giaBanTangDan:
-        sql += "gia_ban ASC";
+        sql += " ORDER BY gia_ban ASC";
         break;
       case config.giaBanGiamDan:
-        sql += "gia_ban DESC";
+        sql += " ORDER BY gia_ban DESC";
         break;
       case config.giaThueTangDan:
-        sql += "gia_thue ASC";
+        sql += " ORDER BY gia_thue ASC";
         break;
       case config.giaThueGiamDan:
-        sql += "gia_thue DESC";
+        sql += " ORDER BY gia_thue DESC";
         break;
       default:
         break;
