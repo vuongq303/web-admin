@@ -24,6 +24,6 @@ export const moduleDanhDau = {
 };
 
 export const ketNoi = {
-  url: "http://192.168.1.226:8080/api",
-  backend: "http://192.168.1.226:8080",
+  url: "https://api.connecthome.vn/api",
+  backend: "https://api.connecthome.vn",
 };

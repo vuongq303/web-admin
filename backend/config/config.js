@@ -1,6 +1,6 @@
 module.exports = {
-  url: "https://api.quan67.id.vn",
-  client: "http://localhost:3000",
+  url: "https://api.connecthome.vn",
+  client: "https://connecthome.vn",
   gray: "gray",
   yellow: "yellow",
   orange: "orange",

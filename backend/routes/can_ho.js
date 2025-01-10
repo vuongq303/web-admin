@@ -1,13 +1,12 @@
 var express = require("express");
 const { join } = require("path");
 const fs = require("fs");
-const momnet = require("moment-timezone");
+const moment = require("moment");
 const upload = require("../middleware/upload_can_ho");
 const executeQuery = require("../sql/promise");
 const config = require("../config/config");
 const authentication = require("../middleware/authentication");
 var router = express.Router();
-const now = momnet().tz('Asia/Ho_Chi_Minh');
 
 router.get("/", authentication, async function (req, res) {
   try {
@@ -18,7 +17,7 @@ router.get("/", authentication, async function (req, res) {
     var sql = `SELECT id, danh_dau, gia_ban, gia_thue, trang_thai, ten_du_an,
     dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that,
     ghi_chu, nguoi_cap_nhat, ngay_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho FROM can_ho
-    WHERE trang_thai = '0' LIMIT ? OFFSET ?`;
+    WHERE trang_thai = '0' ORDER BY ngay_cap_nhat DESC LIMIT ? OFFSET ?`;
 
     if (data.phan_quyen === config.admin || data.phan_quyen === config.quanLy) {
       sql = `SELECT * FROM can_ho ORDER BY trang_thai ASC LIMIT ? OFFSET ?`;
@@ -165,6 +164,7 @@ router.post("/them-can-ho", authentication, async (req, res) => {
         VALUES (?, ? ,? ,? ,? ,? , ?, ?, ? ,? ,? , ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     const nguoi_cap_nhat = data.ho_ten;
+    let now = moment();
     const ngay_cap_nhat = now.format("YYYY-MM-DD");
 
     const result = await executeQuery(sqlCanHo, [
@@ -229,6 +229,7 @@ router.post("/cap-nhat-can-ho", authentication, async (req, res) => {
         nguoi_cap_nhat = ?, ngay_cap_nhat = ?, danh_dau = ? WHERE id = ?`;
 
     const nguoi_cap_nhat = data.ho_ten;
+    let now = moment();
     const ngay_cap_nhat = now.format("YYYY-MM-DD");
 
     await executeQuery(sqlCanHo, [
