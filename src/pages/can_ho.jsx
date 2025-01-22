@@ -1,20 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-import axios from "axios";
 import { Button, Modal, Form } from "react-bootstrap";
 import * as xlsx from "xlsx";
-import {
-  danhDauCanHo,
-  dateToText,
-  getRoleNguoiDung,
-  locGiaCanHo,
-} from "../services/utils";
+import { danhDauCanHo, dateToText, locGiaCanHo } from "../services/utils";
 import PreviewImage from "./components/preview_image";
 import { toast, ToastContainer } from "react-toastify";
-import { dataCanHoDefault, excelImportFormat } from "../data/default_data";
 import { downloadImages, exportFileExcel } from "./controllers/function";
-import { ketNoi, modulePhanQuyen } from "../data/module";
+import {
+  baseURL,
+  modulePhanQuyen,
+  dataCanHoDefault,
+  excelImportFormat,
+} from "../data/module";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { REQUEST } from "../api/method";
 
 export default function CanHo() {
   const limitRow = 50;
@@ -71,7 +70,7 @@ export default function CanHo() {
     if (item.hinh_anh) {
       let arrayHinhAnh = item.hinh_anh.split(",");
       setShowImageData(
-        arrayHinhAnh.map((img) => `${ketNoi.backend}/can-ho/${item.id}/${img}`)
+        arrayHinhAnh.map((img) => `${baseURL}/can-ho/${item.id}/${img}`)
       );
     } else {
       setShowImageData([]);
@@ -84,27 +83,16 @@ export default function CanHo() {
     try {
       setLoading(true);
       const {
-        status,
-        data: { response, type },
-      } = await axios.post(
-        `${ketNoi.url}/yeu-cau/gui-yeu-cau`,
-        { can_ho: id },
-        {
-          headers: {
-            Authorization: getRoleNguoiDung(),
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (status === 200) {
-        setLoading(false);
-        if (type) {
-          toast.success(response);
-          return;
-        }
+        data: { response, status },
+      } = await REQUEST.post("/yeu-cau/gui-yeu-cau", { can_ho: id });
+      setLoading(false);
+      if (status) {
         toast.success(response);
+        return;
       }
+      toast.success(response);
     } catch (error) {
+      setLoading(false);
       console.error(error.message);
       toast.error(error.message);
     }
@@ -113,20 +101,14 @@ export default function CanHo() {
   async function getData(page) {
     try {
       const {
-        status,
-        data: { response, role },
-      } = await axios.get(`${ketNoi.url}/can-ho`, {
-        headers: {
-          Authorization: getRoleNguoiDung(),
-          "Content-Type": "application/json",
-        },
+        data: { response, role, status },
+      } = await REQUEST.get("/can-ho", {
         params: {
           limit: limitRow,
           offset: (page - 1) * limitRow,
         },
       });
-
-      if (status === 200) {
+      if (status) {
         setRole(role);
         return response;
       }
@@ -154,26 +136,18 @@ export default function CanHo() {
 
     setLoading(true);
     setIsTimKiem(true);
-    const { status, data } = await axios.get(
-      `${ketNoi.url}/tim-kiem/${
+    const { data } = await REQUEST.get(
+      `/tim-kiem/${
         role === modulePhanQuyen.admin || role === modulePhanQuyen.quanLy
           ? "admin"
           : "sale"
       }`,
       {
         params: dataTimKiem,
-        headers: {
-          Authorization: getRoleNguoiDung(),
-          "Content-Type": "application/json",
-        },
       }
     );
-
-    if (status === 200) {
-      setLoading(false);
-      return data;
-    }
-    return [];
+    setLoading(false);
+    return data;
   }
 
   async function lamMoi() {
@@ -207,28 +181,23 @@ export default function CanHo() {
       files.forEach((file) => {
         formData.append("hinh_anh", file);
       });
-
+      setLoading(true);
       const {
-        status,
-        data: { response: message, data: images, type },
-      } = await axios.post(`${ketNoi.url}/can-ho/them-anh-can-ho`, formData);
-
-      if (status === 200) {
-        toast.success(message);
-        if (type) {
-          setShowImageData(
-            images.map(
-              (img) => `${ketNoi.backend}/can-ho/${dataUpdate.id}/${img}`
-            )
-          );
-          setData((prevData) =>
-            prevData.map((item) =>
-              item.id === dataUpdate.id
-                ? { ...item, hinh_anh: images.join(",") }
-                : item
-            )
-          );
-        }
+        data: { response: message, data: images, status },
+      } = await REQUEST.post("/can-ho/them-anh-can-ho", formData);
+      toast.success(message);
+      setLoading(false);
+      if (status) {
+        setShowImageData(
+          images.map((img) => `${baseURL}/can-ho/${dataUpdate.id}/${img}`)
+        );
+        setData((prevData) =>
+          prevData.map((item) =>
+            item.id === dataUpdate.id
+              ? { ...item, hinh_anh: images.join(",") }
+              : item
+          )
+        );
       }
     } catch (error) {
       setLoading(false);
@@ -244,34 +213,31 @@ export default function CanHo() {
 
     const listImgPath = showImageData[index].split("/");
     const imgPath = listImgPath[listImgPath.length - 1];
-
+    setLoading(true);
     try {
       const {
-        status,
-        data: { response: message, data: images, type },
-      } = await axios.post(`${ketNoi.url}/can-ho/xoa-anh-can-ho`, {
+        data: { response: message, data: images, status },
+      } = await REQUEST.post("/can-ho/xoa-anh-can-ho", {
         id: dataUpdate.id,
         filename: imgPath,
       });
+      toast.success(message);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(message);
-        if (type) {
-          setShowImageData(
-            images.map(
-              (img) => `${ketNoi.backend}/can-ho/${dataUpdate.id}/${img}`
-            )
-          );
-          setData((prevData) =>
-            prevData.map((item) =>
-              item.id === dataUpdate.id
-                ? { ...item, hinh_anh: images.join(",") }
-                : item
-            )
-          );
-        }
+      if (status) {
+        setShowImageData(
+          images.map((img) => `${baseURL}/can-ho/${dataUpdate.id}/${img}`)
+        );
+        setData((prevData) =>
+          prevData.map((item) =>
+            item.id === dataUpdate.id
+              ? { ...item, hinh_anh: images.join(",") }
+              : item
+          )
+        );
       }
     } catch (error) {
+      setLoading(false);
       console.log(error);
     }
   };
@@ -314,25 +280,17 @@ export default function CanHo() {
 
       setLoading(true);
       const {
-        data: { response, type, id, nguoi_cap_nhat, ngay_cap_nhat },
-        status,
-      } = await axios.post(`${ketNoi.url}/can-ho/them-can-ho`, dataPost, {
-        headers: {
-          Authorization: getRoleNguoiDung(),
-          "Content-Type": "application/json",
-        },
-      });
+        data: { response, status, id, nguoi_cap_nhat, ngay_cap_nhat },
+      } = await REQUEST.post("/can-ho/them-can-ho", dataPost);
+      toast.success(response);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(response);
-        setLoading(false);
-        if (type) {
-          setShowModal(false);
-          setData((pre) => [
-            { id, nguoi_cap_nhat, ngay_cap_nhat, ...dataPost },
-            ...pre,
-          ]);
-        }
+      if (status) {
+        setShowModal(false);
+        setData((pre) => [
+          { id, nguoi_cap_nhat, ngay_cap_nhat, ...dataPost },
+          ...pre,
+        ]);
       }
     } catch (error) {
       setLoading(false);
@@ -345,29 +303,24 @@ export default function CanHo() {
     (async function () {
       setLoading(true);
       try {
-        const { status, data: response } = await axios.get(
-          `${ketNoi.url}/thong-tin-du-an`
-        );
+        const { data: response } = await REQUEST.get("/thong-tin-du-an");
+        const { toa_nha, huong_can_ho, loai_can_ho, noi_that, truc_can_ho } =
+          response;
 
-        if (status === 200) {
-          const { toa_nha, huong_can_ho, loai_can_ho, noi_that, truc_can_ho } =
-            response;
+        const listDuAn = [...new Set(toa_nha.map((item) => item.ten_du_an))];
+        const listToaNha = toa_nha.map((item) => item.ten_toa_nha);
 
-          const listDuAn = [...new Set(toa_nha.map((item) => item.ten_du_an))];
-          const listToaNha = toa_nha.map((item) => item.ten_toa_nha);
+        setDataDuAn(listDuAn);
+        setDataToaNha(listToaNha);
+        setDataToaNhaDuAn(toa_nha);
+        setDataHuongCanHo(huong_can_ho);
+        setDataLoaiCanHo(loai_can_ho);
+        setDataNoiThat(noi_that);
+        setDataTrucCanHo(truc_can_ho);
 
-          setDataDuAn(listDuAn);
-          setDataToaNha(listToaNha);
-          setDataToaNhaDuAn(toa_nha);
-          setDataHuongCanHo(huong_can_ho);
-          setDataLoaiCanHo(loai_can_ho);
-          setDataNoiThat(noi_that);
-          setDataTrucCanHo(truc_can_ho);
-
-          const data = await getData(pages);
-          setLoading(false);
-          setData(data);
-        }
+        const data = await getData(pages);
+        setLoading(false);
+        setData(data);
       } catch (error) {
         setLoading(false);
         console.log(error);
@@ -431,28 +384,20 @@ export default function CanHo() {
       }
       setLoading(true);
       const {
-        data: { response: message, type, nguoi_cap_nhat, ngay_cap_nhat },
-        status,
-      } = await axios.post(`${ketNoi.url}/can-ho/cap-nhat-can-ho`, dataPost, {
-        headers: {
-          Authorization: getRoleNguoiDung(),
-          "Content-Type": "application/json",
-        },
-      });
+        data: { response: message, status, nguoi_cap_nhat, ngay_cap_nhat },
+      } = await REQUEST.post("/can-ho/cap-nhat-can-ho", dataPost);
+      toast.success(message);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(message);
-        setLoading(false);
-        if (type) {
-          setShowModalUpdate(false);
-          setData((prev) =>
-            prev.map((item) =>
-              item.id === dataPost.id
-                ? { ...item, ...dataPost, nguoi_cap_nhat, ngay_cap_nhat }
-                : item
-            )
-          );
-        }
+      if (status) {
+        setShowModalUpdate(false);
+        setData((prev) =>
+          prev.map((item) =>
+            item.id === dataPost.id
+              ? { ...item, ...dataPost, nguoi_cap_nhat, ngay_cap_nhat }
+              : item
+          )
+        );
       }
     } catch (error) {
       console.error("Lỗi khi cập nhật căn hộ:", error);
@@ -503,17 +448,14 @@ export default function CanHo() {
           .filter((item) => item !== null);
 
         setLoading(true);
-        const response = await axios.post(
-          `${ketNoi.url}/can-ho/upload-excel`,
+        const { data: response } = await REQUEST.post(
+          "/can-ho/upload-excel",
           validData
         );
-
-        if (response.status === 200) {
-          setLoading(false);
-          setIsDisableLoadMore(true);
-          toast.success(response.data);
-          setData((pre) => [...pre, ...validData]);
-        }
+        setLoading(false);
+        setIsDisableLoadMore(true);
+        toast.success(response);
+        setData((pre) => [...pre, ...validData]);
       };
 
       reader.readAsArrayBuffer(fileExcel);
@@ -533,24 +475,21 @@ export default function CanHo() {
       danh_dau: checked ? "" : "gray",
     };
     const dataPost = { ...data, id };
+    setLoading(true);
 
     try {
       const {
-        status,
-        data: { response, type },
-      } = await axios.post(
-        `${ketNoi.url}/can-ho/cap-nhat-trang-thai`,
-        dataPost
-      );
-      if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setData((prev) =>
-            prev.map((item) => (item.id === id ? { ...item, ...data } : item))
-          );
-        }
+        data: { response, status },
+      } = await REQUEST.post("/can-ho/cap-nhat-trang-thai", dataPost);
+      toast.success(response);
+      setLoading(false);
+      if (status) {
+        setData((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, ...data } : item))
+        );
       }
     } catch (error) {
+      setLoading(false);
       console.error(error);
     }
   }

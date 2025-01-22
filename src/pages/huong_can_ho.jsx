@@ -1,9 +1,8 @@
-import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import Loading from "./components/loading";
-import { ketNoi } from "../data/module";
+import { REQUEST } from "../api/method";
 
 export default function HuongCanHo() {
   const [data, setData] = useState([]);
@@ -16,13 +15,12 @@ export default function HuongCanHo() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await axios.get(
-          `${ketNoi.url}/thong-tin-du-an/huong-can-ho`
-        );
+        const { data } = await REQUEST.get("/thong-tin-du-an/huong-can-ho");
         setLoading(false);
         setData(data);
       } catch (error) {
-        console.log(error);
+        setLoading(false);
+        console.error(error);
       }
     })();
   }, []);
@@ -31,6 +29,7 @@ export default function HuongCanHo() {
     setDataUpdate(item);
     setShowModalUpdate(true);
   }
+
   async function themhuongCanHo() {
     try {
       const dataPost = {
@@ -41,25 +40,21 @@ export default function HuongCanHo() {
         toast.error("Dữ liệu trống");
         return;
       }
+
       setLoading(true);
       const {
-        status,
-        data: { response, type, id },
-      } = await axios.post(
-        `${ketNoi.url}/thong-tin-du-an/them-huong-can-ho`,
-        dataPost
-      );
+        data: { response, status, id },
+      } = await REQUEST.post("/thong-tin-du-an/them-huong-can-ho", dataPost);
+      toast.success(response);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setLoading(false);
-          setShowModal(false);
-          setData((pre) => [...pre, { id, ...dataPost }]);
-        }
+      if (status) {
+        setShowModal(false);
+        setData((pre) => [...pre, { id, ...dataPost }]);
       }
     } catch (error) {
-      console.log(error);
+      setLoading(false);
+      console.error(error);
     }
   }
 
@@ -76,24 +71,22 @@ export default function HuongCanHo() {
       }
       setLoading(true);
       const {
-        status,
-        data: { response, type },
-      } = await axios.post(
-        `${ketNoi.url}/thong-tin-du-an/cap-nhat-huong-can-ho`,
+        data: { response, status },
+      } = await REQUEST.post(
+        "/thong-tin-du-an/cap-nhat-huong-can-ho",
         dataPost
       );
+      toast.success(response);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setLoading(false);
-          setShowModalUpdate(false);
-          setData((pre) =>
-            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
-          );
-        }
+      if (status) {
+        setShowModalUpdate(false);
+        setData((pre) =>
+          pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+        );
       }
     } catch (error) {
+      setLoading(false);
       console.log(error);
     }
   }
@@ -102,7 +95,7 @@ export default function HuongCanHo() {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={200}
+        autoClose={500}
         hideProgressBar={false}
       />
       <Loading loading={loading} />

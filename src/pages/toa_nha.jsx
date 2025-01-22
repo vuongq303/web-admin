@@ -1,9 +1,8 @@
-import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
 import Loading from "./components/loading";
-import { ketNoi } from "../data/module";
+import { REQUEST } from "../api/method";
 
 export default function DuAn() {
   const [data, setData] = useState([]);
@@ -20,9 +19,7 @@ export default function DuAn() {
       try {
         const {
           data: { toa_nha, du_an },
-        } = await axios.get(
-           `${ketNoi.url}/thong-tin-du-an/toa-nha`
-        );
+        } = await REQUEST.get("/thong-tin-du-an/toa-nha");
 
         setLoading(false);
         setData(toa_nha);
@@ -48,20 +45,14 @@ export default function DuAn() {
 
     try {
       const {
-        status,
-        data: { response, type, id },
-      } = await axios.post(
-        `${ketNoi.url}/thong-tin-du-an/them-toa-nha`,
-        dataPost
-      );
+        data: { response, status, id },
+      } = await REQUEST.post("/thong-tin-du-an/them-toa-nha", dataPost);
+      toast.success(response);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setLoading(false);
-          setShowModal(false);
-          setData((pre) => [...pre, { id, ...dataPost }]);
-        }
+      if (status) {
+        setShowModal(false);
+        setData((pre) => [...pre, { id, ...dataPost }]);
       }
     } catch (error) {
       toast.error("Lỗi khi thêm tòa nhà");
@@ -89,22 +80,16 @@ export default function DuAn() {
 
     try {
       const {
-        status,
-        data: { response, type },
-      } = await axios.post(
-        `${ketNoi.url}/thong-tin-du-an/cap-nhat-toa-nha`,
-        dataPost
-      );
+        data: { response, status },
+      } = await REQUEST.post("/thong-tin-du-an/cap-nhat-toa-nha", dataPost);
+      toast.success(response);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setLoading(false);
-          setShowModalUpdate(false);
-          setData((pre) =>
-            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
-          );
-        }
+      if (status) {
+        setShowModalUpdate(false);
+        setData((pre) =>
+          pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+        );
       }
     } catch (error) {
       toast.error("Lỗi khi cập nhật tòa nhà");

@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import axios from "axios";
 import { trangThaiYeuCau } from "../services/utils";
 import Loading from "./components/loading";
 import { Button, Modal } from "react-bootstrap";
 import PreviewImage from "./components/preview_image";
 import { downloadImages } from "./controllers/function";
 import { toast, ToastContainer } from "react-toastify";
-import { ketNoi } from "../data/module";
-import { GET } from "../api/method";
+import { baseURL } from "../data/module";
+import { REQUEST } from "../api/method";
 
 export default function CanHoDaDuyet() {
   const [data, setData] = useState([]);
@@ -27,30 +26,28 @@ export default function CanHoDaDuyet() {
       files.forEach((file) => {
         formData.append("hinh_anh", file);
       });
+      setLoading(true);
 
       const {
-        status,
-        data: { response: message, data: images, type },
-      } = await axios.post(`${ketNoi.url}/can-ho/them-anh-can-ho`, formData);
+        data: { response: message, data: images, status },
+      } = await REQUEST.post("/can-ho/them-anh-can-ho", formData);
+      toast.success(message);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(message);
-        if (type) {
-          setShowImageData(
-            images.map(
-              (img) => `${ketNoi.backend}/can-ho/${dataUpdate.can_ho}/${img}`
-            )
-          );
-          setData((prevData) =>
-            prevData.map((item) =>
-              item.can_ho === dataUpdate.can_ho
-                ? { ...item, hinh_anh: images.join(",") }
-                : item
-            )
-          );
-        }
+      if (status) {
+        setShowImageData(
+          images.map((img) => `${baseURL}/can-ho/${dataUpdate.can_ho}/${img}`)
+        );
+        setData((prevData) =>
+          prevData.map((item) =>
+            item.can_ho === dataUpdate.can_ho
+              ? { ...item, hinh_anh: images.join(",") }
+              : item
+          )
+        );
       }
     } catch (error) {
+      setLoading(false);
       console.error(error);
     }
   }
@@ -59,9 +56,7 @@ export default function CanHoDaDuyet() {
     if (item.hinh_anh) {
       let arrayHinhAnh = item.hinh_anh.split(",");
       setShowImageData(
-        arrayHinhAnh.map(
-          (img) => `${ketNoi.backend}/can-ho/${item.can_ho}/${img}`
-        )
+        arrayHinhAnh.map((img) => `${baseURL}/can-ho/${item.can_ho}/${img}`)
       );
     } else {
       setShowImageData([]);
@@ -73,11 +68,12 @@ export default function CanHoDaDuyet() {
   useEffect(() => {
     (async function getData() {
       try {
-        const response = await GET("/yeu-cau/danh-sach-duyet-yeu-cau");
+        const { data } = await REQUEST.get("/yeu-cau/danh-sach-duyet-yeu-cau");
         setLoading(false);
-        setData(response);
+        setData(data);
       } catch (error) {
-        console.log(error);
+        setLoading(false);
+        console.error(error);
       }
     })();
   }, []);

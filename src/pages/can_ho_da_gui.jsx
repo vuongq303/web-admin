@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { getRoleNguoiDung, trangThaiYeuCau } from "../services/utils";
+import { trangThaiYeuCau } from "../services/utils";
 import { toast, ToastContainer } from "react-toastify";
 import Loading from "./components/loading";
 import { downloadImages } from "./controllers/function";
 import PreviewImage from "./components/preview_image";
 import { Button, Modal } from "react-bootstrap";
-import { ketNoi, modulePhanQuyen } from "../data/module";
+import { baseURL, modulePhanQuyen } from "../data/module";
+import { REQUEST } from "../api/method";
 
 export default function CanHoDaGui() {
   const [data, setData] = useState([]);
@@ -28,27 +28,24 @@ export default function CanHoDaGui() {
         formData.append("hinh_anh", file);
       });
 
+      setLoading(true);
       const {
-        status,
-        data: { response: message, data: images, type },
-      } = await axios.post(`${ketNoi.url}/can-ho/them-anh-can-ho`, formData);
+        data: { response: message, data: images, status },
+      } = await REQUEST.post("/can-ho/them-anh-can-ho", formData);
+      toast.success(message);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(message);
-        if (type) {
-          setShowImageData(
-            images.map(
-              (img) => `${ketNoi.backend}/can-ho/${dataUpdate.can_ho}/${img}`
-            )
-          );
-          setData((prevData) =>
-            prevData.map((item) =>
-              item.can_ho === dataUpdate.can_ho
-                ? { ...item, hinh_anh: images.join(",") }
-                : item
-            )
-          );
-        }
+      if (status) {
+        setShowImageData(
+          images.map((img) => `${baseURL}/can-ho/${dataUpdate.can_ho}/${img}`)
+        );
+        setData((prevData) =>
+          prevData.map((item) =>
+            item.can_ho === dataUpdate.can_ho
+              ? { ...item, hinh_anh: images.join(",") }
+              : item
+          )
+        );
       }
     } catch (error) {
       console.error(error);
@@ -63,35 +60,33 @@ export default function CanHoDaGui() {
 
     const listImgPath = showImageData[index].split("/");
     const imgPath = listImgPath[listImgPath.length - 1];
+    setLoading(true);
 
     try {
       const {
-        status,
-        data: { response: message, data: images, type },
-      } = await axios.post(`${ketNoi.url}/can-ho/xoa-anh-can-ho`, {
+        data: { response: message, data: images, status },
+      } = await REQUEST.post("/can-ho/xoa-anh-can-ho", {
         id: dataUpdate.can_ho,
         filename: imgPath,
       });
 
-      if (status === 200) {
-        toast.success(message);
-        if (type) {
-          setShowImageData(
-            images.map(
-              (img) => `${ketNoi.url}/can-ho/${dataUpdate.can_ho}/${img}`
-            )
-          );
-          setData((prevData) =>
-            prevData.map((item) =>
-              item.can_ho === dataUpdate.can_ho
-                ? { ...item, hinh_anh: images.join(",") }
-                : item
-            )
-          );
-        }
+      toast.success(message);
+      setLoading(false);
+
+      if (status) {
+        setShowImageData(
+          images.map((img) => `${baseURL}/can-ho/${dataUpdate.can_ho}/${img}`)
+        );
+        setData((prevData) =>
+          prevData.map((item) =>
+            item.can_ho === dataUpdate.can_ho
+              ? { ...item, hinh_anh: images.join(",") }
+              : item
+          )
+        );
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -99,9 +94,7 @@ export default function CanHoDaGui() {
     if (item.hinh_anh) {
       let arrayHinhAnh = item.hinh_anh.split(",");
       setShowImageData(
-        arrayHinhAnh.map(
-          (img) => `${ketNoi.backend}/can-ho/${item.can_ho}/${img}`
-        )
+        arrayHinhAnh.map((img) => `${baseURL}/can-ho/${item.can_ho}/${img}`)
       );
     } else {
       setShowImageData([]);
@@ -114,27 +107,17 @@ export default function CanHoDaGui() {
     setLoading(true);
     try {
       const {
-        status,
-        data: { response, type },
-      } = await axios.post(
-        `${ketNoi.url}/yeu-cau/duyet-yeu-cau`,
-        { id: id },
-        {
-          headers: {
-            Authorization: getRoleNguoiDung(),
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (status === 200) {
-        setLoading(false);
-        toast.success(response);
-        if (type) {
-          setData((pre) => pre.filter((item) => item.id !== id));
-        }
+        data: { response, status },
+      } = await REQUEST.post("/yeu-cau/duyet-yeu-cau", { id: id });
+      setLoading(false);
+      toast.success(response);
+
+      if (status) {
+        setData((pre) => pre.filter((item) => item.id !== id));
       }
     } catch (error) {
-      console.log(error);
+      setLoading(false);
+      console.error(error);
     }
   }
 
@@ -143,17 +126,12 @@ export default function CanHoDaGui() {
       try {
         const {
           data: { response, role },
-        } = await axios.get(`${ketNoi.url}/yeu-cau/danh-sach-gui-yeu-cau`, {
-          headers: {
-            Authorization: getRoleNguoiDung(),
-            "Content-Type": "application/json",
-          },
-        });
+        } = await REQUEST.get("/yeu-cau/danh-sach-gui-yeu-cau");
         setLoading(false);
         setData(response);
         setRole(role);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     })();
   }, []);

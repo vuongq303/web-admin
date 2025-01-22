@@ -1,12 +1,14 @@
-import axios from "axios";
 import "./css/css.css";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import { ketNoi, modulePhanQuyen } from "../data/module";
+import { modulePhanQuyen } from "../data/module";
+import Loading from "./components/loading";
+import { REQUEST } from "../api/method";
 
 export default function DangNhap() {
   const navigation = useNavigate();
+  const [loading, setLoading] = useState(false);
   const username = useRef();
   const password = useRef();
   const btnLogin = useRef();
@@ -22,34 +24,31 @@ export default function DangNhap() {
       return;
     }
 
+    setLoading(true);
     try {
       const {
-        status,
-        data: { response, type, data, role },
-      } = await axios.post(`${ketNoi.url}/nguoi-dung/dang-nhap`, user, {
-        withCredentials: true,
-      });
-      if (status === 200) {
-        if (type) {
-          localStorage.setItem("role", data);
-          if (
-            role === modulePhanQuyen.admin ||
-            role === modulePhanQuyen.quanLy
-          ) {
-            navigation("/nguoi-dung");
-            return;
-          }
+        data: { response, status, token, role },
+      } = await REQUEST.post("/nguoi-dung/dang-nhap", user);
 
-          if (role === modulePhanQuyen.sale) {
-            navigation("/can-ho");
-            return;
-          }
-          if (role === modulePhanQuyen.cskh) {
-            navigation("/cham-soc-khach-hang");
-            return;
-          }
+      toast.success(response);
+      if (status) {
+        localStorage.setItem("role", token);
+        setLoading(false);
+
+        if (role === modulePhanQuyen.admin || role === modulePhanQuyen.quanLy) {
+          navigation("/nguoi-dung");
+          return;
         }
-        toast.error(response);
+
+        if (role === modulePhanQuyen.sale) {
+          navigation("/can-ho");
+          return;
+        }
+
+        if (role === modulePhanQuyen.cskh) {
+          navigation("/cham-soc-khach-hang");
+          return;
+        }
       }
     } catch (error) {
       toast.error("Lỗi hệ thống");
@@ -60,9 +59,10 @@ export default function DangNhap() {
     <div className="login-container">
       <ToastContainer
         position="bottom-right"
-        autoClose={200}
+        autoClose={500}
         hideProgressBar={false}
       />
+      <Loading loading={loading} />
       <div className="login-content">
         <div className="login-image">
           <img

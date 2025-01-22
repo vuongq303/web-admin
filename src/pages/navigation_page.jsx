@@ -14,9 +14,8 @@ import {
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { getRoleNguoiDung } from "../services/utils";
-import { ketNoi, modulePhanQuyen } from "../data/module";
+import { modulePhanQuyen } from "../data/module";
+import { REQUEST } from "../api/method";
 
 export default function NavigationPage({ children }) {
   return (
@@ -37,18 +36,11 @@ function SizeBar() {
     (async function () {
       try {
         const {
-          status,
           data: { ho_ten, phan_quyen },
-        } = await axios.get(`${ketNoi.url}/phan-quyen`, {
-          headers: {
-            Authorization: getRoleNguoiDung(),
-            "Content-Type": "application/json",
-          },
-        });
-        if (status === 200) {
-          setHoten(ho_ten);
-          setRole(phan_quyen);
-        }
+        } = await REQUEST.get("/phan-quyen");
+
+        setHoten(ho_ten);
+        setRole(phan_quyen);
       } catch (error) {
         console.error(error);
       }

@@ -1,11 +1,14 @@
 const jwt = require("jsonwebtoken");
-const env = require("../env/get_env");
+const env = require("../config/env");
 
 function authentication(req, res, next) {
-  const token = req.headers["authorization"];
-  
+  const token = req.cookies.TOKEN;
+
   if (!token) {
-    return res.status(401).json({ response: "No token provided" });
+    return res.status(401).json({
+      response: "No token provided",
+      status: false,
+    });
   }
 
   try {
@@ -13,7 +16,10 @@ function authentication(req, res, next) {
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({ response: "Invalid token" });
+    res.status(401).json({
+      response: "Invalid token",
+      status: false,
+    });
   }
 }
 

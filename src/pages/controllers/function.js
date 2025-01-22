@@ -1,7 +1,7 @@
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import * as xlsx from "xlsx";
-import { columnMapping, excelExportFormat } from "../../data/default_data";
+import { columnMapping, excelExportFormat } from "../../data/module";
 import { toast } from "react-toastify";
 
 export const downloadImages = async (images, item) => {

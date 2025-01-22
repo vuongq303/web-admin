@@ -1,6 +1,5 @@
 var mysql = require("mysql");
-require("dotenv").config();
-const env = require("../env/get_env");
+const env = require("../config/env");
 
 var connect = mysql.createPool({
   host: env.HOSTNAME,

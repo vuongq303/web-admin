@@ -1,21 +1,20 @@
-import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import {
   dataPhanQuyen,
   dateToText,
-  getRoleNguoiDung,
   gioiTinhNguoiDung,
   trangThaiLamViec,
 } from "../services/utils";
 import Loading from "./components/loading";
 import {
-  ketNoi,
+  baseURL,
   moduleDanhDau,
   modulePhanQuyen,
   moduleTrangThaiLamViec,
 } from "../data/module";
+import { REQUEST } from "../api/method";
 
 export default function NguoiDung() {
   const [data, setData] = useState([]);
@@ -41,12 +40,7 @@ export default function NguoiDung() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await axios.get(`${ketNoi.url}/nguoi-dung`, {
-          headers: {
-            Authorization: getRoleNguoiDung(),
-            "Content-Type": "application/json",
-          },
-        });
+        const { data } = await REQUEST.get("/nguoi-dung");
 
         setLoading(false);
         setData(data);
@@ -100,21 +94,15 @@ export default function NguoiDung() {
       setLoading(true);
 
       const {
-        status,
-        data: { response, type, id },
-      } = await axios.post(
-        `${ketNoi.url}/nguoi-dung/them-nguoi-dung`,
-        formData
-      );
+        data: { response, status, id },
+      } = await REQUEST.post("/nguoi-dung/them-nguoi-dung", formData);
 
-      if (status === 200) {
-        setLoading(false);
-        toast.success(response);
-        if (type) {
-          setShowModal(false);
-          setData((pre) => [...pre, { id, ...dataPost }]);
-          return;
-        }
+      setLoading(false);
+      toast.success(response);
+
+      if (status) {
+        setShowModal(false);
+        setData((pre) => [...pre, { id, ...dataPost }]);
       }
     } catch (error) {
       setLoading(false);
@@ -125,8 +113,8 @@ export default function NguoiDung() {
   async function capNhatNguoiDung() {
     try {
       const dataPost = {
-        tai_khoan: taiKhoanRef.current.value,
         ho_ten: hoTenRef.current.value,
+        tai_khoan: taiKhoanRef.current.value,
         ngay_bat_dau: ngayBatDauRef.current.value,
         so_dien_thoai: soDienThoaiRef.current.value,
         ngay_sinh: ngaySinhRef.current.value,
@@ -139,8 +127,8 @@ export default function NguoiDung() {
 
       const formData = new FormData();
       formData.append("id", dataPost.id);
-      formData.append("tai_khoan", dataPost.tai_khoan);
       formData.append("ho_ten", dataPost.ho_ten);
+      formData.append("tai_khoan", dataPost.tai_khoan);
       formData.append("ngay_bat_dau", dataPost.ngay_bat_dau);
       formData.append("so_dien_thoai", dataPost.so_dien_thoai);
       formData.append("ngay_sinh", dataPost.ngay_sinh);
@@ -164,25 +152,18 @@ export default function NguoiDung() {
 
       setLoading(true);
       const {
-        status,
-        data: { response, type },
-      } = await axios.post(
-        `${ketNoi.url}/nguoi-dung/cap-nhat-nguoi-dung`,
-        formData
-      );
+        data: { response, status },
+      } = await REQUEST.post("/nguoi-dung/cap-nhat-nguoi-dung", formData);
+      setLoading(false);
+      toast.success(response);
 
-      if (status === 200) {
-        setLoading(false);
-        toast.success(response);
-        if (type) {
-          setShowModalUpdate(false);
-          setData((pre) =>
-            pre.map((item) =>
-              item.id === dataPost.id ? { ...item, ...dataPost } : item
-            )
-          );
-          return;
-        }
+      if (status) {
+        setShowModalUpdate(false);
+        setData((pre) =>
+          pre.map((item) =>
+            item.id === dataPost.id ? { ...item, ...dataPost } : item
+          )
+        );
       }
     } catch (error) {
       setLoading(false);
@@ -209,7 +190,8 @@ export default function NguoiDung() {
   }
 
   function openModalUpdate(item) {
-    setShowImageUpdate(item.hinh_anh);
+    const imageBaseURL = `${baseURL}/nguoi-dung/${item.tai_khoan}.png`;
+    setShowImageUpdate(imageBaseURL);
     setDataUpdate(item);
     setShowModalUpdate(true);
   }

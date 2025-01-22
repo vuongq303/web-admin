@@ -35,10 +35,14 @@ router.get("/danh-sach-gui-yeu-cau", authentication, async function (req, res) {
     }
 
     const result = await executeQuery(sql);
-    res.status(200).send({ response: result, role: data.phan_quyen });
+    res.status(200).send({
+      response: result,
+      role: data.phan_quyen,
+      status: true,
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).send({ response: [], type: false });
+    console.error("/danh-sach-gui-yeu-cau" + error.message);
+    res.status(500).send({ response: [], status: false });
   }
 });
 
@@ -77,8 +81,8 @@ router.get(
       const result = await executeQuery(sql);
       res.status(200).send(result);
     } catch (error) {
-      console.error(error.message);
-      res.status(500).send({ response: [], type: false });
+      console.error("/danh-sach-duyet-yeu-cau" + error.message);
+      res.status(500).send([]);
     }
   }
 );
@@ -113,9 +117,10 @@ router.post("/gui-yeu-cau", authentication, async function (req, res) {
     ]);
 
     if (dataExist.length > 0) {
-      return res
-        .status(200)
-        .json({ response: "Gửi yêu cầu trùng lặp", type: false });
+      return res.status(200).json({
+        response: "Gửi yêu cầu trùng lặp",
+        status: false,
+      });
     }
 
     const sql = `INSERT INTO yeu_cau (id, can_ho, trang_thai, nguoi_gui, thong_tin) 
@@ -138,10 +143,10 @@ router.post("/gui-yeu-cau", authentication, async function (req, res) {
       yeuCauArray.push(schedule);
       fs.writeFileSync(jsonPath, JSON.stringify(yeuCauArray, null, 2));
     }
-    res.status(200).json({ response: "Yêu cầu đã được gửi", type: true });
+    res.status(200).json({ response: "Yêu cầu đã được gửi", status: true });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ response: "Error", type: false });
+    console.error("/gui-yeu-cau" + error.message);
+    res.status(500).json({ response: "Lỗi gửi yêu cầu", status: false });
   }
 });
 
@@ -156,10 +161,10 @@ router.post("/duyet-yeu-cau", authentication, async function (req, res) {
     const sql = `UPDATE yeu_cau SET trang_thai = ?, thong_tin = ? where id = ?`;
     await executeQuery(sql, [1, `${data.tai_khoan} đã duyệt lúc ${start}`, id]);
 
-    res.status(200).json({ response: "Yêu cầu đã được duyệt", type: true });
+    res.status(200).json({ response: "Yêu cầu đã được duyệt", status: true });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ response: "Error", type: false });
+    console.error("/duyet-yeu-cau" + error.message);
+    res.status(500).json({ response: "Lỗi duyệt yêu cầu", status: false });
   }
 });
 

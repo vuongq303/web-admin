@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
@@ -8,8 +7,7 @@ import {
   loaiGiaoDichKhachHang,
   phiMoiGioi,
 } from "../services/utils";
-import { ketNoi } from "../data/module";
-import { GET, GET_PARAMS } from "../api/method";
+import { REQUEST } from "../api/method";
 
 export default function KhachHang() {
   const [data, setData] = useState([]);
@@ -33,7 +31,7 @@ export default function KhachHang() {
 
   async function getData() {
     setLoading(true);
-    const data = await GET("/khach-hang");
+    const { data } = await REQUEST.get("/khach-hang");
     setLoading(false);
     setData(data);
   }
@@ -58,9 +56,11 @@ export default function KhachHang() {
     }
 
     setLoading(true);
-    const result = await GET_PARAMS("/khach-hang/tim-kiem", dataPost);
+    const { data } = await REQUEST.get("/khach-hang/tim-kiem", {
+      params: dataPost,
+    });
     setLoading(false);
-    setData(result);
+    setData(data);
     try {
     } catch (error) {
       console.error(error);
@@ -107,23 +107,16 @@ export default function KhachHang() {
 
       setLoading(true);
       const {
-        status,
-        data: { response, type, id },
-      } = await axios.post(
-        `${ketNoi.url}/khach-hang/them-khach-hang`,
-        dataPost
-      );
-
-      if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setLoading(false);
-          setShowModal(false);
-          setData((pre) => [...pre, { id, ...dataPost }]);
-          return;
-        }
+        data: { response, status, id },
+      } = await REQUEST.post("/khach-hang/them-khach-hang", dataPost);
+      toast.success(response);
+      setLoading(false);
+      if (status) {
+        setShowModal(false);
+        setData((pre) => [...pre, { id, ...dataPost }]);
       }
     } catch (error) {
+      setLoading(false);
       console.error(error);
     }
   }
@@ -161,25 +154,19 @@ export default function KhachHang() {
 
       setLoading(true);
       const {
-        status,
-        data: { response, type },
-      } = await axios.post(
-        `${ketNoi.url}/khach-hang/cap-nhat-khach-hang`,
-        dataPost
-      );
+        data: { response, status },
+      } = await REQUEST.post("/khach-hang/cap-nhat-khach-hang", dataPost);
+      toast.success(response);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setLoading(false);
-          setShowModalUpdate(false);
-          setData((pre) =>
-            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
-          );
-          return;
-        }
+      if (status) {
+        setShowModalUpdate(false);
+        setData((pre) =>
+          pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+        );
       }
     } catch (error) {
+      setLoading(false);
       console.error(error);
     }
   }

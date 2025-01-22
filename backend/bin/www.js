@@ -1,13 +1,13 @@
 var app = require("../app");
 var http = require("http");
 const mysql = require("../sql/connect");
-const env = require("../env/get_env");
-const port = env.PORT;
+const env = require("../config/env");
 const schedule = require("node-schedule");
 const fs = require("fs");
 const { join } = require("path");
 const moment = require("moment");
 const executeQuery = require("../sql/promise");
+const port = env.PORT;
 
 mysql.getConnection(function (err, connection) {
   if (err) {

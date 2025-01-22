@@ -30,10 +30,11 @@ router.get("/", authentication, async function (req, res) {
     res.status(200).send({
       response: results,
       role: data.phan_quyen,
+      status: true,
     });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).send({ response: [], type: false });
+    console.error("/can-ho" + error.message);
+    res.status(500).send({ response: [], status: false });
   }
 });
 
@@ -65,12 +66,12 @@ router.post(
       ]);
       res.status(200).json({
         response: "Thêm ảnh thành công",
-        type: true,
+        status: true,
         data: resultHinhAnh,
       });
     } catch (error) {
-      console.error(error.message);
-      res.status(500).json({ response: "Lỗi thêm ảnh", type: false });
+      console.error("/them-anh-can-ho" + error.message);
+      res.status(500).json({ response: "Lỗi thêm ảnh", status: false });
     }
   }
 );
@@ -102,17 +103,18 @@ router.post("/xoa-anh-can-ho", async function (req, res) {
       ]);
       return res.status(200).json({
         response: "Xóa ảnh thành công",
-        type: true,
+        status: true,
         data: updatedHinhAnh,
       });
     }
 
-    res
-      .status(200)
-      .json({ response: "Lỗi xóa ảnh, không tìm thấy dữ liệu", type: false });
+    res.status(200).json({
+      response: "Lỗi xóa ảnh, không tìm thấy dữ liệu",
+      status: false,
+    });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ response: "Lỗi hệ thống", type: false });
+    console.error("/xoa-anh-can-ho" + err.message);
+    res.status(500).json({ response: "Lỗi xóa ảnh", status: false });
   }
 });
 
@@ -149,9 +151,10 @@ router.post("/them-can-ho", authentication, async (req, res) => {
     ]);
 
     if (checkMaCanHoExist.length > 0) {
-      return res
-        .status(200)
-        .json({ response: "Căn hộ đã tồn tại", type: false });
+      return res.status(200).json({
+        response: "Căn hộ đã tồn tại",
+        type: false,
+      });
     }
 
     const sqlCanHo = `
@@ -191,14 +194,14 @@ router.post("/them-can-ho", authentication, async (req, res) => {
 
     res.status(200).json({
       response: "Thêm căn hộ thành công",
-      type: true,
+      status: true,
       id: result.insertId,
       nguoi_cap_nhat: nguoi_cap_nhat,
       ngay_cap_nhat: ngay_cap_nhat,
     });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ response: "Lỗi thêm căn hộ", type: false });
+    console.error("/them-can-ho" + error.message);
+    res.status(500).json({ response: "Lỗi thêm căn hộ", status: false });
   }
 });
 
@@ -252,13 +255,13 @@ router.post("/cap-nhat-can-ho", authentication, async (req, res) => {
 
     res.status(200).json({
       response: "Cập nhật căn hộ thành công",
-      type: true,
+      status: true,
       nguoi_cap_nhat: nguoi_cap_nhat,
       ngay_cap_nhat: ngay_cap_nhat,
     });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ response: "Lỗi cập nhật căn hộ", type: false });
+    console.error("/cap-nhat-can-ho" + error.message);
+    res.status(500).json({ response: "Lỗi cập nhật căn hộ", status: false });
   }
 });
 
@@ -268,12 +271,13 @@ router.post("/cap-nhat-trang-thai", async function (req, res) {
     const sql = "UPDATE can_ho SET trang_thai = ?, danh_dau = ? WHERE id = ?";
 
     await executeQuery(sql, [trang_thai, danh_dau, id]);
-    res
-      .status(200)
-      .json({ response: "Cập nhật trạng thái thành công", type: true });
+    res.status(200).json({
+      response: "Cập nhật trạng thái thành công",
+      status: true,
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ response: "Error", type: false });
+    console.error("/cap-nhat-trang-thai" + error.message);
+    res.status(500).json({ response: "Error", status: false });
   }
 });
 
@@ -320,7 +324,7 @@ router.post("/upload-excel", async (req, res) => {
     );
     res.status(200).json("Tải dữ liệu lên thành công");
   } catch (error) {
-    console.error(error.message);
+    console.error("/upload-excel" + error.message);
     res.status(500).json("Error");
   }
 });

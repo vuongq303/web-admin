@@ -1,9 +1,8 @@
-import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
 import Loading from "./components/loading";
-import { ketNoi } from "../data/module";
+import { REQUEST } from "../api/method";
 
 export default function () {
   const [data, setData] = useState([]);
@@ -16,9 +15,7 @@ export default function () {
   useEffect(() => {
     (async function () {
       try {
-        const { data } = await axios.get(
-          `${ketNoi.url}/thong-tin-du-an/truc-can-ho`
-        );
+        const { data } = await REQUEST.get("/thong-tin-du-an/truc-can-ho");
         setLoading(false);
         setData(data);
       } catch (error) {
@@ -39,20 +36,14 @@ export default function () {
 
       setLoading(true);
       const {
-        status,
-        data: { response, type, id },
-      } = await axios.post(
-        `${ketNoi.url}/thong-tin-du-an/them-truc-can-ho`,
-        dataPost
-      );
-
-      if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setLoading(false);
-          setShowModal(false);
-          setData((pre) => [...pre, { id, ...dataPost }]);
-        }
+        data: { response, status, id },
+      } = await REQUEST.post("/thong-tin-du-an/them-truc-can-ho", dataPost);
+      toast.success(response);
+      setLoading(false);
+      
+      if (status) {
+        setShowModal(false);
+        setData((pre) => [...pre, { id, ...dataPost }]);
       }
     } catch (error) {
       setLoading(false);
@@ -72,25 +63,18 @@ export default function () {
     }
 
     setLoading(true);
-
     try {
       const {
-        status,
-        data: { response, type },
-      } = await axios.post(
-        `${ketNoi.url}/thong-tin-du-an/cap-nhat-truc-can-ho`,
-        dataPost
-      );
+        data: { response, status },
+      } = await REQUEST.post("/thong-tin-du-an/cap-nhat-truc-can-ho", dataPost);
+      toast.success(response);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setLoading(false);
-          setShowModalUpdate(false);
-          setData((pre) =>
-            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
-          );
-        }
+      if (status) {
+        setShowModalUpdate(false);
+        setData((pre) =>
+          pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+        );
       }
     } catch (error) {
       setLoading(false);

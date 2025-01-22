@@ -1,10 +1,9 @@
-import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
-import { dateToText, getRoleNguoiDung } from "../services/utils";
+import { dateToText } from "../services/utils";
 import Loading from "./components/loading";
-import { ketNoi } from "../data/module";
+import { REQUEST } from "../api/method";
 
 export default function KhachHangNguon() {
   const [data, setData] = useState([]);
@@ -22,12 +21,7 @@ export default function KhachHangNguon() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await axios.get(`${ketNoi.url}/khach-hang-nguon`, {
-          headers: {
-            Authorization: getRoleNguoiDung(),
-            "Content-Type": "application/json",
-          },
-        });
+        const { data } = await REQUEST.get("/khach-hang-nguon");
         setLoading(false);
         setData(data);
       } catch (error) {
@@ -36,7 +30,7 @@ export default function KhachHangNguon() {
     })();
   }, []);
 
-  async function themNguoiDung() {
+  async function themKhachHangNguon() {
     try {
       const dataPost = {
         ten_khach_hang: hoTenRef.current.value,
@@ -58,27 +52,22 @@ export default function KhachHangNguon() {
       }
       setLoading(true);
       const {
-        status,
-        data: { response, type, id },
-      } = await axios.post(
-        `${ketNoi.url}/khach-hang-nguon/them-khach-hang`,
-        dataPost
-      );
+        data: { response, status, id },
+      } = await REQUEST.post("/khach-hang-nguon/them-khach-hang", dataPost);
+      toast.success(response);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setLoading(false);
-          setShowModal(false);
-          setData((pre) => [...pre, { id, ...dataPost }]);
-        }
+      if (status) {
+        setShowModal(false);
+        setData((pre) => [...pre, { id, ...dataPost }]);
       }
     } catch (error) {
+      setLoading(false);
       console.error(error);
     }
   }
 
-  async function capNhatNguoiDung() {
+  async function capNhatKhachHangNguon() {
     try {
       const dataPost = {
         ten_khach_hang: hoTenRef.current.value,
@@ -101,24 +90,19 @@ export default function KhachHangNguon() {
       }
       setLoading(true);
       const {
-        status,
-        data: { response, type },
-      } = await axios.post(
-        `${ketNoi.url}/khach-hang-nguon/cap-nhat-khach-hang`,
-        dataPost
-      );
+        data: { response, status },
+      } = await REQUEST.post("/khach-hang-nguon/cap-nhat-khach-hang", dataPost);
+      toast.success(response);
+      setLoading(false);
 
       if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setLoading(false);
-          setShowModalUpdate(false);
-          setData((pre) =>
-            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
-          );
-        }
+        setShowModalUpdate(false);
+        setData((pre) =>
+          pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+        );
       }
     } catch (error) {
+      setLoading(false);
       console.error(error);
     }
   }
@@ -216,7 +200,7 @@ export default function KhachHangNguon() {
             <Button variant="secondary" onClick={() => setShowModal(false)}>
               Close
             </Button>
-            <Button variant="primary" onClick={themNguoiDung}>
+            <Button variant="primary" onClick={themKhachHangNguon}>
               Thêm mới
             </Button>
           </Modal.Footer>
@@ -310,7 +294,7 @@ export default function KhachHangNguon() {
             >
               Close
             </Button>
-            <Button variant="primary" onClick={capNhatNguoiDung}>
+            <Button variant="primary" onClick={capNhatKhachHangNguon}>
               Cập nhật
             </Button>
           </Modal.Footer>

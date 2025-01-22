@@ -15,7 +15,7 @@ router.get("/", authentication, async function (req, res) {
     const result = await executeQuery("SELECT * FROM khach_hang_nguon");
     res.status(200).send(result);
   } catch (error) {
-    console.error(error.message);
+    console.error("/khach-hang-nguon" + error.message);
     res.status(500).send([]);
   }
 });
@@ -42,12 +42,15 @@ router.post("/them-khach-hang", async function (req, res) {
     ]);
     res.status(200).json({
       response: "Thêm khách hàng thành công ",
-      type: true,
+      status: true,
       id: result.insertId,
     });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    console.error("/them-khach-hang" + error.message);
+    res.status(500).json({
+      response: "Lỗi thêm khách hàng",
+      status: false,
+    });
   }
 });
 
@@ -76,12 +79,16 @@ router.post("/cap-nhat-khach-hang", async function (req, res) {
       ngay_phat_sinh,
       id,
     ]);
-    res
-      .status(200)
-      .json({ response: "Cập nhật khách hàng thành công", type: true });
+    res.status(200).json({
+      response: "Cập nhật khách hàng thành công",
+      status: true,
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    console.error("/cap-nhat-khach-hang" + error.message);
+    res.status(500).json({
+      response: "Lỗi cập nhật khách hàng thành công",
+      status: false,
+    });
   }
 });
 

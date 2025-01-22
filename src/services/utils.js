@@ -10,7 +10,7 @@ export const trangThaiDuAn = ["Đang giao dịch", "Ngừng giao dịch"];
 
 export const phiMoiGioi = ["Đủ phí", "Chưa đủ phí"];
 
-export const trangThaiYeuCau = [" Đang chờ", " Đã duyệt"];
+export const trangThaiYeuCau = ["Đang chờ", "Đã duyệt"];
 
 export const danhDauCanHo = [
   { mau_sac: "", noi_dung: "Mặc định" },
@@ -37,10 +37,4 @@ export function dateToText(isoString) {
   const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
-}
-
-export function getRoleNguoiDung() {
-  const data = localStorage.getItem("role");
-  if (!data) window.location.replace("/");
-  return data;
 }

@@ -1,9 +1,8 @@
-import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
 import Loading from "./components/loading";
-import { ketNoi } from "../data/module";
+import { REQUEST } from "../api/method";
 
 export default function LoaiCanHo() {
   const [data, setData] = useState([]);
@@ -16,13 +15,12 @@ export default function LoaiCanHo() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await axios.get(
-          `${ketNoi.url}/thong-tin-du-an/loai-can-ho`
-        );
+        const { data } = await REQUEST.get("/thong-tin-du-an/loai-can-ho");
         setLoading(false);
         setData(data);
       } catch (error) {
-        console.log(error);
+        setLoading(false);
+        console.error(error);
       }
     })();
   }, []);
@@ -40,22 +38,17 @@ export default function LoaiCanHo() {
       setLoading(true);
 
       const {
-        status,
-        data: { response, id, type },
-      } = await axios.post(
-        `${ketNoi.url}/thong-tin-du-an/them-loai-can-ho`,
-        dataPost
-      );
+        data: { response, id, status },
+      } = await REQUEST.post("/thong-tin-du-an/them-loai-can-ho", dataPost);
+      toast.success(response);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setLoading(false);
-          setShowModal(false);
-          setData((pre) => [...pre, { id, ...dataPost }]);
-        }
+      if (status) {
+        setShowModal(false);
+        setData((pre) => [...pre, { id, ...dataPost }]);
       }
     } catch (error) {
+      setLoading(false);
       console.error(error);
     }
   }
@@ -74,24 +67,19 @@ export default function LoaiCanHo() {
       setLoading(true);
 
       const {
-        status,
-        data: { response, type },
-      } = await axios.post(
-        `${ketNoi.url}/thong-tin-du-an/cap-nhat-loai-can-ho`,
-        dataPost
-      );
+        data: { response, status },
+      } = await REQUEST.post("/thong-tin-du-an/cap-nhat-loai-can-ho", dataPost);
+      toast.success(response);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setLoading(false);
-          setShowModalUpdate(false);
-          setData((pre) =>
-            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
-          );
-        }
+      if (status) {
+        setShowModalUpdate(false);
+        setData((pre) =>
+          pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+        );
       }
     } catch (error) {
+      setLoading(false);
       console.log(error);
     }
   }
@@ -104,7 +92,7 @@ export default function LoaiCanHo() {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={200}
+        autoClose={500}
         hideProgressBar={false}
       />
       <Loading loading={loading} />

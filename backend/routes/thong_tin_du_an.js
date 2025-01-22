@@ -34,7 +34,7 @@ router.get("/truc-can-ho", async function (_, res) {
     res.status(200).send(result);
   } catch (error) {
     res.status(500).send([]);
-    console.error(error.message);
+    console.error("/truc-can-ho" + error.message);
   }
 });
 
@@ -44,10 +44,17 @@ router.post("/them-truc-can-ho", async function (req, res) {
     const sql = "INSERT INTO truc_can_ho(truc_can) VALUE(?)";
     const result = await executeQuery(sql, [truc_can]);
 
-    res.status(200).json({ response: "Thêm trục căn mới thành công", id: result.insertId, type: true });
+    res.status(200).json({
+      response: "Thêm trục căn hộ mới thành công",
+      id: result.insertId,
+      status: true,
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    res.status(500).json({
+      response: "Lỗi thêm trục căn hộ",
+      status: false,
+    });
+    console.log("/them-truc-can-ho" + error.message);
   }
 });
 
@@ -56,12 +63,16 @@ router.post("/cap-nhat-truc-can-ho", async function (req, res) {
     const { truc_can, id } = req.body;
     const sql = "UPDATE truc_can_ho SET truc_can = ? WHERE id = ?";
     await executeQuery(sql, [truc_can, id]);
-    res
-      .status(200)
-      .json({ response: "Cập nhật trục căn mới thành công", type: true });
+
+    res.status(200).json({
+      response: "Cập nhật trục căn hộ mới thành công",
+      status: true,
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    console.error("/cap-nhat-truc-can-ho" + error.message);
+    res
+      .status(500)
+      .json({ response: "Lỗi cập nhật trục căn hộ", status: false });
   }
 });
 
@@ -77,6 +88,7 @@ router.get("/toa-nha", async function (_, res) {
 
     res.status(200).send(result);
   } catch (error) {
+    console.error("/toa-nha" + error.message);
     res.status(500).send([]);
   }
 });
@@ -87,10 +99,17 @@ router.post("/them-toa-nha", async function (req, res) {
     const sql = "INSERT INTO toa_nha(ten_toa_nha, ten_du_an) value(?, ?)";
     const result = await executeQuery(sql, [ten_toa_nha, ten_du_an]);
 
-    res.status(200).json({ response: "Thêm tòa nhà thành công", type: true, id: result.insertId });
+    res.status(200).json({
+      response: "Thêm tòa nhà thành công",
+      status: true,
+      id: result.insertId,
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    console.error("/them-toa-nha" + error.message);
+    res.status(500).json({
+      response: "Lỗi thêm tòa nhà",
+      status: false,
+    });
   }
 });
 
@@ -100,12 +119,14 @@ router.post("/cap-nhat-toa-nha", async function (req, res) {
     const sql =
       "UPDATE toa_nha SET ten_toa_nha = ? , ten_du_an = ? WHERE id = ?";
     await executeQuery(sql, [ten_toa_nha, ten_du_an, id]);
-    res
-      .status(200)
-      .json({ response: "Cập nhật tòa nhà thành công", type: true });
+
+    res.status(200).json({
+      response: "Cập nhật tòa nhà thành công",
+      status: true,
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    console.error("/cap-nhat-toa-nha" + error.message);
+    res.status(500).json({ response: "Lỗi cập nhật tòa nhà", status: false });
   }
 });
 
@@ -114,8 +135,8 @@ router.get("/noi-that", async function (_, res) {
     const result = await executeQuery("SELECT * FROM noi_that");
     res.status(200).send(result);
   } catch (error) {
-    console.error(error.message);
-    res.status(500).send({});
+    console.error("/noi-that" + error.message);
+    res.status(500).send([]);
   }
 });
 
@@ -127,12 +148,15 @@ router.post("/them-noi-that", async function (req, res) {
     const result = await executeQuery(sql, [loai_noi_that]);
     res.status(200).json({
       response: "Thêm nội thất thành công",
-      type: true,
+      status: true,
       id: result.insertId,
     });
   } catch (error) {
-    console.log(error.message);
-    res.status(500).json({});
+    console.error("/them-noi-that" + error.message);
+    res.status(500).json({
+      response: "Lỗi thêm nội thất",
+      status: false,
+    });
   }
 });
 
@@ -142,12 +166,16 @@ router.post("/cap-nhat-noi-that", async function (req, res) {
     const sql = "UPDATE noi_that SET loai_noi_that = ? WHERE id = ?";
 
     await executeQuery(sql, [loai_noi_that, id]);
-    res
-      .status(200)
-      .json({ response: "Cập nhật nội thất thành công", type: true });
+    res.status(200).json({
+      response: "Cập nhật nội thất thành công",
+      status: true,
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    console.error("/cap-nhat-noi-that" + error.message);
+    res.status(500).json({
+      response: "Lỗi cập nhật nội thất",
+      status: false,
+    });
   }
 });
 
@@ -156,7 +184,7 @@ router.get("/loai-can-ho", async function (_, res) {
     const result = await executeQuery("SELECT * FROM loai_can_ho");
     res.status(200).send(result);
   } catch (error) {
-    console.error(error.message);
+    console.error("/loai-can-ho" + error.message);
     res.status(500).send([]);
   }
 });
@@ -168,12 +196,15 @@ router.post("/them-loai-can-ho", async function (req, res) {
     const result = await executeQuery(sql, [loai_can_ho]);
     res.status(200).json({
       response: "Thêm loại căn hộ thành công",
-      type: true,
+      status: true,
       id: result.insertId,
     });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    console.error("/them-loai-can-ho" + error.message);
+    res.status(500).json({
+      response: "Lỗi thêm loại căn hộ",
+      status: false,
+    });
   }
 });
 
@@ -182,12 +213,16 @@ router.post("/cap-nhat-loai-can-ho", async function (req, res) {
     const { loai_can_ho, id } = req.body;
     const sql = "UPDATE loai_can_ho SET loai_can_ho = ? WHERE id = ?";
     await executeQuery(sql, [loai_can_ho, id]);
-    res
-      .status(200)
-      .json({ response: "Cập nhật loại căn hộ thành công", type: true });
+    res.status(200).json({
+      response: "Cập nhật loại căn hộ thành công",
+      status: true,
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    console.error("/cap-nhat-loai-can-ho" + error.message);
+    res.status(500).json({
+      response: "Lỗi cập nhật loại căn hộ",
+      status: false,
+    });
   }
 });
 
@@ -196,7 +231,7 @@ router.get("/huong-can-ho", async function (_, res) {
     const result = await executeQuery("SELECT * FROM huong_can_ho");
     res.status(200).send(result);
   } catch (error) {
-    console.error(error.message);
+    console.error("/huong-can-ho" + error.message);
     res.status(500).send([]);
   }
 });
@@ -208,12 +243,15 @@ router.post("/them-huong-can-ho", async function (req, res) {
     const result = await executeQuery(sql, [huong_can_ho]);
     res.status(200).json({
       response: "Thêm hướng căn hộ thành công",
-      type: true,
+      status: true,
       id: result.insertId,
     });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    console.error("/them-huong-can-ho" + error.message);
+    res.status(500).json({
+      response: "Lỗi thêm hướng căn hộ",
+      status: false,
+    });
   }
 });
 
@@ -223,12 +261,16 @@ router.post("/cap-nhat-huong-can-ho", async function (req, res) {
 
     const sql = "UPDATE huong_can_ho SET huong_can_ho = ? WHERE id = ?";
     await executeQuery(sql, [huong_can_ho, id]);
-    res
-      .status(200)
-      .json({ response: "Cập nhật hướng căn hộ thành công", type: true });
+    res.status(200).json({
+      response: "Cập nhật hướng căn hộ thành công",
+      status: true,
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    console.error("/cap-nhat-huong-can-ho" + error.message);
+    res.status(200).json({
+      response: "Lỗi cập nhật hướng căn hộ",
+      status: false,
+    });
   }
 });
 
@@ -237,7 +279,7 @@ router.get("/du-an", async function (_, res) {
     const result = await executeQuery("SELECT * FROM du_an");
     res.status(200).send(result);
   } catch (error) {
-    console.error(error.message);
+    console.error("/du-an" + error.message);
     res.status(500).send([]);
   }
 });
@@ -250,12 +292,15 @@ router.post("/them-du-an", async function (req, res) {
     const result = await executeQuery(sql, [ten_du_an]);
     res.status(200).json({
       response: "Thêm dự án thành công",
-      type: true,
+      status: true,
       id: result.insertId,
     });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    console.error("/them-du-an" + error.message);
+    res.status(500).json({
+      response: "Lỗi thêm dự án",
+      status: false,
+    });
   }
 });
 
@@ -265,10 +310,16 @@ router.post("/cap-nhat-du-an", async function (req, res) {
     const sql = "UPDATE du_an SET ten_du_an = ? WHERE id = ?";
 
     await executeQuery(sql, [ten_du_an, id]);
-    res.status(200).json({ response: "Cập nhật dự án thành công", type: true });
+    res.status(200).json({
+      response: "Cập nhật dự án thành công",
+      status: true,
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    console.error("/cap-nhat-du-an" + error.message);
+    res.status(500).json({
+      response: "Lỗi cập nhật dự án",
+      status: true,
+    });
   }
 });
 

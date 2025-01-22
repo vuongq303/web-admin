@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 const jwt = require("jsonwebtoken");
 const executeQuery = require("../sql/promise");
-const env = require("../env/get_env");
+const env = require("../config/env");
 const config = require("../config/config");
 const upload = require("../middleware/upload_nguoi_dung");
 const authentication = require("../middleware/authentication");
@@ -10,20 +10,19 @@ const authentication = require("../middleware/authentication");
 router.get("/", authentication, async function (req, res) {
   try {
     const data = req.user;
-
     if (data.phan_quyen !== config.admin && data.phan_quyen !== config.quanLy) {
       return res.status(401).send([]);
     }
 
     const sql = `SELECT id, ho_ten, ngay_bat_dau,
     tai_khoan,gioi_tinh, so_dien_thoai, email,
-    ngay_sinh, hinh_anh, trang_thai, phan_quyen
+    ngay_sinh, trang_thai, phan_quyen
     FROM nguoi_dung ORDER BY trang_thai DESC, phan_quyen ASC`;
 
     const result = await executeQuery(sql);
     res.status(200).send(result);
   } catch (error) {
-    console.error(error.message);
+    console.error("/nguoi-dung" + error.message);
     res.status(500).send([]);
   }
 });
@@ -54,16 +53,14 @@ router.post(
       if (checkUser.length > 0) {
         return res.status(200).json({
           response: "Tài khoản đã tồn tại",
-          type: false,
+          status: false,
         });
       }
 
-      const hinh_anh = `${config.url}/nguoi-dung/${tai_khoan}.png`;
-
       const sql = `
     INSERT INTO nguoi_dung 
-    (ho_ten, ngay_bat_dau, gioi_tinh, so_dien_thoai, email, ngay_sinh, hinh_anh, trang_thai, phan_quyen, tai_khoan, mat_khau) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    (ho_ten, ngay_bat_dau, gioi_tinh, so_dien_thoai, email, ngay_sinh, trang_thai, phan_quyen, tai_khoan, mat_khau) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
       const result = await executeQuery(sql, [
         ho_ten,
@@ -72,20 +69,22 @@ router.post(
         so_dien_thoai,
         email,
         ngay_sinh,
-        hinh_anh,
         trang_thai,
         phan_quyen,
         tai_khoan,
         mat_khau,
       ]);
       res.status(200).json({
-        response: "Thêm người dùng thành công ",
-        type: true,
+        response: "Thêm người dùng thành công",
+        status: true,
         id: result.insertId,
       });
     } catch (error) {
-      console.error(error.message);
-      res.status(500).json({});
+      console.error("/them-nguoi-dung" + error.message);
+      res.status(500).json({
+        response: "Lỗi thêm người dùng",
+        status: false,
+      });
     }
   }
 );
@@ -98,7 +97,6 @@ router.post(
       const {
         id,
         ho_ten,
-        tai_khoan,
         ngay_bat_dau,
         so_dien_thoai,
         ngay_sinh,
@@ -108,14 +106,12 @@ router.post(
         trang_thai,
       } = req.body;
 
-      const hinh_anh = `${config.url}/nguoi-dung/${tai_khoan}.png`;
-
       const sql = `
       UPDATE nguoi_dung SET ho_ten = ? ,
       ngay_bat_dau = ?, gioi_tinh = ?,
       so_dien_thoai = ?, email = ?,
-      ngay_sinh = ?, hinh_anh = ?,
-      trang_thai = ?, phan_quyen = ? WHERE id = ?`;
+      ngay_sinh = ?, trang_thai = ?,
+      phan_quyen = ? WHERE id = ?`;
       await executeQuery(sql, [
         ho_ten,
         ngay_bat_dau,
@@ -123,17 +119,20 @@ router.post(
         so_dien_thoai,
         email,
         ngay_sinh,
-        hinh_anh,
         trang_thai,
         phan_quyen,
         id,
       ]);
-      res
-        .status(200)
-        .json({ response: "Cập nhật người dùng thành công", type: true });
+      res.status(200).json({
+        response: "Cập nhật người dùng thành công",
+        status: true,
+      });
     } catch (error) {
-      console.error("/nguoi-dung/cap-nhat-nguoi-dung ", error.message);
-      res.status(500).json({ response: "Error", type: false });
+      console.error("/cap-nhat-nguoi-dung" + error.message);
+      res.status(500).json({
+        response: "Lỗi cập nhật người dùng",
+        status: false,
+      });
     }
   }
 );
@@ -148,21 +147,32 @@ router.post("/dang-nhap", async function (req, res) {
     const result = await executeQuery(sql, [username, password]);
 
     if (result.length > 0) {
+      const token = jwt.sign({ ...result[0] }, env.JWT_KEY, {
+        expiresIn: "4h",
+      });
+
+      res.cookie("TOKEN", token, {
+        httpOnly: true,
+        maxAge: 4 * 60 * 60 * 1000,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+
       return res.status(200).json({
         response: "Đăng nhập thành công",
-        type: true,
-        data: jwt.sign(JSON.stringify(result[0]), env.JWT_KEY),
+        status: true,
+        token: token,
         role: result[0].phan_quyen,
       });
     }
 
     res.status(200).json({
       response: "Đăng nhập không thành công",
-      type: false,
+      status: false,
     });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ response: "Error", type: false });
+    console.error("/dang-nhap: " + error.message);
+    res.status(500).json({ response: "Lỗi đăng nhập", status: false });
   }
 });
 

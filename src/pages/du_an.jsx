@@ -1,9 +1,8 @@
-import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import Loading from "./components/loading";
-import { ketNoi } from "../data/module";
+import { REQUEST } from "../api/method";
 
 export default function DuAn() {
   const [data, setData] = useState([]);
@@ -16,7 +15,7 @@ export default function DuAn() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await axios.get(`${ketNoi.url}/thong-tin-du-an/du-an`);
+        const { data } = await REQUEST.get("/thong-tin-du-an/du-an");
         setLoading(false);
         setData(data);
       } catch (error) {
@@ -44,8 +43,8 @@ export default function DuAn() {
       const {
         status,
         data: { response, type, id },
-      } = await axios.post(
-        `${ketNoi.url}/thong-tin-du-an/them-du-an`,
+      } = await REQUEST.post(
+        '/thong-tin-du-an/them-du-an',
         dataPost
       );
 
@@ -75,25 +74,20 @@ export default function DuAn() {
       }
       setLoading(true);
       const {
-        status,
-        data: { response, type },
-      } = await axios.post(
-        `${ketNoi.url}/thong-tin-du-an/cap-nhat-du-an`,
-        dataPost
-      );
+        data: { response, status },
+      } = await REQUEST.post("/thong-tin-du-an/cap-nhat-du-an", dataPost);
+      toast.success(response);
+      setLoading(false);
 
-      if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setLoading(false);
-          setShowModalUpdate(false);
-          setData((pre) =>
-            pre.map((item) => (item.id === dataPost.id ? dataPost : item))
-          );
-        }
+      if (status) {
+        setShowModalUpdate(false);
+        setData((pre) =>
+          pre.map((item) => (item.id === dataPost.id ? dataPost : item))
+        );
       }
     } catch (error) {
-      console.log(error);
+      setLoading(false);
+      console.error(error);
     }
   }
 
@@ -101,7 +95,7 @@ export default function DuAn() {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={200}
+        autoClose={500}
         hideProgressBar={false}
       />
       <Loading loading={loading} />

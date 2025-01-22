@@ -117,7 +117,7 @@ router.get("/admin", authentication, async function (req, res) {
     );
     res.status(200).send(result);
   } catch (error) {
-    console.error(error.message);
+    console.error("/admin" + error.message);
     res.status(500).send([]);
   }
 });
@@ -224,7 +224,6 @@ router.get("/sale", authentication, async function (req, res) {
       default:
         break;
     }
-    console.log(`\n${sql}\n`);
 
     const result = await executeQuery(
       sql + ` LIMIT ${limit} OFFSET ${offset}`,
@@ -232,7 +231,7 @@ router.get("/sale", authentication, async function (req, res) {
     );
     res.status(200).send(result);
   } catch (error) {
-    console.error(error.message);
+    console.error("/sale" + error.message);
     res.status(500).send([]);
   }
 });

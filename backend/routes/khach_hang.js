@@ -57,12 +57,15 @@ router.post("/them-khach-hang", async function (req, res) {
     ]);
     res.status(200).json({
       response: "Thêm khách hàng thành công",
-      type: true,
+      status: true,
       id: result.insertId,
     });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    console.error("/them-khach-hang" + error.message);
+    res.status(500).json({
+      response: "Lỗi thêm khách hàng",
+      status: false,
+    });
   }
 });
 
@@ -103,12 +106,16 @@ router.post("/cap-nhat-khach-hang", async function (req, res) {
       phi_moi_gioi,
       id,
     ]);
-    res
-      .status(200)
-      .json({ response: "Cập nhật khách hàng thành công", type: true });
+    res.status(200).json({
+      response: "Cập nhật khách hàng thành công",
+      status: true,
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({});
+    console.error("/cap-nhat-khach-hang" + error.message);
+    res.status(500).json({
+      response: "Lỗi cập nhật khách hàng",
+      status: false,
+    });
   }
 });
 
@@ -137,7 +144,7 @@ router.get("/tim-kiem", async (req, res) => {
 
     res.status(200).send(result);
   } catch (error) {
-    console.error(error.message);
+    console.error("/tim-kiem" + error.message);
     res.status(500).json([]);
   }
 });
