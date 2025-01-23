@@ -13,18 +13,24 @@ router.get("/", authentication, async function (req, res) {
       data.phan_quyen !== config.quanLy &&
       data.phan_quyen !== config.cskh
     ) {
-      return res.status(401).send([]);
+      return res.status(401).send({
+        status: false,
+        response: "Không thể lấy dữ liệu",
+      });
     }
 
     const result = await executeQuery("SELECT * FROM khach_hang");
-    res.status(200).send(result);
+    res.status(200).send({ data: result, status: true });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).send([]);
+    console.error("/khach-hang" + error.message);
+    res.status(500).send({
+      status: false,
+      response: "Lỗi khi lấy dữ liệu",
+    });
   }
 });
 
-router.post("/them-khach-hang", async function (req, res) {
+router.post("/them-khach-hang", authentication, async function (req, res) {
   try {
     const {
       ten_khach_hang,
@@ -69,7 +75,7 @@ router.post("/them-khach-hang", async function (req, res) {
   }
 });
 
-router.post("/cap-nhat-khach-hang", async function (req, res) {
+router.post("/cap-nhat-khach-hang", authentication, async function (req, res) {
   try {
     const {
       ten_khach_hang,
@@ -119,7 +125,7 @@ router.post("/cap-nhat-khach-hang", async function (req, res) {
   }
 });
 
-router.get("/tim-kiem", async (req, res) => {
+router.get("/tim-kiem", authentication, async (req, res) => {
   try {
     const { phi_moi_gioi, ngay_bat_dau, ngay_ket_thuc } = req.query;
     var sql = "SELECT * FROM khach_hang";
@@ -142,10 +148,13 @@ router.get("/tim-kiem", async (req, res) => {
     }
     const result = await executeQuery(sql, value);
 
-    res.status(200).send(result);
+    res.status(200).send({ status: true, data: result });
   } catch (error) {
     console.error("/tim-kiem" + error.message);
-    res.status(500).json([]);
+    res.status(500).send({
+      status: false,
+      response: "Lỗi khi lấy dữ liệu",
+    });
   }
 });
 

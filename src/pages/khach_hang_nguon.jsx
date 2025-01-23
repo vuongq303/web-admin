@@ -21,11 +21,18 @@ export default function KhachHangNguon() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await REQUEST.get("/khach-hang-nguon");
+        const {
+          data: { status, data, response },
+        } = await REQUEST.get("/khach-hang-nguon");
         setLoading(false);
+        if (!status) {
+          toast.error(response);
+          return;
+        }
         setData(data);
       } catch (error) {
-        console.log(error);
+        setLoading(false);
+        toast.error("Lỗi khi lấy dữ liệu");
       }
     })();
   }, []);
@@ -54,8 +61,8 @@ export default function KhachHangNguon() {
       const {
         data: { response, status, id },
       } = await REQUEST.post("/khach-hang-nguon/them-khach-hang", dataPost);
-      toast.success(response);
       setLoading(false);
+      toast.success(response);
 
       if (status) {
         setShowModal(false);
@@ -63,7 +70,7 @@ export default function KhachHangNguon() {
       }
     } catch (error) {
       setLoading(false);
-      console.error(error);
+      toast.error("Lỗi thêm khách hàng");
     }
   }
 
@@ -92,8 +99,8 @@ export default function KhachHangNguon() {
       const {
         data: { response, status },
       } = await REQUEST.post("/khach-hang-nguon/cap-nhat-khach-hang", dataPost);
-      toast.success(response);
       setLoading(false);
+      toast.success(response);
 
       if (status === 200) {
         setShowModalUpdate(false);
@@ -103,7 +110,7 @@ export default function KhachHangNguon() {
       }
     } catch (error) {
       setLoading(false);
-      console.error(error);
+      toast.error("Lỗi cập nhật khách hàng");
     }
   }
 
@@ -115,7 +122,7 @@ export default function KhachHangNguon() {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={200}
+        autoClose={500}
         hideProgressBar={false}
       />
       <Loading loading={loading} />

@@ -5,13 +5,16 @@ const executeQuery = require("../sql/promise");
 const env = require("../config/env");
 const config = require("../config/config");
 const upload = require("../middleware/upload_nguoi_dung");
-const authentication = require("../middleware/authentication");
+const authentication = require("../middleware/employer");
 
 router.get("/", authentication, async function (req, res) {
   try {
     const data = req.user;
     if (data.phan_quyen !== config.admin && data.phan_quyen !== config.quanLy) {
-      return res.status(401).send([]);
+      return res.status(401).send({
+        status: false,
+        response: "Không thể lấy dữ liệu",
+      });
     }
 
     const sql = `SELECT id, ho_ten, ngay_bat_dau,
@@ -20,10 +23,13 @@ router.get("/", authentication, async function (req, res) {
     FROM nguoi_dung ORDER BY trang_thai DESC, phan_quyen ASC`;
 
     const result = await executeQuery(sql);
-    res.status(200).send(result);
+    res.status(200).send({ status: true, data: result });
   } catch (error) {
     console.error("/nguoi-dung" + error.message);
-    res.status(500).send([]);
+    res.status(500).send({
+      status: false,
+      response: "Lỗi khi lấy dữ liệu",
+    });
   }
 });
 
@@ -161,7 +167,6 @@ router.post("/dang-nhap", async function (req, res) {
       return res.status(200).json({
         response: "Đăng nhập thành công",
         status: true,
-        token: token,
         role: result[0].phan_quyen,
       });
     }

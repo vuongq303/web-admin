@@ -15,11 +15,19 @@ export default function DuAn() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await REQUEST.get("/thong-tin-du-an/du-an");
+        const {
+          data: { response, status, data },
+        } = await REQUEST.get("/thong-tin-du-an/du-an");
+
         setLoading(false);
+        if (!status) {
+          toast.error(response);
+          return;
+        }
         setData(data);
       } catch (error) {
-        console.log(error);
+        setLoading(false);
+        toast.error("Lỗi khi lấy dữ liệu");
       }
     })();
   }, []);
@@ -41,23 +49,18 @@ export default function DuAn() {
       }
       setLoading(true);
       const {
-        status,
-        data: { response, type, id },
-      } = await REQUEST.post(
-        '/thong-tin-du-an/them-du-an',
-        dataPost
-      );
+        data: { response, status, id },
+      } = await REQUEST.post("/thong-tin-du-an/them-du-an", dataPost);
+      setLoading(false);
+      toast.success(response);
 
-      if (status === 200) {
-        toast.success(response);
-        if (type) {
-          setLoading(false);
-          setShowModal(false);
-          setData((pre) => [...pre, { id, ...dataPost }]);
-        }
+      if (status) {
+        setShowModal(false);
+        setData((pre) => [...pre, { id, ...dataPost }]);
       }
     } catch (error) {
-      console.log(error);
+      setLoading(false);
+      toast.error("Lỗi thêm dự án");
     }
   }
 
@@ -87,7 +90,7 @@ export default function DuAn() {
       }
     } catch (error) {
       setLoading(false);
-      console.error(error);
+      toast.error("Lỗi cập nhật dự án");
     }
   }
 

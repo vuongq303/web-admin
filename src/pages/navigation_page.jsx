@@ -39,6 +39,8 @@ function SizeBar() {
           data: { ho_ten, phan_quyen },
         } = await REQUEST.get("/phan-quyen");
 
+        localStorage.removeItem("role");
+
         setHoten(ho_ten);
         setRole(phan_quyen);
       } catch (error) {

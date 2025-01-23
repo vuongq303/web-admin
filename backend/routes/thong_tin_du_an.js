@@ -31,10 +31,13 @@ router.get("/", async function (req, res) {
 router.get("/truc-can-ho", async function (_, res) {
   try {
     const result = await executeQuery("SELECT * FROM truc_can_ho");
-    res.status(200).send(result);
+    res.status(200).send({ data: result, status: true });
   } catch (error) {
-    res.status(500).send([]);
     console.error("/truc-can-ho" + error.message);
+    res.status(500).send({
+      status: false,
+      response: "Lỗi khi lấy dữ liệu",
+    });
   }
 });
 
@@ -50,11 +53,11 @@ router.post("/them-truc-can-ho", async function (req, res) {
       status: true,
     });
   } catch (error) {
+    console.error("/them-truc-can-ho" + error.message);
     res.status(500).json({
       response: "Lỗi thêm trục căn hộ",
       status: false,
     });
-    console.log("/them-truc-can-ho" + error.message);
   }
 });
 
@@ -70,9 +73,10 @@ router.post("/cap-nhat-truc-can-ho", async function (req, res) {
     });
   } catch (error) {
     console.error("/cap-nhat-truc-can-ho" + error.message);
-    res
-      .status(500)
-      .json({ response: "Lỗi cập nhật trục căn hộ", status: false });
+    res.status(500).json({
+      response: "Lỗi cập nhật trục căn hộ",
+      status: false,
+    });
   }
 });
 
@@ -86,10 +90,13 @@ router.get("/toa-nha", async function (_, res) {
     const resultDuAn = await executeQuery("SELECT * FROM du_an");
     result.du_an = resultDuAn;
 
-    res.status(200).send(result);
+    res.status(200).send({ data: result, status: true });
   } catch (error) {
     console.error("/toa-nha" + error.message);
-    res.status(500).send([]);
+    res.status(500).send({
+      status: false,
+      response: "Lỗi khi lấy dữ liệu",
+    });
   }
 });
 
@@ -133,10 +140,13 @@ router.post("/cap-nhat-toa-nha", async function (req, res) {
 router.get("/noi-that", async function (_, res) {
   try {
     const result = await executeQuery("SELECT * FROM noi_that");
-    res.status(200).send(result);
+    res.status(200).send({ data: result, status: true });
   } catch (error) {
     console.error("/noi-that" + error.message);
-    res.status(500).send([]);
+    res.status(500).send({
+      status: false,
+      response: "Lỗi khi lấy dữ liệu",
+    });
   }
 });
 
@@ -182,10 +192,13 @@ router.post("/cap-nhat-noi-that", async function (req, res) {
 router.get("/loai-can-ho", async function (_, res) {
   try {
     const result = await executeQuery("SELECT * FROM loai_can_ho");
-    res.status(200).send(result);
+    res.status(200).send({ data: result, status: true });
   } catch (error) {
     console.error("/loai-can-ho" + error.message);
-    res.status(500).send([]);
+    res.status(500).send({
+      status: false,
+      response: "Lỗi khi lấy dữ liệu",
+    });
   }
 });
 
@@ -229,10 +242,13 @@ router.post("/cap-nhat-loai-can-ho", async function (req, res) {
 router.get("/huong-can-ho", async function (_, res) {
   try {
     const result = await executeQuery("SELECT * FROM huong_can_ho");
-    res.status(200).send(result);
+    res.status(200).send({ data: result, status: true });
   } catch (error) {
     console.error("/huong-can-ho" + error.message);
-    res.status(500).send([]);
+    res.status(500).send({
+      status: false,
+      response: "Lỗi khi lấy dữ liệu",
+    });
   }
 });
 
@@ -277,10 +293,13 @@ router.post("/cap-nhat-huong-can-ho", async function (req, res) {
 router.get("/du-an", async function (_, res) {
   try {
     const result = await executeQuery("SELECT * FROM du_an");
-    res.status(200).send(result);
+    res.status(200).send({ data: result, status: true });
   } catch (error) {
     console.error("/du-an" + error.message);
-    res.status(500).send([]);
+    res.status(500).send({
+      status: false,
+      response: "Lỗi khi lấy dữ liệu",
+    });
   }
 });
 

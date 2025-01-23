@@ -15,12 +15,19 @@ export default function LoaiCanHo() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await REQUEST.get("/thong-tin-du-an/loai-can-ho");
+        const {
+          data: { response, status, data },
+        } = await REQUEST.get("/thong-tin-du-an/loai-can-ho");
         setLoading(false);
+        if (!status) {
+          toast.error(response);
+          return;
+        }
+
         setData(data);
       } catch (error) {
         setLoading(false);
-        console.error(error);
+        toast.error("Lỗi khi lấy dữ liệu");
       }
     })();
   }, []);
@@ -40,8 +47,8 @@ export default function LoaiCanHo() {
       const {
         data: { response, id, status },
       } = await REQUEST.post("/thong-tin-du-an/them-loai-can-ho", dataPost);
-      toast.success(response);
       setLoading(false);
+      toast.success(response);
 
       if (status) {
         setShowModal(false);
@@ -49,7 +56,7 @@ export default function LoaiCanHo() {
       }
     } catch (error) {
       setLoading(false);
-      console.error(error);
+      toast.error("Lỗi thêm loại căn hộ");
     }
   }
 
@@ -69,8 +76,8 @@ export default function LoaiCanHo() {
       const {
         data: { response, status },
       } = await REQUEST.post("/thong-tin-du-an/cap-nhat-loai-can-ho", dataPost);
-      toast.success(response);
       setLoading(false);
+      toast.success(response);
 
       if (status) {
         setShowModalUpdate(false);
@@ -80,7 +87,7 @@ export default function LoaiCanHo() {
       }
     } catch (error) {
       setLoading(false);
-      console.log(error);
+      toast.error("Lỗi cập nhật loại căn hộ");
     }
   }
 

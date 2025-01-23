@@ -40,9 +40,15 @@ export default function NguoiDung() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await REQUEST.get("/nguoi-dung");
+        const {
+          data: { status, response, data },
+        } = await REQUEST.get("/nguoi-dung");
 
         setLoading(false);
+        if (!status) {
+          toast.error(response);
+          return;
+        }
         setData(data);
       } catch (error) {
         setLoading(false);

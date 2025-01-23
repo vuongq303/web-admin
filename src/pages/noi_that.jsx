@@ -15,8 +15,14 @@ export default function DuAn() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await REQUEST.get("/thong-tin-du-an/noi-that");
+        const {
+          data: { status, response, data },
+        } = await REQUEST.get("/thong-tin-du-an/noi-that");
         setLoading(false);
+        if (!status) {
+          toast.error(response);
+          return;
+        }
         setData(data);
       } catch (error) {
         setLoading(false);
@@ -38,8 +44,8 @@ export default function DuAn() {
       const {
         data: { response, status, id },
       } = await REQUEST.post("/thong-tin-du-an/them-noi-that", dataPost);
-      toast.success(response);
       setLoading(false);
+      toast.success(response);
 
       if (status) {
         setShowModal(false);
@@ -67,9 +73,9 @@ export default function DuAn() {
       const {
         data: { response, status },
       } = await REQUEST.post("/thong-tin-du-an/cap-nhat-noi-that", dataPost);
-      toast.success(response);
       setLoading(false);
-      
+      toast.success(response);
+
       if (status) {
         setShowModalUpdate(false);
         setData((pre) =>

@@ -15,8 +15,15 @@ export default function () {
   useEffect(() => {
     (async function () {
       try {
-        const { data } = await REQUEST.get("/thong-tin-du-an/truc-can-ho");
+        const {
+          data: { status, response, data },
+        } = await REQUEST.get("/thong-tin-du-an/truc-can-ho");
+
         setLoading(false);
+        if (!status) {
+          toast.error(response);
+          return;
+        }
         setData(data);
       } catch (error) {
         setLoading(false);
@@ -38,9 +45,9 @@ export default function () {
       const {
         data: { response, status, id },
       } = await REQUEST.post("/thong-tin-du-an/them-truc-can-ho", dataPost);
-      toast.success(response);
       setLoading(false);
-      
+      toast.success(response);
+
       if (status) {
         setShowModal(false);
         setData((pre) => [...pre, { id, ...dataPost }]);
@@ -67,8 +74,8 @@ export default function () {
       const {
         data: { response, status },
       } = await REQUEST.post("/thong-tin-du-an/cap-nhat-truc-can-ho", dataPost);
-      toast.success(response);
       setLoading(false);
+      toast.success(response);
 
       if (status) {
         setShowModalUpdate(false);

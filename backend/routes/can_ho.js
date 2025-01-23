@@ -2,10 +2,10 @@ var express = require("express");
 const { join } = require("path");
 const fs = require("fs");
 const moment = require("moment");
-const upload = require("../middleware/upload_can_ho");
 const executeQuery = require("../sql/promise");
 const config = require("../config/config");
-const authentication = require("../middleware/authentication");
+const authentication = require("../middleware/authentication/admin");
+const upload = require("../middleware/uploads/can_ho");
 var router = express.Router();
 
 router.get("/", authentication, async function (req, res) {

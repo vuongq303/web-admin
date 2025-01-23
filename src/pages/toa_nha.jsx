@@ -18,15 +18,22 @@ export default function DuAn() {
     (async function getData() {
       try {
         const {
-          data: { toa_nha, du_an },
+          data: {
+            status,
+            response,
+            data: { toa_nha, du_an },
+          },
         } = await REQUEST.get("/thong-tin-du-an/toa-nha");
-
         setLoading(false);
+        if (!status) {
+          toast.error(response);
+          return;
+        }
         setData(toa_nha);
         setDataDuAn(du_an);
       } catch (error) {
-        toast.error("Lỗi khi lấy dữ liệu");
         setLoading(false);
+        toast.error("Lỗi khi lấy dữ liệu");
       }
     })();
   }, []);
@@ -47,16 +54,16 @@ export default function DuAn() {
       const {
         data: { response, status, id },
       } = await REQUEST.post("/thong-tin-du-an/them-toa-nha", dataPost);
-      toast.success(response);
       setLoading(false);
+      toast.success(response);
 
       if (status) {
         setShowModal(false);
         setData((pre) => [...pre, { id, ...dataPost }]);
       }
     } catch (error) {
-      toast.error("Lỗi khi thêm tòa nhà");
       setLoading(false);
+      toast.error("Lỗi khi thêm tòa nhà");
     }
   }
 
@@ -82,8 +89,8 @@ export default function DuAn() {
       const {
         data: { response, status },
       } = await REQUEST.post("/thong-tin-du-an/cap-nhat-toa-nha", dataPost);
-      toast.success(response);
       setLoading(false);
+      toast.success(response);
 
       if (status) {
         setShowModalUpdate(false);
@@ -92,8 +99,8 @@ export default function DuAn() {
         );
       }
     } catch (error) {
-      toast.error("Lỗi khi cập nhật tòa nhà");
       setLoading(false);
+      toast.error("Lỗi khi cập nhật tòa nhà");
     }
   }
 

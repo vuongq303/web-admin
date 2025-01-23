@@ -30,10 +30,22 @@ export default function KhachHang() {
   const ngaySinhKetThucTimKiemRef = useRef(null);
 
   async function getData() {
-    setLoading(true);
-    const { data } = await REQUEST.get("/khach-hang");
-    setLoading(false);
-    setData(data);
+    try {
+      setLoading(true);
+      const {
+        data: { status, response, data },
+      } = await REQUEST.get("/khach-hang");
+
+      setLoading(false);
+      if (!status) {
+        toast.error(response);
+        return;
+      }
+      setData(data);
+    } catch (error) {
+      setLoading(false);
+      toast.error("Lỗi khi lấy dữ liệu");
+    }
   }
 
   useEffect(() => {
@@ -56,15 +68,22 @@ export default function KhachHang() {
     }
 
     setLoading(true);
-    const { data } = await REQUEST.get("/khach-hang/tim-kiem", {
+    const {
+      data: { response, status, data },
+    } = await REQUEST.get("/khach-hang/tim-kiem", {
       params: dataPost,
     });
+
     setLoading(false);
+    if (!status) {
+      toast.error(response);
+      return;
+    }
     setData(data);
     try {
     } catch (error) {
-      console.error(error);
       setLoading(false);
+      toast.error("Lỗi tìm kiếm khách hàng");
     }
   }
 
@@ -109,15 +128,16 @@ export default function KhachHang() {
       const {
         data: { response, status, id },
       } = await REQUEST.post("/khach-hang/them-khach-hang", dataPost);
-      toast.success(response);
       setLoading(false);
+      toast.success(response);
+
       if (status) {
         setShowModal(false);
         setData((pre) => [...pre, { id, ...dataPost }]);
       }
     } catch (error) {
       setLoading(false);
-      console.error(error);
+      toast.error("Lỗi thêm khách hàng");
     }
   }
 
@@ -156,8 +176,8 @@ export default function KhachHang() {
       const {
         data: { response, status },
       } = await REQUEST.post("/khach-hang/cap-nhat-khach-hang", dataPost);
-      toast.success(response);
       setLoading(false);
+      toast.success(response);
 
       if (status) {
         setShowModalUpdate(false);
@@ -167,7 +187,7 @@ export default function KhachHang() {
       }
     } catch (error) {
       setLoading(false);
-      console.error(error);
+      toast.error("Lỗi cập nhật khách hàng");
     }
   }
 
@@ -175,11 +195,12 @@ export default function KhachHang() {
     setDataUpdate(item);
     setShowModalUpdate(true);
   }
+
   return (
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={200}
+        autoClose={500}
         hideProgressBar={false}
       />
       <Loading loading={loading} />
@@ -569,9 +590,9 @@ export default function KhachHang() {
         <tbody>
           {data.map((item, index) => {
             const styles = {
-              w_10: { width: "10%" },
-              w_15: { width: "15%" },
-              w_5: { width: "5%" },
+              w_10: { width: "10%", fontSize: 12 },
+              w_15: { width: "15%", fontSize: 12 },
+              w_5: { width: "5%", fontSize: 12 },
             };
             return (
               <tr key={index}>

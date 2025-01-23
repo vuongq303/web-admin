@@ -9,18 +9,24 @@ router.get("/", authentication, async function (req, res) {
     const data = req.user;
 
     if (data.phan_quyen !== config.admin && data.phan_quyen !== config.quanLy) {
-      return res.status(401).send([]);
+      return res.status(401).send({
+        response: "Không thể lấy dữ liệu",
+        status: false,
+      });
     }
 
     const result = await executeQuery("SELECT * FROM khach_hang_nguon");
-    res.status(200).send(result);
+    res.status(200).send({ status: true, data: result });
   } catch (error) {
     console.error("/khach-hang-nguon" + error.message);
-    res.status(500).send([]);
+    res.status(500).send({
+      status: false,
+      response: "Lỗi khi lấy dữ liệu",
+    });
   }
 });
 
-router.post("/them-khach-hang", async function (req, res) {
+router.post("/them-khach-hang", authentication, async function (req, res) {
   try {
     const {
       ten_khach_hang,
@@ -54,7 +60,7 @@ router.post("/them-khach-hang", async function (req, res) {
   }
 });
 
-router.post("/cap-nhat-khach-hang", async function (req, res) {
+router.post("/cap-nhat-khach-hang", authentication, async function (req, res) {
   try {
     const {
       ten_khach_hang,

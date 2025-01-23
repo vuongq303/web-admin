@@ -15,12 +15,19 @@ export default function HuongCanHo() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await REQUEST.get("/thong-tin-du-an/huong-can-ho");
+        const {
+          data: { status, data, response },
+        } = await REQUEST.get("/thong-tin-du-an/huong-can-ho");
+
         setLoading(false);
+        if (!status) {
+          toast.error(response);
+          return;
+        }
         setData(data);
       } catch (error) {
         setLoading(false);
-        console.error(error);
+        toast.error("Lỗi khi lấy dữ liệu");
       }
     })();
   }, []);
@@ -45,8 +52,8 @@ export default function HuongCanHo() {
       const {
         data: { response, status, id },
       } = await REQUEST.post("/thong-tin-du-an/them-huong-can-ho", dataPost);
-      toast.success(response);
       setLoading(false);
+      toast.success(response);
 
       if (status) {
         setShowModal(false);
@@ -54,11 +61,11 @@ export default function HuongCanHo() {
       }
     } catch (error) {
       setLoading(false);
-      console.error(error);
+      toast.error("Lỗi thêm hướng căn hộ");
     }
   }
 
-  async function capNhathuongCanHo() {
+  async function capNhatHuongCanHo() {
     try {
       const dataPost = {
         huong_can_ho: huongCanHoRef.current.value,
@@ -76,8 +83,8 @@ export default function HuongCanHo() {
         "/thong-tin-du-an/cap-nhat-huong-can-ho",
         dataPost
       );
-      toast.success(response);
       setLoading(false);
+      toast.success(response);
 
       if (status) {
         setShowModalUpdate(false);
@@ -87,7 +94,7 @@ export default function HuongCanHo() {
       }
     } catch (error) {
       setLoading(false);
-      console.log(error);
+      toast.error("Lỗi cập nhật hướng căn hộ");
     }
   }
 
@@ -168,7 +175,7 @@ export default function HuongCanHo() {
             >
               Close
             </Button>
-            <Button variant="primary" onClick={capNhathuongCanHo}>
+            <Button variant="primary" onClick={capNhatHuongCanHo}>
               Cập nhật
             </Button>
           </Modal.Footer>
