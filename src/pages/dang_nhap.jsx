@@ -1,5 +1,5 @@
 import "./css/css.css";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { modulePhanQuyen } from "../data/module";
@@ -12,6 +12,14 @@ export default function DangNhap() {
   const username = useRef();
   const password = useRef();
   const btnLogin = useRef();
+
+  useEffect(() => {
+    document.addEventListener("keypress", (event) => {
+      if (event.key === "Enter") {
+        btnLogin.current.click();
+      }
+    });
+  }, []);
 
   async function loginForm() {
     const user = {

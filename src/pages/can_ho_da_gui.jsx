@@ -14,7 +14,7 @@ export default function CanHoDaGui() {
   const [showModalHinhAnh, setShowModalHinhAnh] = useState(false);
   const [showImageData, setShowImageData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [role, setRole] = useState("");
+  const [isAdmin, setIsAdmin] = useState(true);
   const hinhAnhRef = useRef(null);
 
   async function capNhatAnhCanHo(event) {
@@ -53,7 +53,7 @@ export default function CanHoDaGui() {
   }
 
   const xoaAnhCanHo = async (index) => {
-    if (role !== modulePhanQuyen.admin && role !== modulePhanQuyen.quanLy) {
+    if (!isAdmin) {
       toast.error("Bạn không thể xóa ảnh");
       return;
     }
@@ -117,7 +117,6 @@ export default function CanHoDaGui() {
       }
     } catch (error) {
       setLoading(false);
-      console.error(error);
     }
   }
 
@@ -125,13 +124,17 @@ export default function CanHoDaGui() {
     (async function getData() {
       try {
         const {
-          data: { response, role },
+          data: { data, isAdmin, status, response },
         } = await REQUEST.get("/yeu-cau/danh-sach-gui-yeu-cau");
         setLoading(false);
-        setData(response);
-        setRole(role);
+        if (!status) {
+          toast.error(response);
+          return;
+        }
+        setData(data);
+        setIsAdmin(isAdmin);
       } catch (error) {
-        console.error(error);
+        setLoading(false);
       }
     })();
   }, []);
@@ -140,7 +143,7 @@ export default function CanHoDaGui() {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={200}
+        autoClose={500}
         hideProgressBar={false}
       />
       <Loading loading={loading} />
@@ -266,7 +269,7 @@ export default function CanHoDaGui() {
                     Hình ảnh
                   </button>
                   <br />
-                  {role !== modulePhanQuyen.sale && (
+                  {!isAdmin && (
                     <button
                       style={styles.f_}
                       type="button"

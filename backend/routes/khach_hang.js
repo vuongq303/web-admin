@@ -1,26 +1,15 @@
 var express = require("express");
 var router = express.Router();
 const executeQuery = require("../sql/promise");
-const config = require("../config/config");
-const authentication = require("../middleware/authentication");
+const authCskh = require("../middleware/auth/cskh");
 
-router.get("/", authentication, async function (req, res) {
+router.get("/", authCskh, async function (req, res) {
   try {
-    const data = req.user;
-
-    if (
-      data.phan_quyen !== config.admin &&
-      data.phan_quyen !== config.quanLy &&
-      data.phan_quyen !== config.cskh
-    ) {
-      return res.status(401).send({
-        status: false,
-        response: "Không thể lấy dữ liệu",
-      });
-    }
-
     const result = await executeQuery("SELECT * FROM khach_hang");
-    res.status(200).send({ data: result, status: true });
+    res.status(200).send({
+      data: result,
+      status: true
+    });
   } catch (error) {
     console.error("/khach-hang" + error.message);
     res.status(500).send({
@@ -30,37 +19,14 @@ router.get("/", authentication, async function (req, res) {
   }
 });
 
-router.post("/them-khach-hang", authentication, async function (req, res) {
+router.post("/them-khach-hang", authCskh, async function (req, res) {
   try {
-    const {
-      ten_khach_hang,
-      so_dien_thoai,
-      loai_giao_dich,
-      ngay_ki_hop_dong,
-      ghi_chu,
-      ma_can_ho,
-      ho_ten_chu_nha,
-      so_dien_thoai_chu_nha,
-      ngay_sinh,
-      phi_moi_gioi,
-    } = req.body;
-    const sql = `
-      INSERT INTO khach_hang (ten_khach_hang, so_dien_thoai, loai_giao_dich, ngay_ki_hop_dong, ghi_chu,
+    const { ten_khach_hang, so_dien_thoai, loai_giao_dich, ngay_ki_hop_dong, ghi_chu, ma_can_ho, ho_ten_chu_nha, so_dien_thoai_chu_nha, ngay_sinh, phi_moi_gioi } = req.body;
+    const sql = `INSERT INTO khach_hang (ten_khach_hang, so_dien_thoai, loai_giao_dich, ngay_ki_hop_dong, ghi_chu,
       ma_can_ho, ho_ten_chu_nha, so_dien_thoai_chu_nha, ngay_sinh, phi_moi_gioi) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    const result = await executeQuery(sql, [
-      ten_khach_hang,
-      so_dien_thoai,
-      loai_giao_dich,
-      ngay_ki_hop_dong,
-      ghi_chu,
-      ma_can_ho,
-      ho_ten_chu_nha,
-      so_dien_thoai_chu_nha,
-      ngay_sinh,
-      phi_moi_gioi,
-    ]);
+    const result = await executeQuery(sql, [ten_khach_hang, so_dien_thoai, loai_giao_dich, ngay_ki_hop_dong, ghi_chu, ma_can_ho, ho_ten_chu_nha, so_dien_thoai_chu_nha, ngay_sinh, phi_moi_gioi]);
     res.status(200).json({
       response: "Thêm khách hàng thành công",
       status: true,
@@ -75,43 +41,17 @@ router.post("/them-khach-hang", authentication, async function (req, res) {
   }
 });
 
-router.post("/cap-nhat-khach-hang", authentication, async function (req, res) {
+router.post("/cap-nhat-khach-hang", authCskh, async function (req, res) {
   try {
-    const {
-      ten_khach_hang,
-      so_dien_thoai,
-      loai_giao_dich,
-      ngay_ki_hop_dong,
-      ghi_chu,
-      ma_can_ho,
-      ho_ten_chu_nha,
-      so_dien_thoai_chu_nha,
-      ngay_sinh,
-      phi_moi_gioi,
-      id,
-    } = req.body;
-
-    const sql = `
-    UPDATE khach_hang SET ten_khach_hang = ? ,
+    const { ten_khach_hang, so_dien_thoai, loai_giao_dich, ngay_ki_hop_dong, ghi_chu, ma_can_ho, ho_ten_chu_nha, so_dien_thoai_chu_nha, ngay_sinh, phi_moi_gioi, id } = req.body;
+    const sql = `UPDATE khach_hang SET ten_khach_hang = ? ,
     so_dien_thoai = ?,
     loai_giao_dich = ?, ngay_ki_hop_dong = ?,
     ghi_chu = ?, ma_can_ho = ?, ho_ten_chu_nha = ?,
     so_dien_thoai_chu_nha = ?, ngay_sinh = ?,
     phi_moi_gioi = ? WHERE id = ?`;
 
-    await executeQuery(sql, [
-      ten_khach_hang,
-      so_dien_thoai,
-      loai_giao_dich,
-      ngay_ki_hop_dong,
-      ghi_chu,
-      ma_can_ho,
-      ho_ten_chu_nha,
-      so_dien_thoai_chu_nha,
-      ngay_sinh,
-      phi_moi_gioi,
-      id,
-    ]);
+    await executeQuery(sql, [ten_khach_hang, so_dien_thoai, loai_giao_dich, ngay_ki_hop_dong, ghi_chu, ma_can_ho, ho_ten_chu_nha, so_dien_thoai_chu_nha, ngay_sinh, phi_moi_gioi, id]);
     res.status(200).json({
       response: "Cập nhật khách hàng thành công",
       status: true,
@@ -125,7 +65,7 @@ router.post("/cap-nhat-khach-hang", authentication, async function (req, res) {
   }
 });
 
-router.get("/tim-kiem", authentication, async (req, res) => {
+router.get("/tim-kiem", authCskh, async (req, res) => {
   try {
     const { phi_moi_gioi, ngay_bat_dau, ngay_ket_thuc } = req.query;
     var sql = "SELECT * FROM khach_hang";
@@ -148,7 +88,10 @@ router.get("/tim-kiem", authentication, async (req, res) => {
     }
     const result = await executeQuery(sql, value);
 
-    res.status(200).send({ status: true, data: result });
+    res.status(200).send({
+      status: true,
+      data: result
+    });
   } catch (error) {
     console.error("/tim-kiem" + error.message);
     res.status(500).send({

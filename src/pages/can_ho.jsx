@@ -5,12 +5,7 @@ import { danhDauCanHo, dateToText, locGiaCanHo } from "../services/utils";
 import PreviewImage from "./components/preview_image";
 import { toast, ToastContainer } from "react-toastify";
 import { downloadImages, exportFileExcel } from "./controllers/function";
-import {
-  baseURL,
-  modulePhanQuyen,
-  dataCanHoDefault,
-  excelImportFormat,
-} from "../data/module";
+import { baseURL, dataCanHoDefault, excelImportFormat } from "../data/module";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { REQUEST } from "../api/method";
@@ -18,7 +13,7 @@ import { REQUEST } from "../api/method";
 export default function CanHo() {
   const limitRow = 50;
   const [data, setData] = useState([]);
-  const [role, setRole] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const [pages, setPages] = useState(1);
   const [timKiemPages, setTimeKiemPages] = useState(1);
   const [isTimKiem, setIsTimKiem] = useState(false);
@@ -93,15 +88,14 @@ export default function CanHo() {
       toast.success(response);
     } catch (error) {
       setLoading(false);
-      console.error(error.message);
-      toast.error(error.message);
+      toast.error("Lỗi gửi yêu cầu");
     }
   }
 
   async function getData(page) {
     try {
       const {
-        data: { response, role, status },
+        data: { data, isAdmin, status, response },
       } = await REQUEST.get("/can-ho", {
         params: {
           limit: limitRow,
@@ -109,45 +103,53 @@ export default function CanHo() {
         },
       });
       if (status) {
-        setRole(role);
-        return response;
+        setIsAdmin(isAdmin);
+        return data;
       }
+      toast.error(response);
       return [];
     } catch (error) {
-      console.log(error);
+      setLoading(false);
+      toast.error("Lỗi lấy dữ liệu");
     }
   }
 
   async function timKiem(page) {
-    let dataTimKiem = {
-      ten_du_an: tenDuAnTimKiemRef.current.value,
-      ten_toa_nha: tenToaNhaTimKiemRef.current.value,
-      loai_noi_that: loaiNoiThatTimKiemRef.current.value,
-      loai_can_ho: loaiCanHoTimKiemRef.current.value,
-      huong_can_ho: huongCanHoTimKiemRef.current.value,
-      so_phong_ngu: soPhongNguTimKiemRef.current.value,
-      truc_can_ho: trucCanHoTimKiemRef.current.value,
-      loc_gia: locGiaCanHoRef.current.value,
-      gia_tu: giaBanTuState.replace(/,/g, ""),
-      gia_den: giaBanDenState.replace(/,/g, ""),
-      limit: limitRow,
-      offset: (page - 1) * limitRow,
-    };
+    try {
+      let dataTimKiem = {
+        ten_du_an: tenDuAnTimKiemRef.current.value,
+        ten_toa_nha: tenToaNhaTimKiemRef.current.value,
+        loai_noi_that: loaiNoiThatTimKiemRef.current.value,
+        loai_can_ho: loaiCanHoTimKiemRef.current.value,
+        huong_can_ho: huongCanHoTimKiemRef.current.value,
+        so_phong_ngu: soPhongNguTimKiemRef.current.value,
+        truc_can_ho: trucCanHoTimKiemRef.current.value,
+        loc_gia: locGiaCanHoRef.current.value,
+        gia_tu: giaBanTuState.replace(/,/g, ""),
+        gia_den: giaBanDenState.replace(/,/g, ""),
+        limit: limitRow,
+        offset: (page - 1) * limitRow,
+      };
 
-    setLoading(true);
-    setIsTimKiem(true);
-    const { data } = await REQUEST.get(
-      `/tim-kiem/${
-        role === modulePhanQuyen.admin || role === modulePhanQuyen.quanLy
-          ? "admin"
-          : "sale"
-      }`,
-      {
+      setLoading(true);
+      setIsTimKiem(true);
+      const {
+        data: { response, status, data },
+      } = await REQUEST.get(`/tim-kiem/${isAdmin ? "admin" : "sale"}`, {
         params: dataTimKiem,
+      });
+
+      setLoading(false);
+      if (status) {
+        return data;
       }
-    );
-    setLoading(false);
-    return data;
+
+      toast.error(response);
+      return [];
+    } catch (error) {
+      setLoading(false);
+      toast.error("Lỗi tìm kiếm");
+    }
   }
 
   async function lamMoi() {
@@ -206,7 +208,7 @@ export default function CanHo() {
   }
 
   const xoaAnhCanHo = async (index) => {
-    if (role !== modulePhanQuyen.admin && role !== modulePhanQuyen.quanLy) {
+    if (!isAdmin) {
       toast.error("Bạn không thể xóa ảnh");
       return;
     }
@@ -536,8 +538,7 @@ export default function CanHo() {
       />
       <div className="d-flex justify-content-start m-2">
         <div className="d-flex justify-content-between align-items-center w-100">
-          {(role === modulePhanQuyen.admin ||
-            role === modulePhanQuyen.quanLy) && (
+          {isAdmin && (
             <div className="d-flex align-items-center">
               <button
                 type="button"
@@ -1388,8 +1389,7 @@ export default function CanHo() {
                   </strong>
                 </td>
                 <td className="align-middle">
-                  {(role === modulePhanQuyen.admin ||
-                    role === modulePhanQuyen.quanLy) && (
+                  {isAdmin && (
                     <Form.Check
                       style={styles.s_}
                       checked={item.trang_thai === 0}
@@ -1398,8 +1398,7 @@ export default function CanHo() {
                       id="custom-switch"
                     />
                   )}
-                  {(role === modulePhanQuyen.admin ||
-                    role === modulePhanQuyen.quanLy) && (
+                  {isAdmin && (
                     <button
                       type="button"
                       style={styles.f_}

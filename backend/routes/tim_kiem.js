@@ -2,9 +2,10 @@ var express = require("express");
 var router = express.Router();
 const executeQuery = require("../sql/promise");
 const config = require("../config/config");
-const authentication = require("../middleware/authentication");
+const authAdmin = require("../middleware/auth/admin");
+const authSale = require("../middleware/auth/sale");
 
-router.get("/admin", authentication, async function (req, res) {
+router.get("/admin", authAdmin, async function (req, res) {
   try {
     var value = [];
     var condition = [];
@@ -12,18 +13,7 @@ router.get("/admin", authentication, async function (req, res) {
     const offset = req.query.offset || 0;
     var sql = "SELECT * FROM can_ho";
 
-    const {
-      ten_du_an,
-      ten_toa_nha,
-      loai_noi_that,
-      loai_can_ho,
-      huong_can_ho,
-      so_phong_ngu,
-      truc_can_ho,
-      loc_gia,
-      gia_tu,
-      gia_den,
-    } = req.query;
+    const { ten_du_an, ten_toa_nha, loai_noi_that, loai_can_ho, huong_can_ho, so_phong_ngu, truc_can_ho, loc_gia, gia_tu, gia_den } = req.query;
 
     if (ten_du_an !== "") {
       condition.push("ten_du_an = ?");
@@ -60,11 +50,8 @@ router.get("/admin", authentication, async function (req, res) {
       value.push(truc_can_ho);
     }
 
-    const gia_ban =
-      loc_gia === config.giaBanTangDan || loc_gia === config.giaBanGiamDan;
-
-    const gia_thue =
-      loc_gia === config.giaThueTangDan || loc_gia === config.giaThueGiamDan;
+    const gia_ban = loc_gia === config.giaBanTangDan || loc_gia === config.giaBanGiamDan;
+    const gia_thue = loc_gia === config.giaThueTangDan || loc_gia === config.giaThueGiamDan;
 
     if (gia_tu !== "" && gia_den !== "") {
       if (gia_ban) {
@@ -111,18 +98,21 @@ router.get("/admin", authentication, async function (req, res) {
         break;
     }
 
-    const result = await executeQuery(
-      sql + ` LIMIT ${limit} OFFSET ${offset}`,
-      value
-    );
-    res.status(200).send(result);
+    const result = await executeQuery(sql + ` LIMIT ${limit} OFFSET ${offset}`, value);
+    res.status(200).send({
+      data: result,
+      status: true
+    });
   } catch (error) {
     console.error("/admin" + error.message);
-    res.status(500).send([]);
+    res.status(500).send({
+      response: "Lỗi tìm kiếm",
+      status: false
+    });
   }
 });
 
-router.get("/sale", authentication, async function (req, res) {
+router.get("/sale", authSale, async function (req, res) {
   try {
     var value = [];
     var condition = [];
@@ -133,18 +123,7 @@ router.get("/sale", authentication, async function (req, res) {
       so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, hinh_anh,
       ten_toa_nha, truc_can_ho FROM can_ho WHERE trang_thai = '0'`;
 
-    const {
-      ten_du_an,
-      ten_toa_nha,
-      loai_noi_that,
-      loai_can_ho,
-      huong_can_ho,
-      so_phong_ngu,
-      truc_can_ho,
-      loc_gia,
-      gia_tu,
-      gia_den,
-    } = req.query;
+    const { ten_du_an, ten_toa_nha, loai_noi_that, loai_can_ho, huong_can_ho, so_phong_ngu, truc_can_ho, loc_gia, gia_tu, gia_den } = req.query;
 
     if (ten_du_an !== "") {
       condition.push("ten_du_an = ?");
@@ -181,11 +160,9 @@ router.get("/sale", authentication, async function (req, res) {
       value.push(truc_can_ho);
     }
 
-    const gia_ban =
-      loc_gia === config.giaBanTangDan || loc_gia === config.giaBanGiamDan;
+    const gia_ban = loc_gia === config.giaBanTangDan || loc_gia === config.giaBanGiamDan;
 
-    const gia_thue =
-      loc_gia === config.giaThueTangDan || loc_gia === config.giaThueGiamDan;
+    const gia_thue = loc_gia === config.giaThueTangDan || loc_gia === config.giaThueGiamDan;
 
     if (gia_tu !== "" && gia_den !== "") {
       if (gia_ban) {
@@ -225,14 +202,17 @@ router.get("/sale", authentication, async function (req, res) {
         break;
     }
 
-    const result = await executeQuery(
-      sql + ` LIMIT ${limit} OFFSET ${offset}`,
-      value
-    );
-    res.status(200).send(result);
+    const result = await executeQuery(sql + ` LIMIT ${limit} OFFSET ${offset}`, value);
+    res.status(200).send({
+      data: result,
+      status: true
+    });
   } catch (error) {
-    console.error("/sale" + error.message);
-    res.status(500).send([]);
+    console.error("/admin" + error.message);
+    res.status(500).send({
+      response: "Lỗi tìm kiếm",
+      status: false
+    });
   }
 });
 

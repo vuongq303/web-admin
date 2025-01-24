@@ -68,12 +68,20 @@ export default function CanHoDaDuyet() {
   useEffect(() => {
     (async function getData() {
       try {
-        const { data } = await REQUEST.get("/yeu-cau/danh-sach-duyet-yeu-cau");
+        const {
+          data: { response, data, status },
+        } = await REQUEST.get("/yeu-cau/danh-sach-duyet-yeu-cau");
         setLoading(false);
+        
+        if (!status) {
+          toast.error(response);
+          return;
+        }
+
         setData(data);
       } catch (error) {
         setLoading(false);
-        console.error(error);
+        toast.error("Lỗi lấy dữ liệu");
       }
     })();
   }, []);

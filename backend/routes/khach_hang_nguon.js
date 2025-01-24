@@ -1,20 +1,10 @@
 var express = require("express");
 var router = express.Router();
 const executeQuery = require("../sql/promise");
-const config = require("../config/config");
-const authentication = require("../middleware/authentication");
+const authAdmin = require("../middleware/auth/admin");
 
-router.get("/", authentication, async function (req, res) {
+router.get("/", authAdmin, async function (req, res) {
   try {
-    const data = req.user;
-
-    if (data.phan_quyen !== config.admin && data.phan_quyen !== config.quanLy) {
-      return res.status(401).send({
-        response: "Không thể lấy dữ liệu",
-        status: false,
-      });
-    }
-
     const result = await executeQuery("SELECT * FROM khach_hang_nguon");
     res.status(200).send({ status: true, data: result });
   } catch (error) {
@@ -26,26 +16,14 @@ router.get("/", authentication, async function (req, res) {
   }
 });
 
-router.post("/them-khach-hang", authentication, async function (req, res) {
+router.post("/them-khach-hang", authAdmin, async function (req, res) {
   try {
-    const {
-      ten_khach_hang,
-      so_dien_thoai,
-      khach_goi_tu,
-      ghi_chu,
-      ngay_phat_sinh,
-    } = req.body;
-    const sql = `
-    INSERT INTO khach_hang_nguon (ten_khach_hang, so_dien_thoai, khach_goi_tu, ghi_chu, ngay_phat_sinh) 
+    const { ten_khach_hang, so_dien_thoai, khach_goi_tu, ghi_chu, ngay_phat_sinh } = req.body;
+    const sql = `INSERT INTO khach_hang_nguon
+    (ten_khach_hang, so_dien_thoai, khach_goi_tu, ghi_chu, ngay_phat_sinh) 
     VALUES (?, ?, ?, ?, ?)`;
 
-    const result = await executeQuery(sql, [
-      ten_khach_hang,
-      so_dien_thoai,
-      khach_goi_tu,
-      ghi_chu,
-      ngay_phat_sinh,
-    ]);
+    const result = await executeQuery(sql, [ten_khach_hang, so_dien_thoai, khach_goi_tu, ghi_chu, ngay_phat_sinh]);
     res.status(200).json({
       response: "Thêm khách hàng thành công ",
       status: true,
@@ -60,16 +38,9 @@ router.post("/them-khach-hang", authentication, async function (req, res) {
   }
 });
 
-router.post("/cap-nhat-khach-hang", authentication, async function (req, res) {
+router.post("/cap-nhat-khach-hang", authAdmin, async function (req, res) {
   try {
-    const {
-      ten_khach_hang,
-      so_dien_thoai,
-      khach_goi_tu,
-      ghi_chu,
-      ngay_phat_sinh,
-      id,
-    } = req.body;
+    const { ten_khach_hang, so_dien_thoai, khach_goi_tu, ghi_chu, ngay_phat_sinh, id } = req.body;
 
     const sql = `
     UPDATE khach_hang_nguon SET ten_khach_hang = ? ,
@@ -77,14 +48,7 @@ router.post("/cap-nhat-khach-hang", authentication, async function (req, res) {
     khach_goi_tu = ?,
     ghi_chu = ?,ngay_phat_sinh = ? WHERE id = ?`;
 
-    await executeQuery(sql, [
-      ten_khach_hang,
-      so_dien_thoai,
-      khach_goi_tu,
-      ghi_chu,
-      ngay_phat_sinh,
-      id,
-    ]);
+    await executeQuery(sql, [ten_khach_hang, so_dien_thoai, khach_goi_tu, ghi_chu, ngay_phat_sinh, id]);
     res.status(200).json({
       response: "Cập nhật khách hàng thành công",
       status: true,

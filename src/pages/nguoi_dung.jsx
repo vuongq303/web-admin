@@ -52,7 +52,6 @@ export default function NguoiDung() {
         setData(data);
       } catch (error) {
         setLoading(false);
-        toast.error("Lỗi khi lấy dữ liệu");
       }
     })();
   }, []);
