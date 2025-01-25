@@ -33,7 +33,10 @@ router.get("/", authSale, async function (req, res) {
 router.get("/truc-can-ho", authAdmin, async function (_, res) {
   try {
     const result = await executeQuery("SELECT * FROM truc_can_ho");
-    res.status(200).send({ data: result, status: true });
+    res.status(200).send({
+      data: result,
+      status: true,
+    });
   } catch (error) {
     console.error("/truc-can-ho" + error.message);
     res.status(500).send({

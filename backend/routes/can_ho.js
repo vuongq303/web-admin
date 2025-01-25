@@ -6,9 +6,10 @@ const executeQuery = require("../sql/promise");
 const upload = require("../middleware/uploads/can_ho");
 const authAdmin = require("../middleware/auth/admin");
 const authSale = require("../middleware/auth/sale");
+const auth = require("../middleware/auth/auth");
 var router = express.Router();
 
-router.get("/", authAdmin, async function (req, res) {
+router.get("/", auth, async function (req, res) {
   try {
     const isAdmin = req.isAdmin;
     const limit = req.query.limit || 10;

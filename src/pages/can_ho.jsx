@@ -102,15 +102,15 @@ export default function CanHo() {
           offset: (page - 1) * limitRow,
         },
       });
-      if (status) {
-        setIsAdmin(isAdmin);
-        return data;
+      if (!status) {
+        toast.error(response);
+        return [];
       }
-      toast.error(response);
-      return [];
+
+      setIsAdmin(isAdmin);
+      return data;
     } catch (error) {
       setLoading(false);
-      toast.error("Lỗi lấy dữ liệu");
     }
   }
 
@@ -319,13 +319,12 @@ export default function CanHo() {
         setDataLoaiCanHo(loai_can_ho);
         setDataNoiThat(noi_that);
         setDataTrucCanHo(truc_can_ho);
-
         const data = await getData(pages);
+
         setLoading(false);
         setData(data);
       } catch (error) {
         setLoading(false);
-        console.log(error);
       }
     })();
   }, []);
