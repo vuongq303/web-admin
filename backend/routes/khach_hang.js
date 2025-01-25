@@ -1,9 +1,9 @@
 var express = require("express");
 var router = express.Router();
 const executeQuery = require("../sql/promise");
-const authCskh = require("../middleware/auth/cskh");
+const authentication = require("../middleware/authentication");
 
-router.get("/", authCskh, async function (req, res) {
+router.get("/", authentication, async function (req, res) {
   try {
     const result = await executeQuery("SELECT * FROM khach_hang");
     res.status(200).send({
@@ -19,7 +19,7 @@ router.get("/", authCskh, async function (req, res) {
   }
 });
 
-router.post("/them-khach-hang", authCskh, async function (req, res) {
+router.post("/them-khach-hang", authentication, async function (req, res) {
   try {
     const { ten_khach_hang, so_dien_thoai, loai_giao_dich, ngay_ki_hop_dong, ghi_chu, ma_can_ho, ho_ten_chu_nha, so_dien_thoai_chu_nha, ngay_sinh, phi_moi_gioi } = req.body;
     const sql = `INSERT INTO khach_hang (ten_khach_hang, so_dien_thoai, loai_giao_dich, ngay_ki_hop_dong, ghi_chu,
@@ -41,7 +41,7 @@ router.post("/them-khach-hang", authCskh, async function (req, res) {
   }
 });
 
-router.post("/cap-nhat-khach-hang", authCskh, async function (req, res) {
+router.post("/cap-nhat-khach-hang", authentication, async function (req, res) {
   try {
     const { ten_khach_hang, so_dien_thoai, loai_giao_dich, ngay_ki_hop_dong, ghi_chu, ma_can_ho, ho_ten_chu_nha, so_dien_thoai_chu_nha, ngay_sinh, phi_moi_gioi, id } = req.body;
     const sql = `UPDATE khach_hang SET ten_khach_hang = ? ,
@@ -65,7 +65,7 @@ router.post("/cap-nhat-khach-hang", authCskh, async function (req, res) {
   }
 });
 
-router.get("/tim-kiem", authCskh, async (req, res) => {
+router.get("/tim-kiem", authentication, async (req, res) => {
   try {
     const { phi_moi_gioi, ngay_bat_dau, ngay_ket_thuc } = req.query;
     var sql = "SELECT * FROM khach_hang";

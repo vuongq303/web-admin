@@ -4,20 +4,27 @@ import * as xlsx from "xlsx";
 import { danhDauCanHo, dateToText, locGiaCanHo } from "../services/utils";
 import PreviewImage from "./components/preview_image";
 import { toast, ToastContainer } from "react-toastify";
-import { downloadImages, exportFileExcel } from "./controllers/function";
+import {
+  authentication,
+  downloadImages,
+  exportFileExcel,
+} from "./controllers/function";
 import { baseURL, dataCanHoDefault, excelImportFormat } from "../data/module";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { REQUEST } from "../api/method";
+import { useNavigate } from "react-router-dom";
+import Loading from "./components/loading";
 
 export default function CanHo() {
   const limitRow = 50;
   const [data, setData] = useState([]);
+  const navigation = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   const [pages, setPages] = useState(1);
   const [timKiemPages, setTimeKiemPages] = useState(1);
   const [isTimKiem, setIsTimKiem] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [giaBanTuState, setGiaBanTuState] = useState("");
   const [giaBanDenState, setGiaBanDenState] = useState("");
@@ -78,39 +85,41 @@ export default function CanHo() {
     try {
       setLoading(true);
       const {
-        data: { response, status },
+        data: { response },
       } = await REQUEST.post("/yeu-cau/gui-yeu-cau", { can_ho: id });
       setLoading(false);
-      if (status) {
-        toast.success(response);
-        return;
-      }
       toast.success(response);
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      toast.error("Lỗi gửi yêu cầu");
+      toast.error(response);
     }
   }
 
   async function getData(page) {
     try {
       const {
-        data: { data, isAdmin, status, response },
+        data: { data, isAdmin, status },
       } = await REQUEST.get("/can-ho", {
         params: {
           limit: limitRow,
           offset: (page - 1) * limitRow,
         },
       });
-      if (!status) {
-        toast.error(response);
-        return [];
+      if (status) {
+        setIsAdmin(isAdmin);
+        return data;
       }
-
-      setIsAdmin(isAdmin);
-      return data;
-    } catch (error) {
-      setLoading(false);
+      return [];
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
+      authentication(navigation, response, toast);
     }
   }
 
@@ -134,7 +143,7 @@ export default function CanHo() {
       setLoading(true);
       setIsTimKiem(true);
       const {
-        data: { response, status, data },
+        data: { status, data },
       } = await REQUEST.get(`/tim-kiem/${isAdmin ? "admin" : "sale"}`, {
         params: dataTimKiem,
       });
@@ -144,11 +153,15 @@ export default function CanHo() {
         return data;
       }
 
+      return [];
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
+      setLoading(false);
       toast.error(response);
       return [];
-    } catch (error) {
-      setLoading(false);
-      toast.error("Lỗi tìm kiếm");
     }
   }
 
@@ -201,9 +214,13 @@ export default function CanHo() {
           )
         );
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      console.error(error);
+      toast.error(response);
     }
   }
 
@@ -238,9 +255,13 @@ export default function CanHo() {
           )
         );
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      console.log(error);
+      toast.error(response);
     }
   };
 
@@ -294,10 +315,13 @@ export default function CanHo() {
           ...pre,
         ]);
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      toast.error("Đã xảy ra lỗi. Vui lòng thử lại!");
-      console.error("Lỗi khi thêm căn hộ:", error);
+      toast.error(response);
     }
   }
 
@@ -320,11 +344,17 @@ export default function CanHo() {
         setDataNoiThat(noi_that);
         setDataTrucCanHo(truc_can_ho);
         const data = await getData(pages);
+        setLoading(false);
 
-        setLoading(false);
-        setData(data);
-      } catch (error) {
-        setLoading(false);
+        if (data) {
+          setData(data);
+        }
+      } catch ({
+        response: {
+          data: { response },
+        },
+      }) {
+        authentication(navigation, response, toast);
       }
     })();
   }, []);
@@ -400,9 +430,13 @@ export default function CanHo() {
           )
         );
       }
-    } catch (error) {
-      console.error("Lỗi khi cập nhật căn hộ:", error);
-      toast.error("Đã xảy ra lỗi. Vui lòng thử lại!");
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
+      setLoading(false);
+      toast.error(response);
     }
   }
 
@@ -463,9 +497,13 @@ export default function CanHo() {
       reader.onloadend = () => {
         uploadFileExcelRef.current.value = "";
       };
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      console.error("Error while uploading Excel file:", error);
+      toast.error(response);
     }
   };
 
@@ -489,9 +527,13 @@ export default function CanHo() {
           prev.map((item) => (item.id === id ? { ...item, ...data } : item))
         );
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      console.error(error);
+      toast.error(response);
     }
   }
 
@@ -532,9 +574,10 @@ export default function CanHo() {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={500}
+        autoClose={1000}
         hideProgressBar={false}
       />
+      <Loading loading={loading} />
       <div className="d-flex justify-content-start m-2">
         <div className="d-flex justify-content-between align-items-center w-100">
           {isAdmin && (
@@ -585,21 +628,6 @@ export default function CanHo() {
             </div>
           </div>
         </div>
-        <Modal className="modal-sm" show={loading} backdrop="static">
-          <Modal.Body>
-            <div className="d-flex flex-row justify-content-around align-items-center">
-              <img
-                src={require("../imgs/connect_home.png")}
-                height={50}
-                width={50}
-                alt="Logo"
-              />
-              <div className="text-center">
-                <strong>Connect Home Loading...</strong>
-              </div>
-            </div>
-          </Modal.Body>
-        </Modal>
         {/*  */}
         <Modal
           className="modal-lg"

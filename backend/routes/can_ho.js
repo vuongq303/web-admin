@@ -4,12 +4,10 @@ const fs = require("fs");
 const moment = require("moment");
 const executeQuery = require("../sql/promise");
 const upload = require("../middleware/uploads/can_ho");
-const authAdmin = require("../middleware/auth/admin");
-const authSale = require("../middleware/auth/sale");
-const auth = require("../middleware/auth/auth");
+const authentication = require("../middleware/authentication");
 var router = express.Router();
 
-router.get("/", auth, async function (req, res) {
+router.get("/", authentication, async function (req, res) {
   try {
     const isAdmin = req.isAdmin;
     const limit = req.query.limit || 10;
@@ -41,7 +39,7 @@ router.get("/", auth, async function (req, res) {
   }
 });
 
-router.post("/them-anh-can-ho", upload.array("hinh_anh"), authSale, async function (req, res) {
+router.post("/them-anh-can-ho", upload.array("hinh_anh"), async function (req, res) {
   try {
     const files = req.files;
     const { id } = req.body;
@@ -75,7 +73,7 @@ router.post("/them-anh-can-ho", upload.array("hinh_anh"), authSale, async functi
 }
 );
 
-router.post("/xoa-anh-can-ho", authAdmin, async function (req, res) {
+router.post("/xoa-anh-can-ho", async function (req, res) {
   try {
     const { id, filename } = req.body;
 
@@ -111,7 +109,7 @@ router.post("/xoa-anh-can-ho", authAdmin, async function (req, res) {
   }
 });
 
-router.post("/them-can-ho", authAdmin, async (req, res) => {
+router.post("/them-can-ho", async (req, res) => {
   try {
     const user = req.user;
     var { chu_can_ho, so_dien_thoai, ma_can_ho, ten_toa_nha, ten_du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, gia_ban, gia_thue, truc_can_ho, danh_dau, trang_thai } = req.body;
@@ -156,7 +154,7 @@ router.post("/them-can-ho", authAdmin, async (req, res) => {
   }
 });
 
-router.post("/cap-nhat-can-ho", authAdmin, async (req, res) => {
+router.post("/cap-nhat-can-ho", async (req, res) => {
   try {
     const user = req.user;
     var { chu_can_ho, so_dien_thoai, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, gia_ban, gia_thue, danh_dau, id } = req.body;
@@ -187,7 +185,7 @@ router.post("/cap-nhat-can-ho", authAdmin, async (req, res) => {
   }
 });
 
-router.post("/cap-nhat-trang-thai", authAdmin, async function (req, res) {
+router.post("/cap-nhat-trang-thai",  async function (req, res) {
   try {
     const { trang_thai, id, danh_dau } = req.body;
     const sql = "UPDATE can_ho SET trang_thai = ?, danh_dau = ? WHERE id = ?";
@@ -202,7 +200,7 @@ router.post("/cap-nhat-trang-thai", authAdmin, async function (req, res) {
   }
 });
 
-router.post("/upload-excel", authAdmin, async (req, res) => {
+router.post("/upload-excel",  async (req, res) => {
   try {
     const listData = req.body;
     const result = listData.map((item) => [

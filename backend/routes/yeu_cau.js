@@ -5,10 +5,9 @@ const executeQuery = require("../sql/promise");
 const moment = require("moment");
 const { join } = require("path");
 const fs = require("fs");
-const authAdmin = require("../middleware/auth/admin");
-const authSale = require("../middleware/auth/sale");
+const authentication = require("../middleware/authentication");
 
-router.get("/danh-sach-gui-yeu-cau", authAdmin, async function (req, res) {
+router.get("/danh-sach-gui-yeu-cau", authentication, async function (req, res) {
   try {
     const data = req.user;
     const isAdmin = req.isAdmin;
@@ -50,7 +49,7 @@ router.get("/danh-sach-gui-yeu-cau", authAdmin, async function (req, res) {
   }
 });
 
-router.get("/danh-sach-duyet-yeu-cau", authAdmin, async function (req, res) {
+router.get("/danh-sach-duyet-yeu-cau", authentication, async function (req, res) {
   try {
     const data = req.user;
     const isAdmin = req.isAdmin;
@@ -92,7 +91,7 @@ router.get("/danh-sach-duyet-yeu-cau", authAdmin, async function (req, res) {
 }
 );
 
-router.post("/gui-yeu-cau", authSale, async function (req, res) {
+router.post("/gui-yeu-cau", authentication, async function (req, res) {
   try {
     const { can_ho } = req.body;
     const jsonPath = join(__dirname, "..", "temp", "yeu_cau.json");
@@ -148,7 +147,7 @@ router.post("/gui-yeu-cau", authSale, async function (req, res) {
   }
 });
 
-router.post("/duyet-yeu-cau", authAdmin, async function (req, res) {
+router.post("/duyet-yeu-cau", authentication, async function (req, res) {
   try {
     const { id } = req.body;
     const data = req.user;
@@ -159,10 +158,16 @@ router.post("/duyet-yeu-cau", authAdmin, async function (req, res) {
     const sql = `UPDATE yeu_cau SET trang_thai = ?, thong_tin = ? where id = ?`;
     await executeQuery(sql, [1, `${data.tai_khoan} đã duyệt lúc ${start}`, id]);
 
-    res.status(200).json({ response: "Yêu cầu đã được duyệt", status: true });
+    res.status(200).json({
+      response: "Yêu cầu đã được duyệt",
+      status: true
+    });
   } catch (error) {
     console.error("/duyet-yeu-cau" + error.message);
-    res.status(500).json({ response: "Lỗi duyệt yêu cầu", status: false });
+    res.status(500).json({
+      response: "Lỗi duyệt yêu cầu",
+      status: false
+    });
   }
 });
 

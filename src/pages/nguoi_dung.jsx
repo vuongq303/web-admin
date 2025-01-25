@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
+import Loading from "./components/loading";
 import {
   dataPhanQuyen,
   dateToText,
   gioiTinhNguoiDung,
   trangThaiLamViec,
 } from "../services/utils";
-import Loading from "./components/loading";
+
 import {
   baseURL,
   moduleDanhDau,
@@ -15,8 +16,11 @@ import {
   moduleTrangThaiLamViec,
 } from "../data/module";
 import { REQUEST } from "../api/method";
+import { useNavigate } from "react-router-dom";
+import { authentication } from "./controllers/function";
 
-export default function NguoiDung() {
+export default function () {
+  const navigation = useNavigate();
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
@@ -41,17 +45,19 @@ export default function NguoiDung() {
     (async function getData() {
       try {
         const {
-          data: { status, response, data },
+          data: { status, data },
         } = await REQUEST.get("/nguoi-dung");
 
         setLoading(false);
-        if (!status) {
-          toast.error(response);
-          return;
+        if (status) {
+          setData(data);
         }
-        setData(data);
-      } catch (error) {
-        setLoading(false);
+      } catch ({
+        response: {
+          data: { response },
+        },
+      }) {
+        authentication(navigation, response, toast);
       }
     })();
   }, []);
@@ -99,19 +105,22 @@ export default function NguoiDung() {
       setLoading(true);
 
       const {
-        data: { response, status, id },
+        data: { status, id, response },
       } = await REQUEST.post("/nguoi-dung/them-nguoi-dung", formData);
 
       setLoading(false);
       toast.success(response);
-
       if (status) {
         setShowModal(false);
         setData((pre) => [...pre, { id, ...dataPost }]);
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      toast.error("Lỗi khi thêm người dùng");
+      toast.error(response);
     }
   }
 
@@ -157,11 +166,10 @@ export default function NguoiDung() {
 
       setLoading(true);
       const {
-        data: { response, status },
+        data: { status, response },
       } = await REQUEST.post("/nguoi-dung/cap-nhat-nguoi-dung", formData);
       setLoading(false);
       toast.success(response);
-
       if (status) {
         setShowModalUpdate(false);
         setData((pre) =>
@@ -170,9 +178,13 @@ export default function NguoiDung() {
           )
         );
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      toast.error("Lỗi khi cập nhật người dùng");
+      toast.error(response);
     }
   }
 
@@ -205,7 +217,7 @@ export default function NguoiDung() {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={500}
+        autoClose={1000}
         hideProgressBar={false}
       />
       <Loading loading={loading} />

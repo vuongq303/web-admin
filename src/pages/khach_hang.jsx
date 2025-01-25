@@ -8,13 +8,16 @@ import {
   phiMoiGioi,
 } from "../services/utils";
 import { REQUEST } from "../api/method";
+import { authentication } from "./controllers/function";
+import { useNavigate } from "react-router-dom";
 
 export default function KhachHang() {
   const [data, setData] = useState([]);
+  const navigation = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const hoTenRef = useRef(null);
   const ngayKiHopDongRef = useRef(null);
   const hoTenChuNhaRef = useRef(null);
@@ -31,20 +34,20 @@ export default function KhachHang() {
 
   async function getData() {
     try {
-      setLoading(true);
       const {
-        data: { status, response, data },
+        data: { status, data },
       } = await REQUEST.get("/khach-hang");
 
       setLoading(false);
-      if (!status) {
-        toast.error(response);
-        return;
+      if (status) {
+        setData(data);
       }
-      setData(data);
-    } catch (error) {
-      setLoading(false);
-      toast.error("Lỗi khi lấy dữ liệu");
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
+      authentication(navigation, response, toast);
     }
   }
 
@@ -53,37 +56,40 @@ export default function KhachHang() {
   }, []);
 
   async function timKiemKhachHang() {
-    const dataPost = {
-      phi_moi_gioi: phiMoiGioiTimKiemRef.current.value,
-      ngay_bat_dau: ngaySinhBatDauTimKiemRef.current.value,
-      ngay_ket_thuc: ngaySinhKetThucTimKiemRef.current.value,
-    };
-
-    if (
-      dataPost.phi_moi_gioi === "" &&
-      dataPost.ngay_bat_dau === "" &&
-      dataPost.ngay_ket_thuc === ""
-    ) {
-      return;
-    }
-
-    setLoading(true);
-    const {
-      data: { response, status, data },
-    } = await REQUEST.get("/khach-hang/tim-kiem", {
-      params: dataPost,
-    });
-
-    setLoading(false);
-    if (!status) {
-      toast.error(response);
-      return;
-    }
-    setData(data);
     try {
-    } catch (error) {
+      const dataPost = {
+        phi_moi_gioi: phiMoiGioiTimKiemRef.current.value,
+        ngay_bat_dau: ngaySinhBatDauTimKiemRef.current.value,
+        ngay_ket_thuc: ngaySinhKetThucTimKiemRef.current.value,
+      };
+
+      if (
+        dataPost.phi_moi_gioi === "" &&
+        dataPost.ngay_bat_dau === "" &&
+        dataPost.ngay_ket_thuc === ""
+      ) {
+        return;
+      }
+
+      setLoading(true);
+      const {
+        data: { status, data, response },
+      } = await REQUEST.get("/khach-hang/tim-kiem", {
+        params: dataPost,
+      });
+
       setLoading(false);
-      toast.error("Lỗi tìm kiếm khách hàng");
+      toast.success(response);
+      if (status) {
+        setData(data);
+      }
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
+      setLoading(false);
+      toast.error(response);
     }
   }
 
@@ -91,6 +97,7 @@ export default function KhachHang() {
     phiMoiGioiTimKiemRef.current.value = "";
     ngaySinhBatDauTimKiemRef.current.value = "";
     ngaySinhKetThucTimKiemRef.current.value = "";
+    setLoading(true);
     await getData();
   }
 
@@ -126,18 +133,21 @@ export default function KhachHang() {
 
       setLoading(true);
       const {
-        data: { response, status, id },
+        data: { status, id, response },
       } = await REQUEST.post("/khach-hang/them-khach-hang", dataPost);
       setLoading(false);
       toast.success(response);
-
       if (status) {
         setShowModal(false);
         setData((pre) => [...pre, { id, ...dataPost }]);
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      toast.error("Lỗi thêm khách hàng");
+      toast.error(response);
     }
   }
 
@@ -174,20 +184,23 @@ export default function KhachHang() {
 
       setLoading(true);
       const {
-        data: { response, status },
+        data: { status, response },
       } = await REQUEST.post("/khach-hang/cap-nhat-khach-hang", dataPost);
       setLoading(false);
       toast.success(response);
-
       if (status) {
         setShowModalUpdate(false);
         setData((pre) =>
           pre.map((item) => (item.id === dataPost.id ? dataPost : item))
         );
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      toast.error("Lỗi cập nhật khách hàng");
+      toast.error(response);
     }
   }
 
@@ -200,7 +213,7 @@ export default function KhachHang() {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={500}
+        autoClose={1000}
         hideProgressBar={false}
       />
       <Loading loading={loading} />

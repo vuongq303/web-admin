@@ -1,9 +1,9 @@
 var express = require("express");
 var router = express.Router();
 const executeQuery = require("../sql/promise");
-const authAdmin = require("../middleware/auth/admin");
+const authentication = require("../middleware/authentication");
 
-router.get("/", authAdmin, async function (req, res) {
+router.get("/", authentication, async function (req, res) {
   try {
     const result = await executeQuery("SELECT * FROM khach_hang_nguon");
     res.status(200).send({ status: true, data: result });
@@ -16,7 +16,7 @@ router.get("/", authAdmin, async function (req, res) {
   }
 });
 
-router.post("/them-khach-hang", authAdmin, async function (req, res) {
+router.post("/them-khach-hang", authentication, async function (req, res) {
   try {
     const { ten_khach_hang, so_dien_thoai, khach_goi_tu, ghi_chu, ngay_phat_sinh } = req.body;
     const sql = `INSERT INTO khach_hang_nguon
@@ -38,7 +38,7 @@ router.post("/them-khach-hang", authAdmin, async function (req, res) {
   }
 });
 
-router.post("/cap-nhat-khach-hang", authAdmin, async function (req, res) {
+router.post("/cap-nhat-khach-hang", authentication, async function (req, res) {
   try {
     const { ten_khach_hang, so_dien_thoai, khach_goi_tu, ghi_chu, ngay_phat_sinh, id } = req.body;
 

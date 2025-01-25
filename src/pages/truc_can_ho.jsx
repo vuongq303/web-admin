@@ -3,9 +3,12 @@ import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
 import Loading from "./components/loading";
 import { REQUEST } from "../api/method";
+import { authentication } from "./controllers/function";
+import { useNavigate } from "react-router-dom";
 
 export default function () {
   const [data, setData] = useState([]);
+  const navigation = useNavigate();
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
@@ -16,18 +19,19 @@ export default function () {
     (async function () {
       try {
         const {
-          data: { status, response, data },
+          data: { status, data },
         } = await REQUEST.get("/thong-tin-du-an/truc-can-ho");
 
         setLoading(false);
-        if (!status) {
-          toast.error(response);
-          return;
+        if (status) {
+          setData(data);
         }
-        setData(data);
-      } catch (error) {
-        setLoading(false);
-        toast.error("Lỗi lấy dữ liệu");
+      } catch ({
+        response: {
+          data: { response },
+        },
+      }) {
+        authentication(navigation, response, toast);
       }
     })();
   }, []);
@@ -43,7 +47,7 @@ export default function () {
 
       setLoading(true);
       const {
-        data: { response, status, id },
+        data: { status, id, response },
       } = await REQUEST.post("/thong-tin-du-an/them-truc-can-ho", dataPost);
       setLoading(false);
       toast.success(response);
@@ -52,9 +56,13 @@ export default function () {
         setShowModal(false);
         setData((pre) => [...pre, { id, ...dataPost }]);
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      toast.error("Lỗi thêm trục căn hộ");
+      toast.error(response);
     }
   }
 
@@ -72,7 +80,7 @@ export default function () {
     setLoading(true);
     try {
       const {
-        data: { response, status },
+        data: { status, response },
       } = await REQUEST.post("/thong-tin-du-an/cap-nhat-truc-can-ho", dataPost);
       setLoading(false);
       toast.success(response);
@@ -83,9 +91,13 @@ export default function () {
           pre.map((item) => (item.id === dataPost.id ? dataPost : item))
         );
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      toast.error("Lỗi cập nhật trục căn hộ");
+      toast.error(response);
     }
   }
 
@@ -98,7 +110,7 @@ export default function () {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={500}
+        autoClose={1000}
         hideProgressBar={false}
       />
       <Loading loading={loading} />

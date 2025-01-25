@@ -1,10 +1,9 @@
 var express = require("express");
 var router = express.Router();
 const executeQuery = require("../sql/promise");
-const authAdmin = require("../middleware/auth/admin");
-const authSale = require("../middleware/auth/sale");
+const authentication = require("../middleware/authentication");
 
-router.get("/", authSale, async function (req, res) {
+router.get("/", authentication, async function (req, res) {
   try {
     var result = {};
 
@@ -30,7 +29,7 @@ router.get("/", authSale, async function (req, res) {
   }
 });
 
-router.get("/truc-can-ho", authAdmin, async function (_, res) {
+router.get("/truc-can-ho", authentication, async function (_, res) {
   try {
     const result = await executeQuery("SELECT * FROM truc_can_ho");
     res.status(200).send({
@@ -46,7 +45,7 @@ router.get("/truc-can-ho", authAdmin, async function (_, res) {
   }
 });
 
-router.post("/them-truc-can-ho", authAdmin, async function (req, res) {
+router.post("/them-truc-can-ho", authentication, async function (req, res) {
   try {
     const { truc_can } = req.body;
     const sql = "INSERT INTO truc_can_ho(truc_can) VALUE(?)";
@@ -66,7 +65,7 @@ router.post("/them-truc-can-ho", authAdmin, async function (req, res) {
   }
 });
 
-router.post("/cap-nhat-truc-can-ho", authAdmin, async function (req, res) {
+router.post("/cap-nhat-truc-can-ho", authentication, async function (req, res) {
   try {
     const { truc_can, id } = req.body;
     const sql = "UPDATE truc_can_ho SET truc_can = ? WHERE id = ?";
@@ -85,7 +84,7 @@ router.post("/cap-nhat-truc-can-ho", authAdmin, async function (req, res) {
   }
 });
 
-router.get("/toa-nha", authAdmin, async function (_, res) {
+router.get("/toa-nha", authentication, async function (_, res) {
   try {
     const result = {};
 
@@ -105,7 +104,7 @@ router.get("/toa-nha", authAdmin, async function (_, res) {
   }
 });
 
-router.post("/them-toa-nha", authAdmin, async function (req, res) {
+router.post("/them-toa-nha", authentication, async function (req, res) {
   try {
     const { ten_toa_nha, ten_du_an } = req.body;
     const sql = "INSERT INTO toa_nha(ten_toa_nha, ten_du_an) value(?, ?)";
@@ -125,7 +124,7 @@ router.post("/them-toa-nha", authAdmin, async function (req, res) {
   }
 });
 
-router.post("/cap-nhat-toa-nha", authAdmin, async function (req, res) {
+router.post("/cap-nhat-toa-nha", authentication, async function (req, res) {
   try {
     const { ten_toa_nha, ten_du_an, id } = req.body;
     const sql =
@@ -142,7 +141,7 @@ router.post("/cap-nhat-toa-nha", authAdmin, async function (req, res) {
   }
 });
 
-router.get("/noi-that", authAdmin, async function (_, res) {
+router.get("/noi-that", authentication, async function (_, res) {
   try {
     const result = await executeQuery("SELECT * FROM noi_that");
     res.status(200).send({ data: result, status: true });
@@ -155,7 +154,7 @@ router.get("/noi-that", authAdmin, async function (_, res) {
   }
 });
 
-router.post("/them-noi-that", authAdmin, async function (req, res) {
+router.post("/them-noi-that", authentication, async function (req, res) {
   try {
     const { loai_noi_that } = req.body;
 
@@ -175,7 +174,7 @@ router.post("/them-noi-that", authAdmin, async function (req, res) {
   }
 });
 
-router.post("/cap-nhat-noi-that", authAdmin, async function (req, res) {
+router.post("/cap-nhat-noi-that", authentication, async function (req, res) {
   try {
     const { loai_noi_that, id } = req.body;
     const sql = "UPDATE noi_that SET loai_noi_that = ? WHERE id = ?";
@@ -194,7 +193,7 @@ router.post("/cap-nhat-noi-that", authAdmin, async function (req, res) {
   }
 });
 
-router.get("/loai-can-ho", authAdmin, async function (_, res) {
+router.get("/loai-can-ho", authentication, async function (_, res) {
   try {
     const result = await executeQuery("SELECT * FROM loai_can_ho");
     res.status(200).send({ data: result, status: true });
@@ -207,7 +206,7 @@ router.get("/loai-can-ho", authAdmin, async function (_, res) {
   }
 });
 
-router.post("/them-loai-can-ho", authAdmin, async function (req, res) {
+router.post("/them-loai-can-ho", authentication, async function (req, res) {
   try {
     const { loai_can_ho } = req.body;
     const sql = "INSERT INTO loai_can_ho(loai_can_ho) value(?)";
@@ -226,7 +225,7 @@ router.post("/them-loai-can-ho", authAdmin, async function (req, res) {
   }
 });
 
-router.post("/cap-nhat-loai-can-ho", authAdmin, async function (req, res) {
+router.post("/cap-nhat-loai-can-ho", authentication, async function (req, res) {
   try {
     const { loai_can_ho, id } = req.body;
     const sql = "UPDATE loai_can_ho SET loai_can_ho = ? WHERE id = ?";
@@ -244,7 +243,7 @@ router.post("/cap-nhat-loai-can-ho", authAdmin, async function (req, res) {
   }
 });
 
-router.get("/huong-can-ho", authAdmin, async function (_, res) {
+router.get("/huong-can-ho", authentication, async function (_, res) {
   try {
     const result = await executeQuery("SELECT * FROM huong_can_ho");
     res.status(200).send({ data: result, status: true });
@@ -257,7 +256,7 @@ router.get("/huong-can-ho", authAdmin, async function (_, res) {
   }
 });
 
-router.post("/them-huong-can-ho", authAdmin, async function (req, res) {
+router.post("/them-huong-can-ho", authentication, async function (req, res) {
   try {
     const { huong_can_ho } = req.body;
     const sql = "INSERT INTO huong_can_ho(huong_can_ho) value(?)";
@@ -276,7 +275,7 @@ router.post("/them-huong-can-ho", authAdmin, async function (req, res) {
   }
 });
 
-router.post("/cap-nhat-huong-can-ho", authAdmin, async function (req, res) {
+router.post("/cap-nhat-huong-can-ho", authentication, async function (req, res) {
   try {
     const { huong_can_ho, id } = req.body;
 
@@ -295,7 +294,7 @@ router.post("/cap-nhat-huong-can-ho", authAdmin, async function (req, res) {
   }
 });
 
-router.get("/du-an", authAdmin, async function (_, res) {
+router.get("/du-an", authentication, async function (_, res) {
   try {
     const result = await executeQuery("SELECT * FROM du_an");
     res.status(200).send({ data: result, status: true });
@@ -308,7 +307,7 @@ router.get("/du-an", authAdmin, async function (_, res) {
   }
 });
 
-router.post("/them-du-an", authAdmin, async function (req, res) {
+router.post("/them-du-an", authentication, async function (req, res) {
   try {
     const { ten_du_an } = req.body;
     const sql = "INSERT INTO du_an(ten_du_an) value(?)";
@@ -328,7 +327,7 @@ router.post("/them-du-an", authAdmin, async function (req, res) {
   }
 });
 
-router.post("/cap-nhat-du-an", authAdmin, async function (req, res) {
+router.post("/cap-nhat-du-an", authentication, async function (req, res) {
   try {
     const { ten_du_an, id } = req.body;
     const sql = "UPDATE du_an SET ten_du_an = ? WHERE id = ?";

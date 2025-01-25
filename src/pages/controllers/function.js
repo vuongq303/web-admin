@@ -5,9 +5,8 @@ import { columnMapping, excelExportFormat } from "../../data/module";
 import { toast } from "react-toastify";
 
 export const downloadImages = async (images, item) => {
-  const folderName = `${item.ten_toa_nha}-${item.ma_can_ho ?? "x"}${
-    item.truc_can_ho
-  }`;
+  const folderName = `${item.ten_toa_nha}-${item.ma_can_ho ?? "x"}${item.truc_can_ho
+    }`;
   const zip = new JSZip();
   const folder = zip.folder(folderName);
 
@@ -52,4 +51,11 @@ export function exportFileExcel(itemChecked) {
     type: "application/octet-stream",
   });
   saveAs(file, "connect_home.xlsx");
+}
+
+export function authentication(navigation, response, toast) {
+  toast.error(response);
+  setTimeout(() => {
+    navigation("/dang-nhap", { replace: true });
+  }, 1000);
 }

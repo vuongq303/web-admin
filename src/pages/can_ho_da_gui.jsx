@@ -2,11 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { trangThaiYeuCau } from "../services/utils";
 import { toast, ToastContainer } from "react-toastify";
 import Loading from "./components/loading";
-import { downloadImages } from "./controllers/function";
+import { authentication, downloadImages } from "./controllers/function";
 import PreviewImage from "./components/preview_image";
 import { Button, Modal } from "react-bootstrap";
-import { baseURL, modulePhanQuyen } from "../data/module";
+import { baseURL } from "../data/module";
 import { REQUEST } from "../api/method";
+import { useNavigate } from "react-router-dom";
 
 export default function CanHoDaGui() {
   const [data, setData] = useState([]);
@@ -16,6 +17,7 @@ export default function CanHoDaGui() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(true);
   const hinhAnhRef = useRef(null);
+  const navigation = useNavigate();
 
   async function capNhatAnhCanHo(event) {
     try {
@@ -32,8 +34,8 @@ export default function CanHoDaGui() {
       const {
         data: { response: message, data: images, status },
       } = await REQUEST.post("/can-ho/them-anh-can-ho", formData);
-      toast.success(message);
       setLoading(false);
+      toast.success(message);
 
       if (status) {
         setShowImageData(
@@ -47,8 +49,13 @@ export default function CanHoDaGui() {
           )
         );
       }
-    } catch (error) {
-      console.error(error);
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
+      setLoading(false);
+      toast.error(response);
     }
   }
 
@@ -69,9 +76,8 @@ export default function CanHoDaGui() {
         id: dataUpdate.can_ho,
         filename: imgPath,
       });
-
-      toast.success(message);
       setLoading(false);
+      toast.success(message);
 
       if (status) {
         setShowImageData(
@@ -85,8 +91,13 @@ export default function CanHoDaGui() {
           )
         );
       }
-    } catch (error) {
-      console.error(error);
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
+      setLoading(false);
+      toast.error(response);
     }
   };
 
@@ -115,8 +126,13 @@ export default function CanHoDaGui() {
       if (status) {
         setData((pre) => pre.filter((item) => item.id !== id));
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
+      toast.error(response);
     }
   }
 
@@ -124,17 +140,19 @@ export default function CanHoDaGui() {
     (async function getData() {
       try {
         const {
-          data: { data, isAdmin, status, response },
+          data: { data, isAdmin, status },
         } = await REQUEST.get("/yeu-cau/danh-sach-gui-yeu-cau");
         setLoading(false);
-        if (!status) {
-          toast.error(response);
-          return;
+        if (status) {
+          setData(data);
+          setIsAdmin(isAdmin);
         }
-        setData(data);
-        setIsAdmin(isAdmin);
-      } catch (error) {
-        setLoading(false);
+      } catch ({
+        response: {
+          data: { response },
+        },
+      }) {
+        authentication(navigation, response, toast);
       }
     })();
   }, []);
@@ -143,7 +161,7 @@ export default function CanHoDaGui() {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={500}
+        autoClose={1000}
         hideProgressBar={false}
       />
       <Loading loading={loading} />

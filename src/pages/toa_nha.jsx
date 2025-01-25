@@ -3,9 +3,12 @@ import { toast, ToastContainer } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
 import Loading from "./components/loading";
 import { REQUEST } from "../api/method";
+import { authentication } from "./controllers/function";
+import { useNavigate } from "react-router-dom";
 
 export default function DuAn() {
   const [data, setData] = useState([]);
+  const navigation = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [dataDuAn, setDataDuAn] = useState([]);
@@ -20,20 +23,20 @@ export default function DuAn() {
         const {
           data: {
             status,
-            response,
             data: { toa_nha, du_an },
           },
         } = await REQUEST.get("/thong-tin-du-an/toa-nha");
         setLoading(false);
-        if (!status) {
-          toast.error(response);
-          return;
+        if (status) {
+          setData(toa_nha);
+          setDataDuAn(du_an);
         }
-        setData(toa_nha);
-        setDataDuAn(du_an);
-      } catch (error) {
-        setLoading(false);
-        toast.error("Lỗi khi lấy dữ liệu");
+      } catch ({
+        response: {
+          data: { response },
+        },
+      }) {
+        authentication(navigation, response, toast);
       }
     })();
   }, []);
@@ -52,7 +55,7 @@ export default function DuAn() {
 
     try {
       const {
-        data: { response, status, id },
+        data: { status, id, response },
       } = await REQUEST.post("/thong-tin-du-an/them-toa-nha", dataPost);
       setLoading(false);
       toast.success(response);
@@ -61,9 +64,13 @@ export default function DuAn() {
         setShowModal(false);
         setData((pre) => [...pre, { id, ...dataPost }]);
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      toast.error("Lỗi khi thêm tòa nhà");
+      toast.error(response);
     }
   }
 
@@ -87,20 +94,23 @@ export default function DuAn() {
 
     try {
       const {
-        data: { response, status },
+        data: { status, response },
       } = await REQUEST.post("/thong-tin-du-an/cap-nhat-toa-nha", dataPost);
       setLoading(false);
       toast.success(response);
-
       if (status) {
         setShowModalUpdate(false);
         setData((pre) =>
           pre.map((item) => (item.id === dataPost.id ? dataPost : item))
         );
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      toast.error("Lỗi khi cập nhật tòa nhà");
+      toast.error(response);
     }
   }
 
@@ -108,7 +118,7 @@ export default function DuAn() {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={500}
+        autoClose={1000}
         hideProgressBar={false}
       />
       <Loading loading={loading} />

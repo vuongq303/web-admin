@@ -1,12 +1,12 @@
 var express = require("express");
-const auth = require("../middleware/auth/auth");
+const authentication = require("../middleware/authentication");
 var router = express.Router();
 
 router.get("/", (req, res) => {
   res.status(200).json({ status: 200 });
 });
 
-router.get("/phan-quyen", auth, function (req, res) {
+router.get("/phan-quyen", authentication, function (req, res) {
   try {
     const data = req.user;
     res.status(200).json(data);

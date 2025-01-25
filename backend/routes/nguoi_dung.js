@@ -5,10 +5,18 @@ const executeQuery = require("../sql/promise");
 const env = require("../config/env");
 const config = require("../config/config");
 const upload = require("../middleware/uploads/nguoi_dung");
-const authAdmin = require("../middleware/auth/admin");
+const authentication = require("../middleware/authentication");
 
-router.get("/", authAdmin, async function (req, res) {
+router.get("/", authentication, async function (req, res) {
   try {
+    const isAdmin = req.isAdmin;
+    if (!isAdmin) {
+      return res.status(401).json({
+        status: false,
+        response: "Không có quyền truy cập",
+      })
+    }
+
     const sql = `SELECT id, ho_ten, ngay_bat_dau,
     tai_khoan,gioi_tinh, so_dien_thoai, email,
     ngay_sinh, trang_thai, phan_quyen
@@ -28,7 +36,7 @@ router.get("/", authAdmin, async function (req, res) {
   }
 });
 
-router.post("/them-nguoi-dung", upload.single("hinh_anh"), authAdmin, async function (req, res) {
+router.post("/them-nguoi-dung", upload.single("hinh_anh"), authentication, async function (req, res) {
   try {
     const { tai_khoan, mat_khau, ho_ten, ngay_bat_dau, so_dien_thoai, ngay_sinh, email, phan_quyen, gioi_tinh, trang_thai, } = req.body;
 
@@ -61,7 +69,7 @@ router.post("/them-nguoi-dung", upload.single("hinh_anh"), authAdmin, async func
 }
 );
 
-router.post("/cap-nhat-nguoi-dung", upload.single("hinh_anh"), authAdmin, async function (req, res) {
+router.post("/cap-nhat-nguoi-dung", upload.single("hinh_anh"), authentication, async function (req, res) {
   try {
     const { id, ho_ten, ngay_bat_dau, so_dien_thoai, ngay_sinh, email, phan_quyen, gioi_tinh, trang_thai, } = req.body;
 
@@ -95,11 +103,11 @@ router.post("/dang-nhap", async function (req, res) {
     const result = await executeQuery(sql, [username, password]);
 
     if (result.length > 0) {
-      const token = jwt.sign({ ...result[0] }, env.JWT_KEY, { expiresIn: "4h", });
+      const token = jwt.sign({ ...result[0] }, env.JWT_KEY, { expiresIn: "8h", });
 
       res.cookie("TOKEN", token, {
         httpOnly: true,
-        maxAge: 4 * 60 * 60 * 1000,
+        maxAge: 8 * 60 * 60 * 1000,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
       });

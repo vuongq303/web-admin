@@ -3,6 +3,8 @@ import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import Loading from "./components/loading";
 import { REQUEST } from "../api/method";
+import { useNavigate } from "react-router-dom";
+import { authentication } from "./controllers/function";
 
 export default function DuAn() {
   const [data, setData] = useState([]);
@@ -11,23 +13,25 @@ export default function DuAn() {
   const [loading, setLoading] = useState(true);
   const [dataUpdate, setDataUpdate] = useState({});
   const duAnRef = useRef(null);
+  const navigation = useNavigate();
 
   useEffect(() => {
     (async function getData() {
       try {
         const {
-          data: { response, status, data },
+          data: { status, data },
         } = await REQUEST.get("/thong-tin-du-an/du-an");
 
         setLoading(false);
-        if (!status) {
-          toast.error(response);
-          return;
+        if (status) {
+          setData(data);
         }
-        setData(data);
-      } catch (error) {
-        setLoading(false);
-        toast.error("Lỗi khi lấy dữ liệu");
+      } catch ({
+        response: {
+          data: { response },
+        },
+      }) {
+        authentication(navigation, response, toast);
       }
     })();
   }, []);
@@ -49,18 +53,21 @@ export default function DuAn() {
       }
       setLoading(true);
       const {
-        data: { response, status, id },
+        data: { status, id, response },
       } = await REQUEST.post("/thong-tin-du-an/them-du-an", dataPost);
       setLoading(false);
       toast.success(response);
-
       if (status) {
         setShowModal(false);
         setData((pre) => [...pre, { id, ...dataPost }]);
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      toast.error("Lỗi thêm dự án");
+      toast.error(response);
     }
   }
 
@@ -77,20 +84,23 @@ export default function DuAn() {
       }
       setLoading(true);
       const {
-        data: { response, status },
+        data: { status, response },
       } = await REQUEST.post("/thong-tin-du-an/cap-nhat-du-an", dataPost);
-      toast.success(response);
       setLoading(false);
-
+      toast.success(response);
       if (status) {
         setShowModalUpdate(false);
         setData((pre) =>
           pre.map((item) => (item.id === dataPost.id ? dataPost : item))
         );
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      toast.error("Lỗi cập nhật dự án");
+      toast.error(response);
     }
   }
 
@@ -98,7 +108,7 @@ export default function DuAn() {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={500}
+        autoClose={1000}
         hideProgressBar={false}
       />
       <Loading loading={loading} />

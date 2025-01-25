@@ -3,13 +3,15 @@ import { trangThaiYeuCau } from "../services/utils";
 import Loading from "./components/loading";
 import { Button, Modal } from "react-bootstrap";
 import PreviewImage from "./components/preview_image";
-import { downloadImages } from "./controllers/function";
+import { authentication, downloadImages } from "./controllers/function";
 import { toast, ToastContainer } from "react-toastify";
 import { baseURL } from "../data/module";
 import { REQUEST } from "../api/method";
+import { useNavigate } from "react-router-dom";
 
 export default function CanHoDaDuyet() {
   const [data, setData] = useState([]);
+  const navigation = useNavigate();
   const [showModalHinhAnh, setShowModalHinhAnh] = useState(false);
   const [showImageData, setShowImageData] = useState([]);
   const [dataUpdate, setDataUpdate] = useState({});
@@ -31,8 +33,8 @@ export default function CanHoDaDuyet() {
       const {
         data: { response: message, data: images, status },
       } = await REQUEST.post("/can-ho/them-anh-can-ho", formData);
-      toast.success(message);
       setLoading(false);
+      toast.success(message);
 
       if (status) {
         setShowImageData(
@@ -46,9 +48,13 @@ export default function CanHoDaDuyet() {
           )
         );
       }
-    } catch (error) {
+    } catch ({
+      response: {
+        data: { response },
+      },
+    }) {
       setLoading(false);
-      console.error(error);
+      toast.error(response);
     }
   }
 
@@ -72,16 +78,16 @@ export default function CanHoDaDuyet() {
           data: { response, data, status },
         } = await REQUEST.get("/yeu-cau/danh-sach-duyet-yeu-cau");
         setLoading(false);
-        
-        if (!status) {
-          toast.error(response);
-          return;
-        }
 
-        setData(data);
-      } catch (error) {
-        setLoading(false);
-        toast.error("Lỗi lấy dữ liệu");
+        if (status) {
+          setData(data);
+        }
+      } catch ({
+        response: {
+          data: { response },
+        },
+      }) {
+        authentication(navigation, response, toast);
       }
     })();
   }, []);
@@ -90,7 +96,7 @@ export default function CanHoDaDuyet() {
     <div>
       <ToastContainer
         position="bottom-right"
-        autoClose={200}
+        autoClose={1000}
         hideProgressBar={false}
       />
       <Loading loading={loading} />

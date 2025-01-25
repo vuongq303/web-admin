@@ -2,10 +2,9 @@ var express = require("express");
 var router = express.Router();
 const executeQuery = require("../sql/promise");
 const config = require("../config/config");
-const authAdmin = require("../middleware/auth/admin");
-const authSale = require("../middleware/auth/sale");
+const authentication = require("../middleware/authentication");
 
-router.get("/admin", authAdmin, async function (req, res) {
+router.get("/admin", authentication, async function (req, res) {
   try {
     var value = [];
     var condition = [];
@@ -112,7 +111,7 @@ router.get("/admin", authAdmin, async function (req, res) {
   }
 });
 
-router.get("/sale", authSale, async function (req, res) {
+router.get("/sale", authentication, async function (req, res) {
   try {
     var value = [];
     var condition = [];
