@@ -8,12 +8,23 @@ router.get("/", (req, res) => {
 
 router.get("/phan-quyen", authentication, function (req, res) {
   try {
-    const data = req.user;
-    res.status(200).json(data);
+    const user = req.user;
+    res.status(200).json({ ...user, status: true });
   } catch (error) {
     console.error("/phan-quyen" + error.message);
-    res.status(500).json({});
+    res.status(500).json({ status: false });
   }
+});
+
+router.get('/auth', authentication, async function (req, res) {
+  try {
+    const user = req.user;
+    
+  } catch (error) {
+    console.error('/auth', error.message);
+    res.status(500).json({ status: false });
+  }
+
 });
 
 module.exports = router;

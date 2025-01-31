@@ -1349,7 +1349,7 @@ export default function CanHo() {
               },
               w_10: { width: "10%" },
               f_: {
-                fontSize: 14,
+                fontSize: 12,
               },
               s_: { transform: "scale(1.3)" },
             };

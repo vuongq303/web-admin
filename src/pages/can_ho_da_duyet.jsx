@@ -174,7 +174,7 @@ export default function CanHoDaDuyet() {
               w_15: { width: "15%" },
               w_5: { width: "5%" },
               f_: {
-                fontSize: 14,
+                fontSize: 12,
               },
             };
             return (
@@ -200,8 +200,7 @@ export default function CanHoDaDuyet() {
                 </td>
                 <td
                   className="text-start align-middle"
-                  style={{ width: "23%" }}
-                >
+                  style={{ width: "23%" }}>
                   - {item.ten_du_an} - {item.dien_tich}m² - {item.so_phong_ngu}
                   PN
                   {item.so_phong_tam}WC - {item.huong_can_ho}

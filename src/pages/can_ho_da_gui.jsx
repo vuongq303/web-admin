@@ -237,12 +237,13 @@ export default function CanHoDaGui() {
               },
               w_10: { width: "10%" },
               w_15: { width: "15%" },
-              f_: { fontSize: 14 },
+              w_5: { width: "5%" },
+              f_: { fontSize: 12 },
             };
             return (
               <tr key={item.id}>
                 <td className="align-middle">{index + 1}</td>
-                <td className="align-middle">
+                <td className="align-middle" style={styles.w_5}>
                   <div style={styles.ma_can_ho}>
                     {item.ten_toa_nha}-{item.ma_can_ho ?? "x"}
                     {item.truc_can_ho}
@@ -280,14 +281,13 @@ export default function CanHoDaGui() {
                     onClick={() => showImage(item)}
                     type="button"
                     style={styles.f_}
-                    className={`btn w-75 ${
-                      item.hinh_anh ? "btn-warning" : "btn-secondary"
-                    }`}
+                    className={`btn w-75 ${item.hinh_anh ? "btn-warning" : "btn-secondary"
+                      }`}
                   >
                     Hình ảnh
                   </button>
                   <br />
-                  {!isAdmin && (
+                  {isAdmin && (
                     <button
                       style={styles.f_}
                       type="button"

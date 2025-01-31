@@ -35,30 +35,30 @@ export default function DangNhap() {
     setLoading(true);
     try {
       const {
-        data: { response, status, token, role },
+        data: { response, status, phan_quyen },
       } = await REQUEST.post("/nguoi-dung/dang-nhap", user);
-
+      setLoading(false);
       toast.success(response);
-      if (status) {
-        localStorage.setItem("role", token);
-        setLoading(false);
 
-        if (role === modulePhanQuyen.admin || role === modulePhanQuyen.quanLy) {
+      if (status) {
+        if (
+          phan_quyen === modulePhanQuyen.admin || phan_quyen === modulePhanQuyen.quanLy) {
           navigation("/nguoi-dung");
           return;
         }
 
-        if (role === modulePhanQuyen.sale) {
+        if (phan_quyen === modulePhanQuyen.sale) {
           navigation("/can-ho");
           return;
         }
 
-        if (role === modulePhanQuyen.cskh) {
+        if (phan_quyen === modulePhanQuyen.cskh) {
           navigation("/cham-soc-khach-hang");
           return;
         }
       }
     } catch (error) {
+      setLoading(false);
       toast.error("Lỗi hệ thống");
     }
   }

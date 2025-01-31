@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const executeQuery = require("../sql/promise");
 const env = require("../config/env");
 const config = require("../config/config");
-const upload = require("../middleware/uploads/nguoi_dung");
+const upload = require("../middleware/nguoi_dung");
 const authentication = require("../middleware/authentication");
 
 router.get("/", authentication, async function (req, res) {
@@ -99,11 +99,12 @@ router.post("/dang-nhap", async function (req, res) {
 
     const sql = `SELECT tai_khoan, ho_ten, phan_quyen FROM
       nguoi_dung WHERE tai_khoan = ? and mat_khau = ? AND
-      trang_thai = '${config.dangLamViec}'`;
-    const result = await executeQuery(sql, [username, password]);
+      trang_thai = ?`;
+    const result = await executeQuery(sql, [username, password, config.dangLamViec]);
 
     if (result.length > 0) {
-      const token = jwt.sign({ ...result[0] }, env.JWT_KEY, { expiresIn: "8h", });
+      const token = jwt.sign({ ...result[0] }, env.JWT_KEY, { expiresIn: "8h" });
+      const apiKey = jwt.sign({ ...result[0] }, env.JWT_KEY);
 
       res.cookie("TOKEN", token, {
         httpOnly: true,
@@ -115,7 +116,10 @@ router.post("/dang-nhap", async function (req, res) {
       return res.status(200).json({
         response: "Đăng nhập thành công",
         status: true,
-        role: result[0].phan_quyen,
+        ho_ten: result[0].ho_ten,
+        phan_quyen: result[0].phan_quyen,
+        token: token,
+        api_key: apiKey,
       });
     }
 
