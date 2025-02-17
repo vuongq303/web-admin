@@ -14,7 +14,7 @@ router.get("/can-ho", authentication, async function (req, res) {
     }
 
     const { limit = 10, offset = 0, loc_gia, gia_tu, gia_den, ...filters } = req.query;
-    let condition = [isSale ? "trang_thai = '0'" : "1=1"];
+    let condition = [!isAdmin ? "trang_thai = '0'" : "1=1"];
     let value = [];
 
     Object.entries(filters).forEach(([key, val]) => {
@@ -53,7 +53,13 @@ router.get("/can-ho", authentication, async function (req, res) {
     }
 
     const queryCount = `SELECT COUNT(*) as count FROM can_ho ${sqlCondition}`;
-    const queryData = `SELECT * FROM can_ho ${sqlCondition} ${orderBy} LIMIT ? OFFSET ?`;
+    let queryData = `SELECT * FROM can_ho ${sqlCondition} ${orderBy} LIMIT ? OFFSET ?`;
+
+    if (!isAdmin) {
+      queryData = `SELECT id, danh_dau, gia_ban, gia_thue, trang_thai, ten_du_an,
+      dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that,
+      ghi_chu, nguoi_cap_nhat, ngay_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho FROM can_ho ${sqlCondition} ${orderBy} LIMIT ? OFFSET ?`;
+    }
 
     const [resultCount, result] = await Promise.all([
       executeQuery(queryCount, value),

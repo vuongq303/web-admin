@@ -10,34 +10,43 @@ var router = express.Router();
 router.get("/", authentication, async function (req, res) {
   try {
     const isAdmin = req.isAdmin;
-    const limit = req.query.limit || 10;
-    const offset = req.query.offset || 0;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = parseInt(req.query.offset) || 0;
 
-    var sql = `SELECT id, danh_dau, gia_ban, gia_thue, trang_thai, ten_du_an,
-    dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that,
-    ghi_chu, nguoi_cap_nhat, ngay_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho FROM can_ho
-    WHERE trang_thai = '0' ORDER BY ngay_cap_nhat DESC LIMIT ? OFFSET ?`;
+    let sql = `SELECT id, danh_dau, gia_ban, gia_thue, trang_thai, ten_du_an,
+               dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that,
+               ghi_chu, nguoi_cap_nhat, ngay_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho FROM can_ho`;
 
-    var sqlCount = "SELECT COUNT(id) FROM can_ho WHERE trang_thai = '0'";
+    let whereClause = "WHERE trang_thai = '0'";
+    let orderByClause = "ORDER BY ngay_cap_nhat DESC";
+
     if (isAdmin) {
-      sql = `SELECT * FROM can_ho ORDER BY trang_thai ASC LIMIT ? OFFSET ?`;
-      sqlCount = "SELECT COUNT(id) FROM can_ho";
+      whereClause = "";
+      sql = 'SELECT * FROM can_ho'
+      orderByClause = "ORDER BY trang_thai ASC";
     }
-    const [resultCount] = await executeQuery(sqlCount);
-    const results = await executeQuery(sql, [Number.parseInt(limit), Number.parseInt(offset)]);
+
+    const sqlWithLimitOffset = `${sql} ${whereClause} ${orderByClause} LIMIT ? OFFSET ?`;
+
+    const sqlCount = `SELECT COUNT(id) FROM can_ho ${whereClause}`;
+
+    const [resultCount, results] = await Promise.all([
+      executeQuery(sqlCount),
+      executeQuery(sqlWithLimitOffset, [limit, offset])
+    ]);
 
     res.status(200).send({
       data: results,
       isAdmin: isAdmin,
       status: true,
-      total: resultCount["COUNT(id)"],
+      total: resultCount[0]["COUNT(id)"],
     });
 
   } catch (error) {
-    console.error("/can-ho" + error.message);
+    console.error("/can-ho " + error.message);
     res.status(500).send({
       response: "Lỗi lấy dữ liệu",
-      status: false
+      status: false,
     });
   }
 });
@@ -46,51 +55,59 @@ router.post("/them-anh-can-ho", authentication, upload.array("hinh_anh"), async 
   try {
     const files = req.files;
     const { id } = req.body;
-    const resultHinhAnh = [];
 
-    var filePath = files.map((file) => file.filename);
-    const [resultGetHinhAnh] = await executeQuery("SELECT hinh_anh FROM can_ho WHERE id = ?", [id]);
-
-    if (resultGetHinhAnh.hinh_anh) {
-      const listHinhAnh = resultGetHinhAnh.hinh_anh.split(",");
-      resultHinhAnh.push(...filePath, ...listHinhAnh);
-    } else {
-      resultHinhAnh.push(...filePath);
+    if (!files || files.length === 0) {
+      return res.status(400).json({
+        response: "Không có ảnh nào được tải lên",
+        status: false,
+      });
     }
 
-    const path = resultHinhAnh.join(",");
-    await executeQuery("UPDATE can_ho SET hinh_anh = ? WHERE id = ?", [path, id]);
+    const newFilePaths = files.map((file) => file.filename).join(",");
+    const [resultGetHinhAnh] = await executeQuery("SELECT hinh_anh FROM can_ho WHERE id = ?", [id]);
+    const existingFilePaths = resultGetHinhAnh && resultGetHinhAnh.hinh_anh ? resultGetHinhAnh.hinh_anh : '';
+    const allFilePaths = existingFilePaths ? `${existingFilePaths},${newFilePaths}` : newFilePaths;
+    await executeQuery("UPDATE can_ho SET hinh_anh = ? WHERE id = ?", [allFilePaths, id]);
 
     res.status(200).json({
       response: "Thêm ảnh thành công",
       status: true,
-      data: resultHinhAnh,
+      data: allFilePaths.split(","),
     });
   } catch (error) {
-    console.error("/them-anh-can-ho" + error.message);
+    console.error("/them-anh-can-ho " + error.message);
     res.status(500).json({
       response: "Lỗi thêm ảnh",
-      status: false
+      status: false,
     });
   }
-}
-);
+});
+
 
 router.post("/xoa-anh-can-ho", authentication, async function (req, res) {
   try {
     const { id, filename } = req.body;
 
     const filePath = join(__dirname, "..", "uploads", "can-ho", `${id}`, filename);
-    await fs.promises.unlink(filePath);
-    const sqlGetHinhAnh = "SELECT hinh_anh FROM can_ho WHERE id = ?";
-    const [resultGetHinhAnh] = await executeQuery(sqlGetHinhAnh, [id]);
+    try {
+      await fs.promises.unlink(filePath);
+    } catch (err) {
+      return res.status(404).json({
+        response: "Ảnh không tồn tại trên hệ thống",
+        status: false,
+      });
+    }
 
-    if (resultGetHinhAnh.hinh_anh) {
+    const [resultGetHinhAnh] = await executeQuery("SELECT hinh_anh FROM can_ho WHERE id = ?", [id]);
+
+    if (resultGetHinhAnh && resultGetHinhAnh.hinh_anh) {
       const listHinhAnh = resultGetHinhAnh.hinh_anh.split(",");
       const updatedHinhAnh = listHinhAnh.filter((item) => item !== filename);
-      const listUpdateHinhAnh = updatedHinhAnh.join(",");
-
-      await executeQuery("UPDATE can_ho SET hinh_anh = ? WHERE id = ?", [listUpdateHinhAnh, id,]);
+      if (updatedHinhAnh.length === 0) {
+        await executeQuery("UPDATE can_ho SET hinh_anh = NULL WHERE id = ?", [id]);
+      } else {
+        await executeQuery("UPDATE can_ho SET hinh_anh = ? WHERE id = ?", [updatedHinhAnh.join(","), id]);
+      }
 
       return res.status(200).json({
         response: "Xóa ảnh thành công",
@@ -99,29 +116,41 @@ router.post("/xoa-anh-can-ho", authentication, async function (req, res) {
       });
     }
 
-    res.status(200).json({
+    res.status(404).json({
       response: "Lỗi xóa ảnh, không tìm thấy dữ liệu",
       status: false,
     });
   } catch (err) {
-    console.error("/xoa-anh-can-ho" + err.message);
+    console.error("/xoa-anh-can-ho " + err.message);
     res.status(500).json({
       response: "Lỗi xóa ảnh",
-      status: false
+      status: false,
     });
   }
 });
 
+
 router.post("/them-can-ho", authentication, async (req, res) => {
   try {
     const user = req.user;
-    var { chu_can_ho, so_dien_thoai, ma_can_ho, ten_toa_nha, ten_du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, gia_ban, gia_thue, truc_can_ho, danh_dau, trang_thai } = req.body;
-    const sql = "SELECT * FROM can_ho WHERE ma_can_ho = ? and ten_toa_nha = ? and truc_can_ho = ?";
+    const {
+      chu_can_ho, so_dien_thoai, ma_can_ho, ten_toa_nha, ten_du_an, dien_tich,
+      so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu,
+      gia_ban, gia_thue, truc_can_ho, danh_dau, trang_thai
+    } = req.body;
 
-    const checkMaCanHoExist = await executeQuery(sql, [ma_can_ho, ten_toa_nha, truc_can_ho]);
+    if (!ma_can_ho || !ten_toa_nha || !truc_can_ho) {
+      return res.status(400).json({
+        response: "Vui lòng cung cấp đủ thông tin về căn hộ",
+        status: false,
+      });
+    }
+
+    const checkSql = "SELECT * FROM can_ho WHERE ma_can_ho = ? and ten_toa_nha = ? and truc_can_ho = ?";
+    const checkMaCanHoExist = await executeQuery(checkSql, [ma_can_ho, ten_toa_nha, truc_can_ho]);
 
     if (checkMaCanHoExist.length > 0) {
-      return res.status(200).json({
+      return res.status(409).json({
         response: "Căn hộ đã tồn tại",
         status: false,
       });
@@ -136,12 +165,15 @@ router.post("/them-can-ho", authentication, async (req, res) => {
         VALUES (?, ? ,? ,? ,? ,? , ?, ?, ? ,? ,? , ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     const nguoi_cap_nhat = user.ho_ten;
-    let now = moment();
-    const ngay_cap_nhat = now.format("YYYY-MM-DD");
+    const ngay_cap_nhat = moment().format("YYYY-MM-DD");
 
-    const result = await executeQuery(sqlCanHo, [ma_can_ho, chu_can_ho, so_dien_thoai, gia_ban, gia_thue, ten_du_an, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, ngay_cap_nhat, trang_thai, ten_toa_nha, truc_can_ho, danh_dau]);
+    const result = await executeQuery(sqlCanHo, [
+      ma_can_ho, chu_can_ho, so_dien_thoai, gia_ban, gia_thue, ten_du_an, dien_tich, so_phong_ngu,
+      so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, ngay_cap_nhat,
+      trang_thai, ten_toa_nha, truc_can_ho, danh_dau
+    ]);
 
-    res.status(200).json({
+    return res.status(201).json({
       response: "Thêm căn hộ thành công",
       status: true,
       id: result.insertId,
@@ -149,41 +181,79 @@ router.post("/them-can-ho", authentication, async (req, res) => {
       ngay_cap_nhat: ngay_cap_nhat,
     });
   } catch (error) {
-    console.error("/them-can-ho" + error.message);
+    console.error("/them-can-ho: " + error.message);
     res.status(500).json({
-      response: "Lỗi thêm căn hộ",
-      status: false
+      response: "Lỗi thêm căn hộ, vui lòng thử lại",
+      status: false,
     });
   }
 });
 
+
 router.post("/cap-nhat-can-ho", authentication, async (req, res) => {
   try {
     const user = req.user;
-    var { chu_can_ho, so_dien_thoai, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, gia_ban, gia_thue, danh_dau, id } = req.body;
+    const {
+      chu_can_ho, so_dien_thoai, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho,
+      loai_can_ho, noi_that, ghi_chu, gia_ban, gia_thue, danh_dau, id
+    } = req.body;
 
-    const sqlCanHo = `UPDATE can_ho SET chu_can_ho = ?, so_dien_thoai = ?, gia_ban = ?,
-        gia_thue = ?, dien_tich = ?, so_phong_ngu = ?, so_phong_tam = ?,
-        huong_can_ho = ?,loai_can_ho = ?, noi_that = ?, ghi_chu = ?,
-        nguoi_cap_nhat = ?, ngay_cap_nhat = ?, danh_dau = ? WHERE id = ?`;
+    if (!id) {
+      return res.status(400).json({
+        response: "ID căn hộ không hợp lệ",
+        status: false,
+      });
+    }
 
     const nguoi_cap_nhat = user.ho_ten;
-    let now = moment();
-    const ngay_cap_nhat = now.format("YYYY-MM-DD");
+    const ngay_cap_nhat = moment().format("YYYY-MM-DD");
 
-    await executeQuery(sqlCanHo, [chu_can_ho, so_dien_thoai, gia_ban, gia_thue, dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, ngay_cap_nhat, danh_dau, id]);
+    const sqlGetCurrentData = "SELECT * FROM can_ho WHERE id = ?";
+    const [currentData] = await executeQuery(sqlGetCurrentData, [id]);
 
-    res.status(200).json({
-      response: "Cập nhật căn hộ thành công",
-      status: true,
-      nguoi_cap_nhat: nguoi_cap_nhat,
-      ngay_cap_nhat: ngay_cap_nhat,
-    });
+    if (!currentData) {
+      return res.status(404).json({
+        response: "Căn hộ không tồn tại",
+        status: false,
+      });
+    }
+
+    const fieldsToUpdate = [
+      chu_can_ho, so_dien_thoai, gia_ban, gia_thue, dien_tich, so_phong_ngu, so_phong_tam,
+      huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, ngay_cap_nhat, danh_dau
+    ];
+
+    const updatedFields = fieldsToUpdate.some((value, index) => value !== Object.values(currentData)[index]);
+
+    if (updatedFields) {
+      const sqlCanHo = `
+        UPDATE can_ho SET 
+          chu_can_ho = ?, so_dien_thoai = ?, gia_ban = ?, gia_thue = ?, dien_tich = ?, 
+          so_phong_ngu = ?, so_phong_tam = ?, huong_can_ho = ?, loai_can_ho = ?, noi_that = ?, 
+          ghi_chu = ?, nguoi_cap_nhat = ?, ngay_cap_nhat = ?, danh_dau = ? WHERE id = ?`;
+
+      await executeQuery(sqlCanHo, [
+        chu_can_ho, so_dien_thoai, gia_ban, gia_thue, dien_tich, so_phong_ngu, so_phong_tam,
+        huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, ngay_cap_nhat, danh_dau, id
+      ]);
+
+      return res.status(200).json({
+        response: "Cập nhật căn hộ thành công",
+        status: true,
+        nguoi_cap_nhat: nguoi_cap_nhat,
+        ngay_cap_nhat: ngay_cap_nhat,
+      });
+    } else {
+      return res.status(200).json({
+        response: "Không có thay đổi để cập nhật",
+        status: true,
+      });
+    }
   } catch (error) {
     console.error("/cap-nhat-can-ho" + error.message);
     res.status(500).json({
       response: "Lỗi cập nhật căn hộ",
-      status: false
+      status: false,
     });
   }
 });
@@ -206,6 +276,14 @@ router.post("/cap-nhat-trang-thai", authentication, async function (req, res) {
 router.post("/upload-excel", authentication, async (req, res) => {
   try {
     const listData = req.body;
+
+    if (!Array.isArray(listData) || listData.length === 0) {
+      return res.status(400).json({
+        response: "Dữ liệu tải lên không hợp lệ",
+        status: false,
+      });
+    }
+
     const result = listData.map((item) => [
       item.ten_du_an || "",
       item.ten_toa_nha || "",
@@ -214,7 +292,7 @@ router.post("/upload-excel", authentication, async (req, res) => {
       item.chu_can_ho || "",
       item.so_dien_thoai || "",
       item.loai_can_ho || "",
-      item.dien_tich || "",
+      item.dien_tich || 0,
       item.so_phong_ngu || 0,
       item.so_phong_tam || 0,
       item.gia_ban || 0,
@@ -224,32 +302,34 @@ router.post("/upload-excel", authentication, async (req, res) => {
       item.ghi_chu || "",
     ]);
 
-    await executeQuery(
-      `INSERT INTO can_ho (
-      ten_du_an, ten_toa_nha, ma_can_ho, truc_can_ho, chu_can_ho, 
-      so_dien_thoai, loai_can_ho, dien_tich, so_phong_ngu, so_phong_tam, 
-      gia_ban, gia_thue, noi_that, huong_can_ho, ghi_chu) VALUES ?
+    const sql = `
+      INSERT INTO can_ho (
+        ten_du_an, ten_toa_nha, ma_can_ho, truc_can_ho, chu_can_ho, 
+        so_dien_thoai, loai_can_ho, dien_tich, so_phong_ngu, so_phong_tam, 
+        gia_ban, gia_thue, noi_that, huong_can_ho, ghi_chu
+      ) VALUES ?
       ON DUPLICATE KEY UPDATE
-      ten_du_an = CASE WHEN VALUES(ten_du_an) <> '' THEN VALUES(ten_du_an) ELSE ten_du_an END,
-      chu_can_ho = CASE WHEN VALUES(chu_can_ho) <> '' THEN VALUES(chu_can_ho) ELSE chu_can_ho END,
-      so_dien_thoai = CASE WHEN VALUES(so_dien_thoai) <> '' THEN VALUES(so_dien_thoai) ELSE so_dien_thoai END,
-      loai_can_ho = CASE WHEN VALUES(loai_can_ho) <> '' THEN VALUES(loai_can_ho) ELSE loai_can_ho END,
-      dien_tich = CASE WHEN VALUES(dien_tich) <> '' THEN VALUES(dien_tich) ELSE dien_tich END,
-      so_phong_ngu = CASE WHEN VALUES(so_phong_ngu) <> 0 THEN VALUES(so_phong_ngu) ELSE so_phong_ngu END,
-      so_phong_tam = CASE WHEN VALUES(so_phong_tam) <> 0 THEN VALUES(so_phong_tam) ELSE so_phong_tam END,
-      gia_ban = CASE WHEN VALUES(gia_ban) <> 0 THEN VALUES(gia_ban) ELSE gia_ban END,
-      gia_thue = CASE WHEN VALUES(gia_thue) <> 0 THEN VALUES(gia_thue) ELSE gia_thue END,
-      noi_that = CASE WHEN VALUES(noi_that) <> '' THEN VALUES(noi_that) ELSE noi_that END,
-      huong_can_ho = CASE WHEN VALUES(huong_can_ho) <> '' THEN VALUES(huong_can_ho) ELSE huong_can_ho END,
-      ghi_chu = CASE WHEN VALUES(ghi_chu) <> '' THEN VALUES(ghi_chu) ELSE ghi_chu END`,
-      [result]
-    );
+        ten_du_an = COALESCE(NULLIF(VALUES(ten_du_an), ''), ten_du_an),
+        chu_can_ho = COALESCE(NULLIF(VALUES(chu_can_ho), ''), chu_can_ho),
+        so_dien_thoai = COALESCE(NULLIF(VALUES(so_dien_thoai), ''), so_dien_thoai),
+        loai_can_ho = COALESCE(NULLIF(VALUES(loai_can_ho), ''), loai_can_ho),
+        dien_tich = COALESCE(NULLIF(VALUES(dien_tich), 0), dien_tich),
+        so_phong_ngu = COALESCE(NULLIF(VALUES(so_phong_ngu), 0), so_phong_ngu),
+        so_phong_tam = COALESCE(NULLIF(VALUES(so_phong_tam), 0), so_phong_tam),
+        gia_ban = COALESCE(NULLIF(VALUES(gia_ban), 0), gia_ban),
+        gia_thue = COALESCE(NULLIF(VALUES(gia_thue), 0), gia_thue),
+        noi_that = COALESCE(NULLIF(VALUES(noi_that), ''), noi_that),
+        huong_can_ho = COALESCE(NULLIF(VALUES(huong_can_ho), ''), huong_can_ho),
+        ghi_chu = COALESCE(NULLIF(VALUES(ghi_chu), ''), ghi_chu)`;
+
+    await executeQuery(sql, [result]);
+
     res.status(200).json({
       response: "Tải dữ liệu lên thành công",
       status: true
     });
   } catch (error) {
-    console.error("/upload-excel" + error.message);
+    console.error("/upload-excel: " + error.message);
     res.status(500).json({
       response: "Lỗi tải lên dữ liệu",
       status: false

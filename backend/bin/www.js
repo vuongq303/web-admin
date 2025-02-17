@@ -24,35 +24,40 @@ async function performTask() {
   const jsonPath = join(__dirname, "..", "temp", "yeu_cau.json");
   const now = moment();
 
-  if (!fs.existsSync(jsonPath)) {
-    fs.writeFileSync(jsonPath, JSON.stringify([], null, 2));
-  }
-
-  const fileData = fs.readFileSync(jsonPath, "utf8");
-  const yeuCauArray = JSON.parse(fileData);
-
-  const yeuCauHetHan = [];
-
-  const yeuCauConLai = yeuCauArray.filter((yeu_cau) => {
-    const endTime = moment(yeu_cau.ket_thuc, "HH:mm DD-MM-YYYY", true);
-    const isExpired = endTime.isSameOrBefore(now);
-    if (isExpired) {
-      yeuCauHetHan.push(yeu_cau);
+  try {
+    try {
+      fs.access(jsonPath);
+    } catch (err) {
+      fs.writeFile(jsonPath, JSON.stringify([], null, 2));
     }
-    return !isExpired;
-  });
 
-  if (yeuCauHetHan.length > 0) {
-    const taiKhoanArray = yeuCauHetHan.map((item) => item.tai_khoan);
-    await executeQuery("DELETE FROM yeu_cau WHERE nguoi_gui IN (?)", [
-      taiKhoanArray,
-    ]);
+    const fileData = fs.readFile(jsonPath, 'utf8');
+    const yeuCauArray = JSON.parse(fileData);
+
+    const yeuCauHetHan = [];
+    const yeuCauConLai = yeuCauArray.filter((yeu_cau) => {
+      const endTime = moment(yeu_cau.ket_thuc, "HH:mm DD-MM-YYYY", true);
+      const isExpired = endTime.isSameOrBefore(now);
+      if (isExpired) {
+        yeuCauHetHan.push(yeu_cau);
+      }
+      return !isExpired;
+    });
+
+    if (yeuCauHetHan.length > 0) {
+      const taiKhoanArray = yeuCauHetHan.map((item) => item.tai_khoan);
+      await executeQuery("DELETE FROM yeu_cau WHERE nguoi_gui IN (?)", [taiKhoanArray]);
+    }
+
+    fs.writeFile(jsonPath, JSON.stringify(yeuCauConLai, null, 2));
+
+  } catch (error) {
+    console.error("Lỗi trong quá trình xử lý yêu cầu:", error.message);
   }
-
-  fs.writeFileSync(jsonPath, JSON.stringify(yeuCauConLai, null, 2));
 }
 
 schedule.scheduleJob("*/60 * * * *", performTask);
+
 
 var server = http.createServer(app);
 
