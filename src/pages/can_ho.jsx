@@ -1323,10 +1323,12 @@ export default function CanHo() {
           <button className="btn btn-outline-primary mx-2" onClick={lamMoi}>
             Làm mới
           </button>
+          <br />
+          <h6 className="text-start mt-4">Có {fitResult}/{totalResult} kết quả phù hợp</h6>
         </div>
-        <br />
-        <h6 className="text-start mb-3 mx-2">Có {fitResult}/{totalResult} kết quả phù hợp</h6>
       </div>
+
+
       <table className="table table-bordered">
         <thead>
           <tr className="table-primary">

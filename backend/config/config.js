@@ -1,6 +1,6 @@
 module.exports = {
-  url: "http://192.168.1.83:8080",
-  client: "http://192.168.1.83:3000",
+  url: "http://192.168.29.55:8080",
+  client: "http://192.168.29.55:3000",
   gray: "gray",
   yellow: "yellow",
   orange: "orange",

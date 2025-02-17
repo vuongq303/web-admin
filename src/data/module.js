@@ -112,4 +112,4 @@ export const excelExportFormat = [
   "danh_dau",
 ];
 
-export const baseURL = "http://192.168.1.83:8080";
+export const baseURL = "http://192.168.29.55:8080";
