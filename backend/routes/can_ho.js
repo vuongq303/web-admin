@@ -18,16 +18,19 @@ router.get("/", authentication, async function (req, res) {
     ghi_chu, nguoi_cap_nhat, ngay_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho FROM can_ho
     WHERE trang_thai = '0' ORDER BY ngay_cap_nhat DESC LIMIT ? OFFSET ?`;
 
+    var sqlCount = "SELECT COUNT(id) FROM can_ho WHERE trang_thai = '0'";
     if (isAdmin) {
       sql = `SELECT * FROM can_ho ORDER BY trang_thai ASC LIMIT ? OFFSET ?`;
+      sqlCount = "SELECT COUNT(id) FROM can_ho";
     }
-
+    const [resultCount] = await executeQuery(sqlCount);
     const results = await executeQuery(sql, [Number.parseInt(limit), Number.parseInt(offset)]);
 
     res.status(200).send({
       data: results,
       isAdmin: isAdmin,
       status: true,
+      total: resultCount["COUNT(id)"],
     });
 
   } catch (error) {

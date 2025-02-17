@@ -12,6 +12,8 @@ export const phiMoiGioi = ["Đủ phí", "Chưa đủ phí"];
 
 export const trangThaiYeuCau = ["Đang chờ", "Đã duyệt"];
 
+export const dataSoPhongNgu = [1, 2, 3, 4, 5, 6];
+
 export const danhDauCanHo = [
   { mau_sac: "", noi_dung: "Mặc định" },
   { mau_sac: "yellow", noi_dung: "Vàng (Căn giá rẻ)" },

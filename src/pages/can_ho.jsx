@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Modal, Form } from "react-bootstrap";
 import * as xlsx from "xlsx";
-import { danhDauCanHo, dateToText, locGiaCanHo } from "../services/utils";
+import { danhDauCanHo, dataSoPhongNgu, dateToText, locGiaCanHo } from "../services/utils";
 import PreviewImage from "./components/preview_image";
 import { toast, ToastContainer } from "react-toastify";
 import {
@@ -41,6 +41,8 @@ export default function CanHo() {
   const [dataToaNha, setDataToaNha] = useState([]);
   const [dataTrucCanHo, setDataTrucCanHo] = useState([]);
   const [itemChecked, setItemChecked] = useState([]);
+  const [totalResult, setTotalResult] = useState(0);
+  const [fitResult, setFitResult] = useState(0);
   const tenToaNhaRef = useRef(null);
   const maCanHoRef = useRef(null);
   const hoTenChuCanHoRef = useRef(null);
@@ -102,7 +104,7 @@ export default function CanHo() {
   async function getData(page) {
     try {
       const {
-        data: { data, isAdmin, status },
+        data: { data, isAdmin, status, total },
       } = await REQUEST.get("/can-ho", {
         params: {
           limit: limitRow,
@@ -111,6 +113,7 @@ export default function CanHo() {
       });
       if (status) {
         setIsAdmin(isAdmin);
+        setTotalResult(total);
         return data;
       }
       return [];
@@ -143,13 +146,14 @@ export default function CanHo() {
       setLoading(true);
       setIsTimKiem(true);
       const {
-        data: { status, data },
+        data: { status, data, count },
       } = await REQUEST.get(`/tim-kiem/${isAdmin ? "admin" : "sale"}`, {
         params: dataTimKiem,
       });
 
       setLoading(false);
       if (status) {
+        setFitResult(count);
         return data;
       }
 
@@ -179,6 +183,7 @@ export default function CanHo() {
     setGiaBanDenState("");
     setDataToaNha([]);
     setPages(1);
+    setFitResult(0);
     setTimeKiemPages(1);
     setIsDisableLoadMore(false);
     const data = await getData(1);
@@ -365,6 +370,7 @@ export default function CanHo() {
         setLoading(true);
         const data = await getData(pages);
         setLoading(false);
+
         if (data.length < limitRow) {
           setIsDisableLoadMore(true);
         }
@@ -1232,14 +1238,19 @@ export default function CanHo() {
             </option>
           ))}
         </select>
-        <input
+        <br />
+        <select
           ref={soPhongNguTimKiemRef}
-          type="number"
-          placeholder="Số phòng ngủ"
-          className="form-control w-auto"
-          aria-label="Sizing example input"
-          aria-describedby="inputGroup-sizing-default"
-        />
+          className="form-select w-auto"
+          aria-label="Default select example"
+        >
+          <option value="">Chọn số phòng ngủ</option>
+          {dataSoPhongNgu.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
         <select
           className="form-select w-auto"
           ref={trucCanHoTimKiemRef}
@@ -1296,7 +1307,8 @@ export default function CanHo() {
           aria-label="Sizing example input"
           aria-describedby="inputGroup-sizing-default"
         />
-        <div>
+        <br />
+        <div >
           <button
             className="btn btn-primary"
             onClick={async () => {
@@ -1311,6 +1323,8 @@ export default function CanHo() {
           <button className="btn btn-outline-primary mx-2" onClick={lamMoi}>
             Làm mới
           </button>
+
+          <h6 style={{ marginTop: 20 }}>Có {fitResult}/{totalResult} kết quả phù hợp</h6>
         </div>
       </div>
       <table className="table table-bordered">
@@ -1375,7 +1389,7 @@ export default function CanHo() {
                   <input
                     className="form-check-input"
                     type="checkbox"
-                    onChange={() => {}}
+                    onChange={() => { }}
                     onClick={saveItemChecked}
                     checked={onChecked}
                     id="flexCheckDefault"
@@ -1440,9 +1454,8 @@ export default function CanHo() {
                     onClick={() => showImage(item)}
                     type="button"
                     style={styles.f_}
-                    className={`btn w-75 ${
-                      item.hinh_anh ? "btn-warning" : "btn-secondary"
-                    }`}
+                    className={`btn w-75 ${item.hinh_anh ? "btn-warning" : "btn-secondary"
+                      }`}
                   >
                     Hình ảnh
                   </button>

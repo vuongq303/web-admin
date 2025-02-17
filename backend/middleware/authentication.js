@@ -24,6 +24,7 @@ function authentication(req, res, next) {
     req.isSale = isSale;
     next();
   } catch (error) {
+    console.error(error);
     res.status(401).json({
       response: "Phiên đăng nhập đã hết hạn",
       status: false,

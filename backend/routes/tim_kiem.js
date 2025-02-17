@@ -4,13 +4,16 @@ const executeQuery = require("../sql/promise");
 const config = require("../config/config");
 const authentication = require("../middleware/authentication");
 
-router.get("/admin", authentication, async function (req, res) {
+router.get("/admin", async function (req, res) {
   try {
     var value = [];
     var condition = [];
     const limit = req.query.limit || 10;
     const offset = req.query.offset || 0;
-    var sql = "SELECT * FROM can_ho";
+
+    const sql = "SELECT * FROM can_ho";
+    const sqlCount = "SELECT COUNT(id) FROM can_ho"
+    var sqlCondition = "";
 
     const { ten_du_an, ten_toa_nha, loai_noi_that, loai_can_ho, huong_can_ho, so_phong_ngu, truc_can_ho, loc_gia, gia_tu, gia_den } = req.query;
 
@@ -70,37 +73,40 @@ router.get("/admin", authentication, async function (req, res) {
       }
 
       const filter = condition.join(" AND ");
-      sql += ` WHERE ${filter}`;
+      sqlCondition += ` WHERE ${filter}`;
+
     } else {
       if (gia_ban) {
-        sql += " WHERE gia_ban > 0";
+        sqlCondition += " WHERE gia_ban > 0";
       } else if (gia_thue) {
-        sql += " WHERE gia_thue > 0";
+        sqlCondition += " WHERE gia_thue > 0";
       }
     }
 
-    sql += " ORDER BY trang_thai ASC";
+    sqlCondition += " ORDER BY trang_thai ASC";
     switch (loc_gia) {
       case config.giaBanTangDan:
-        sql += ", gia_ban ASC";
+        sqlCondition += ", gia_ban ASC";
         break;
       case config.giaBanGiamDan:
-        sql += ", gia_ban DESC";
+        sqlCondition += ", gia_ban DESC";
         break;
       case config.giaThueTangDan:
-        sql += ", gia_thue ASC";
+        sqlCondition += ", gia_thue ASC";
         break;
       case config.giaThueGiamDan:
-        sql += ", gia_thue DESC";
+        sqlCondition += ", gia_thue DESC";
         break;
       default:
         break;
     }
+    const [resultCount] = await executeQuery(`${sqlCount} ${sqlCondition}`, value);
+    const result = await executeQuery(`${sql} ${sqlCondition} LIMIT ${limit} OFFSET ${offset}`, value);
 
-    const result = await executeQuery(sql + ` LIMIT ${limit} OFFSET ${offset}`, value);
     res.status(200).send({
       data: result,
-      status: true
+      status: true,
+      count: resultCount["COUNT(id)"],
     });
   } catch (error) {
     console.error("/admin" + error.message);
@@ -118,10 +124,12 @@ router.get("/sale", authentication, async function (req, res) {
     const limit = req.query.limit || 10;
     const offset = req.query.offset || 0;
 
-    var sql = `SELECT id, danh_dau, gia_ban, gia_thue, trang_thai, ten_du_an, dien_tich, so_phong_ngu,
-      so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat, hinh_anh,
-      ten_toa_nha, truc_can_ho FROM can_ho WHERE trang_thai = '0'`;
+    const sql = `SELECT id, danh_dau, gia_ban, gia_thue, trang_thai, ten_du_an, dien_tich,
+    so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat,
+    hinh_anh, ten_toa_nha, truc_can_ho FROM can_ho WHERE trang_thai = '0'`;
 
+    const sqlCount = "SELECT COUNT(id) FROM can_ho WHERE trang_thai = '0'"
+    var sqlCondition = "";
     const { ten_du_an, ten_toa_nha, loai_noi_that, loai_can_ho, huong_can_ho, so_phong_ngu, truc_can_ho, loc_gia, gia_tu, gia_den } = req.query;
 
     if (ten_du_an !== "") {
@@ -160,7 +168,6 @@ router.get("/sale", authentication, async function (req, res) {
     }
 
     const gia_ban = loc_gia === config.giaBanTangDan || loc_gia === config.giaBanGiamDan;
-
     const gia_thue = loc_gia === config.giaThueTangDan || loc_gia === config.giaThueGiamDan;
 
     if (gia_tu !== "" && gia_den !== "") {
@@ -181,33 +188,36 @@ router.get("/sale", authentication, async function (req, res) {
 
     if (condition.length > 0) {
       const filter = condition.join(" AND ");
-      sql += ` AND ${filter}`;
+      sqlCondition += `AND ${filter}`;
     }
 
     switch (loc_gia) {
       case config.giaBanTangDan:
-        sql += " ORDER BY gia_ban ASC";
+        sqlCondition += " ORDER BY gia_ban ASC";
         break;
       case config.giaBanGiamDan:
-        sql += " ORDER BY gia_ban DESC";
+        sqlCondition += " ORDER BY gia_ban DESC";
         break;
       case config.giaThueTangDan:
-        sql += " ORDER BY gia_thue ASC";
+        sqlCondition += " ORDER BY gia_thue ASC";
         break;
       case config.giaThueGiamDan:
-        sql += " ORDER BY gia_thue DESC";
+        sqlCondition += " ORDER BY gia_thue DESC";
         break;
       default:
         break;
     }
+    
+    const [resultCount] = await executeQuery(`${sqlCount} ${sqlCondition}`, value);
+    const result = await executeQuery(`${sql} ${sqlCondition} LIMIT ${limit} OFFSET ${offset}`, value);
 
-    const result = await executeQuery(sql + ` LIMIT ${limit} OFFSET ${offset}`, value);
     res.status(200).send({
       data: result,
-      status: true
+      status: true,
+      count: resultCount["COUNT(id)"],
     });
   } catch (error) {
-    console.error("/admin" + error.message);
+    console.error("/sale" + error.message);
     res.status(500).send({
       response: "Lỗi tìm kiếm",
       status: false
