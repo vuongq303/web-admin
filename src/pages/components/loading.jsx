@@ -2,7 +2,8 @@ import React from "react";
 import { Modal } from "react-bootstrap";
 
 export default function Loading({ loading }) {
-  const image = require("../../imgs/connect_home.png");
+  const image = require("../../assets/img/connect_home.png");
+  
   return (
     <Modal className="modal-sm" show={loading} backdrop="static">
       <Modal.Body>

@@ -74,7 +74,7 @@ export default function DangNhap() {
       <div className="login-content">
         <div className="login-image">
           <img
-            src={require("../imgs/connect_home.png")}
+            src={require("../assets/img/connect_home.png")}
             height={500}
             width={500}
             alt="Logo"

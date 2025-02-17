@@ -7,6 +7,7 @@ const fs = require("fs");
 const { join } = require("path");
 const moment = require("moment");
 const executeQuery = require("../sql/promise");
+const mongodbConnect = require('../sql/mongodb');
 const port = env.PORT;
 
 mysql.getConnection(function (err, connection) {
@@ -16,6 +17,8 @@ mysql.getConnection(function (err, connection) {
   }
   console.log("Connected as id " + connection.threadId);
 });
+
+mongodbConnect.connect();
 
 async function performTask() {
   const jsonPath = join(__dirname, "..", "temp", "yeu_cau.json");

@@ -147,7 +147,7 @@ export default function CanHo() {
       setIsTimKiem(true);
       const {
         data: { status, data, count },
-      } = await REQUEST.get(`/tim-kiem/${isAdmin ? "admin" : "sale"}`, {
+      } = await REQUEST.get(`/tim-kiem/can-ho`, {
         params: dataTimKiem,
       });
 
@@ -1323,9 +1323,9 @@ export default function CanHo() {
           <button className="btn btn-outline-primary mx-2" onClick={lamMoi}>
             Làm mới
           </button>
-
-          <h6 style={{ marginTop: 20 }}>Có {fitResult}/{totalResult} kết quả phù hợp</h6>
         </div>
+        <br />
+        <h6 className="text-start mb-3 mx-2">Có {fitResult}/{totalResult} kết quả phù hợp</h6>
       </div>
       <table className="table table-bordered">
         <thead>

@@ -8,4 +8,5 @@ module.exports = {
   DATABASE: process.env.DATABASE || "",
   DATABASE_PORT: process.env.DATABASE_PORT || 3306,
   DATABASE_PASSWORD: process.env.DATABASE_PASSWORD || "",
+  MONGODB_KEY: process.env.MONGODB_KEY || "",
 };

@@ -1,5 +1,4 @@
 var express = require("express");
-const { join } = require("path");
 const authentication = require("../middleware/authentication");
 const executeQuery = require("../sql/promise");
 const config = require("../config/config");
@@ -7,8 +6,11 @@ const jsonwebtoken = require("jsonwebtoken");
 const env = require("../config/env");
 var router = express.Router();
 
-router.get("/", (req, res) => {
-  res.status(200).sendFile(join(__dirname, "views", "index.html"));
+router.get("/", (_, res) => {
+  res.status(200).render('layout', {
+    title: 'Welcome',
+    content: 'Hello world'
+   });
 });
 
 router.get("/phan-quyen", authentication, function (req, res) {

@@ -112,4 +112,4 @@ export const excelExportFormat = [
   "danh_dau",
 ];
 
-export const baseURL = "https://api.connecthome.vn";
+export const baseURL = "http://192.168.1.83:8080";
