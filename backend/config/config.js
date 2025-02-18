@@ -1,6 +1,6 @@
 module.exports = {
-  url: "http://192.168.29.55:8080",
-  client: "http://192.168.29.55:3000",
+  url: "https://api.connecthome.vn",
+  client: "https://connecthome.vn",
   gray: "gray",
   yellow: "yellow",
   orange: "orange",

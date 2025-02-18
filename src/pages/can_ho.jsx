@@ -147,7 +147,7 @@ export default function CanHo() {
       setIsTimKiem(true);
       const {
         data: { status, data, count },
-      } = await REQUEST.get(`/tim-kiem/can-ho`, {
+      } = await REQUEST.get(`/tim-kiem/${isAdmin ? 'admin' : 'sale'}`, {
         params: dataTimKiem,
       });
 
