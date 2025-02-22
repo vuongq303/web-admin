@@ -1,4 +1,4 @@
-const connect = require("./connect");
+const connect = require("../database/sql");
 
 const executeQuery = (sql, params) => {
   return new Promise((resolve, reject) => {

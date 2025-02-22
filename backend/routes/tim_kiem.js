@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-const executeQuery = require("../sql/promise");
+const executeQuery = require("../helper/sql_promise");
 const config = require("../config/config");
 const authentication = require("../middleware/authentication");
 

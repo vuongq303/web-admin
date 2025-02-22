@@ -1,9 +1,8 @@
 var express = require("express");
 var router = express.Router();
 const jwt = require("jsonwebtoken");
-const executeQuery = require("../sql/promise");
+const executeQuery = require("../helper/sql_promise");
 const env = require("../config/env");
-const config = require("../config/config");
 const upload = require("../middleware/nguoi_dung");
 const authentication = require("../middleware/authentication");
 
@@ -20,7 +19,7 @@ router.get("/", authentication, async function (req, res) {
     const sql = `SELECT id, ho_ten, ngay_bat_dau,
     tai_khoan,gioi_tinh, so_dien_thoai, email,
     ngay_sinh, trang_thai, phan_quyen
-    FROM nguoi_dung ORDER BY trang_thai DESC, phan_quyen ASC`;
+    FROM nguoi_dung ORDER BY trang_thai ASC, phan_quyen DESC`;
 
     const result = await executeQuery(sql);
     res.status(200).send({
@@ -38,7 +37,7 @@ router.get("/", authentication, async function (req, res) {
 
 router.post("/them-nguoi-dung", upload.single("hinh_anh"), authentication, async function (req, res) {
   try {
-    const { tai_khoan, mat_khau, ho_ten, ngay_bat_dau, so_dien_thoai, ngay_sinh, email, phan_quyen, gioi_tinh, trang_thai, } = req.body;
+    const { tai_khoan, mat_khau, ho_ten, ngay_bat_dau, so_dien_thoai, ngay_sinh, email, phan_quyen, gioi_tinh, trang_thai } = req.body;
 
     const checkUser = await executeQuery("SELECT id FROM nguoi_dung WHERE tai_khoan = ?", [tai_khoan]);
 
@@ -71,7 +70,8 @@ router.post("/them-nguoi-dung", upload.single("hinh_anh"), authentication, async
 
 router.post("/cap-nhat-nguoi-dung", upload.single("hinh_anh"), authentication, async function (req, res) {
   try {
-    const { id, ho_ten, ngay_bat_dau, so_dien_thoai, ngay_sinh, email, phan_quyen, gioi_tinh, trang_thai, } = req.body;
+    const { id, ho_ten, ngay_bat_dau, so_dien_thoai, ngay_sinh, email, phan_quyen, gioi_tinh, trang_thai } = req.body;
+    console.log(req.body);
 
     const sql = `UPDATE nguoi_dung SET ho_ten = ? ,
       ngay_bat_dau = ?, gioi_tinh = ?,
@@ -100,7 +100,7 @@ router.post("/dang-nhap", async function (req, res) {
     const sql = `SELECT tai_khoan, ho_ten, phan_quyen FROM
       nguoi_dung WHERE tai_khoan = ? and mat_khau = ? AND
       trang_thai = ?`;
-    const result = await executeQuery(sql, [username, password, config.dangLamViec]);
+    const result = await executeQuery(sql, [username, password, 0]);
 
     if (result.length > 0) {
       const token = jwt.sign({ ...result[0] }, env.JWT_KEY, { expiresIn: "8h" });

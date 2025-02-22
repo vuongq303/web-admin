@@ -1,6 +1,6 @@
 var express = require("express");
 const authentication = require("../middleware/authentication");
-const executeQuery = require("../sql/promise");
+const executeQuery = require("../helper/sql_promise");
 const config = require("../config/config");
 const jsonwebtoken = require("jsonwebtoken");
 const env = require("../config/env");
@@ -10,7 +10,7 @@ router.get("/", (_, res) => {
   res.status(200).render('layout', {
     title: 'Welcome',
     content: 'Hello world'
-   });
+  });
 });
 
 router.get("/phan-quyen", authentication, function (req, res) {

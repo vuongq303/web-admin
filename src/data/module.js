@@ -1,28 +1,3 @@
-export const moduleTrangThaiLamViec = {
-  dangLamViec: "Đang làm việc",
-  daNghiLam: "Đã nghỉ làm",
-};
-
-export const moduleTrangThaiDuAn = {
-  dangGiaoDich: "Đang giao dịch",
-  ngungGiaoDich: "Ngừng giao dịch",
-};
-
-export const modulePhanQuyen = {
-  admin: "Admin",
-  quanLy: "Quản lý",
-  cskh: "CSKH",
-  sale: "Sale",
-};
-
-export const moduleDanhDau = {
-  gray: "gray",
-  yellow: "yellow",
-  orange: "orange",
-  red: "red",
-  transparent: "",
-};
-
 export const dataCanHoDefault = {
   id: 0,
   gia_ban: 0,
@@ -112,4 +87,10 @@ export const excelExportFormat = [
   "danh_dau",
 ];
 
-export const baseURL = "https://api.connecthome.vn";
+export const trangThaiLamViec = ["Đang làm việc", "Đã nghỉ làm"];
+
+export const dataDanhDau = ["", "gray", "yellow", "orange", "red"];
+
+export const dataPhanQuyen = ["Sale", "CSKH", "Quản lý", "Admin", "Quản trị"];
+
+export const baseURL = "http://192.168.22.2:8080";

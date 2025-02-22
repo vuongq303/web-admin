@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-const executeQuery = require("../sql/promise");
+const executeQuery = require("../helper/sql_promise");
 const authentication = require("../middleware/authentication");
 
 router.get("/", authentication, async function (req, res) {

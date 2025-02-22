@@ -5,17 +5,10 @@ import { Menu, Sidebar, MenuItem, SubMenu } from "react-pro-sidebar";
 import { faUserTie } from "@fortawesome/free-solid-svg-icons/faUserTie";
 import { myColor } from "../styles/color";
 import {
-  faChevronLeft,
-  faChevronRight,
-  faSignOut,
-  faBuilding,
-  faProjectDiagram,
-  faPerson,
-  faUser,
+  faChevronLeft, faChevronRight, faSignOut, faBuilding, faProjectDiagram, faPerson, faUser
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { REQUEST } from "../api/method";
-import { modulePhanQuyen } from "../data/module";
 
 export default function NavigationPage({ children }) {
   return (
@@ -131,29 +124,42 @@ function SizeBar() {
         )}
       </div>
       <Menu>
-        {(phanQuyen === modulePhanQuyen.admin || phanQuyen === modulePhanQuyen.quanLy) && (
-          <MenuItem
+        {(phanQuyen === 2 ||
+          phanQuyen === 3 ||
+          phanQuyen === 4) &&
+          (<MenuItem
             className="item-menu"
             icon={<FontAwesomeIcon icon={faPerson} />}
-            onClick={() => navigator("/nguoi-dung")}>Nhân sự</MenuItem>
-        )}
+            onClick={() => navigator("/nguoi-dung")}>Nhân sự
+          </MenuItem>
+          )}
 
-        {(phanQuyen === modulePhanQuyen.admin || phanQuyen === modulePhanQuyen.quanLy) && (
-          <MenuItem
+        {(phanQuyen === 2 ||
+          phanQuyen === 3 ||
+          phanQuyen === 4) &&
+          (<MenuItem
             icon={<FontAwesomeIcon icon={faUser} />}
             className="item-menu"
-            onClick={() => navigator("/khach-hang-nguon")}>Data khách hàng</MenuItem>
-        )}
+            onClick={() => navigator("/khach-hang-nguon")}>Data khách hàng
+          </MenuItem>
+          )}
 
-        {(phanQuyen === modulePhanQuyen.admin || phanQuyen === modulePhanQuyen.quanLy || phanQuyen === modulePhanQuyen.cskh) && (
-          <MenuItem
+        {(phanQuyen === 1 ||
+          phanQuyen === 2 ||
+          phanQuyen === 3 ||
+          phanQuyen === 4) &&
+          (<MenuItem
             icon={<FontAwesomeIcon icon={faUserTie} />}
             className="item-menu"
-            onClick={() => navigator("/cham-soc-khach-hang")}>Chăm sóc khách hàng</MenuItem>
-        )}
+            onClick={() => navigator("/cham-soc-khach-hang")}>Chăm sóc khách hàng
+          </MenuItem>
+          )}
 
-        {(phanQuyen === modulePhanQuyen.admin || phanQuyen === modulePhanQuyen.quanLy || phanQuyen === modulePhanQuyen.sale) && (
-          <SubMenu
+        {(phanQuyen === 0 ||
+          phanQuyen === 2 ||
+          phanQuyen === 3 ||
+          phanQuyen === 4) &&
+          (<SubMenu
             icon={<FontAwesomeIcon icon={faBuilding} />}
             label="Sale"
             className="item-menu">
@@ -170,10 +176,12 @@ function SizeBar() {
               className="item-menu"
               onClick={() => navigator("/can-ho-da-duyet")}>Căn hộ đã duyệt</MenuItem>
           </SubMenu>
-        )}
+          )}
 
-        {(phanQuyen === modulePhanQuyen.admin || phanQuyen === modulePhanQuyen.quanLy) && (
-          <SubMenu
+        {(phanQuyen === 2 ||
+          phanQuyen === 3 ||
+          phanQuyen === 4) &&
+          (<SubMenu
             label="Dự án"
             className="item-menu"
             icon={<FontAwesomeIcon icon={faProjectDiagram} />}>
@@ -203,7 +211,7 @@ function SizeBar() {
               className="item-menu"
               onClick={() => navigator("/truc-can-ho")}>Trục căn hộ</MenuItem>
           </SubMenu>
-        )}
+          )}
       </Menu>
       <div style={styles.container_logout}>
         <p style={styles.item_logout}>Logout</p>

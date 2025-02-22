@@ -2,7 +2,7 @@ import "./css/css.css";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import { modulePhanQuyen } from "../data/module";
+import { listPhanQuyen } from "../data/module";
 import Loading from "./components/loading";
 import { REQUEST } from "../api/method";
 
@@ -41,18 +41,17 @@ export default function DangNhap() {
       toast.success(response);
 
       if (status) {
-        if (
-          phan_quyen === modulePhanQuyen.admin || phan_quyen === modulePhanQuyen.quanLy) {
+        if (phan_quyen === 2 || phan_quyen === 3 || phan_quyen === 4) {
           navigation("/nguoi-dung");
           return;
         }
 
-        if (phan_quyen === modulePhanQuyen.sale) {
+        if (phan_quyen === 0) {
           navigation("/can-ho");
           return;
         }
 
-        if (phan_quyen === modulePhanQuyen.cskh) {
+        if (phan_quyen === 1) {
           navigation("/cham-soc-khach-hang");
           return;
         }

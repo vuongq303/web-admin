@@ -2,19 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import Loading from "./components/loading";
-import {
-  dataPhanQuyen,
-  dateToText,
-  gioiTinhNguoiDung,
-  trangThaiLamViec,
-} from "../services/utils";
-
-import {
-  baseURL,
-  moduleDanhDau,
-  modulePhanQuyen,
-  moduleTrangThaiLamViec,
-} from "../data/module";
+import { dateToText, gioiTinhNguoiDung } from "../services/utils";
+import { baseURL, dataDanhDau, trangThaiLamViec, dataPhanQuyen, } from "../data/module";
 import { REQUEST } from "../api/method";
 import { useNavigate } from "react-router-dom";
 import { authentication } from "./controllers/function";
@@ -338,10 +327,9 @@ export default function () {
                 <select
                   className="form-select"
                   aria-label="Default select example"
-                  ref={viTriRef}
-                >
+                  ref={viTriRef}>
                   {dataPhanQuyen.map((item, index) => (
-                    <option key={index} value={item}>
+                    <option key={index} value={index}>
                       {item}
                     </option>
                   ))}
@@ -355,7 +343,7 @@ export default function () {
                   ref={trangThaiRef}
                 >
                   {trangThaiLamViec.map((item, index) => (
-                    <option key={index} value={item}>
+                    <option key={index} value={index}>
                       {item}
                     </option>
                   ))}
@@ -507,7 +495,7 @@ export default function () {
                   defaultValue={dataUpdate.phan_quyen}
                 >
                   {dataPhanQuyen.map((item, index) => (
-                    <option key={index} value={item}>
+                    <option key={index} value={index}>
                       {item}
                     </option>
                   ))}
@@ -522,7 +510,7 @@ export default function () {
                   defaultValue={dataUpdate.trang_thai}
                 >
                   {trangThaiLamViec.map((item, index) => (
-                    <option key={index} value={item}>
+                    <option key={index} value={index}>
                       {item}
                     </option>
                   ))}
@@ -554,7 +542,6 @@ export default function () {
             </Button>
             <Button
               variant="primary"
-              disabled={dataUpdate.phan_quyen === modulePhanQuyen.admin}
               onClick={capNhatNguoiDung}
             >
               Cập nhật
@@ -582,10 +569,7 @@ export default function () {
             const styles = {
               danh_dau: {
                 display: "inline-block",
-                backgroundColor:
-                  item.trang_thai === moduleTrangThaiLamViec.daNghiLam
-                    ? moduleDanhDau.gray
-                    : moduleDanhDau.transparent,
+                backgroundColor: dataDanhDau[item.trang_thai ?? 0],
                 padding: "1px 5px",
                 borderRadius: "5px",
               },
@@ -604,8 +588,8 @@ export default function () {
                 <td className="align-middle">{item.so_dien_thoai}</td>
                 <td className="align-middle">{item.email}</td>
                 <td className="align-middle">{dateToText(item.ngay_sinh)}</td>
-                <td className="align-middle">{item.trang_thai}</td>
-                <td className="align-middle">{item.phan_quyen}</td>
+                <td className="align-middle">{trangThaiLamViec[item.trang_thai ?? 0]}</td>
+                <td className="align-middle">{dataPhanQuyen[item.phan_quyen ?? 0]}</td>
                 <td className="align-middle">
                   <button
                     type="button"

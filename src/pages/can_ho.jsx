@@ -634,7 +634,7 @@ export default function CanHo() {
             </div>
           </div>
         </div>
-        {/*  */}
+
         <Modal
           className="modal-lg"
           show={showModal}
@@ -1238,7 +1238,6 @@ export default function CanHo() {
             </option>
           ))}
         </select>
-        <br />
         <select
           ref={soPhongNguTimKiemRef}
           className="form-select w-auto"
@@ -1308,7 +1307,7 @@ export default function CanHo() {
           aria-describedby="inputGroup-sizing-default"
         />
         <br />
-        <div >
+        <div>
           <button
             className="btn btn-primary"
             onClick={async () => {
@@ -1323,12 +1322,9 @@ export default function CanHo() {
           <button className="btn btn-outline-primary mx-2" onClick={lamMoi}>
             Làm mới
           </button>
-          <br />
-          <h6 className="text-start mt-4">Có {fitResult}/{totalResult} kết quả phù hợp</h6>
         </div>
       </div>
-
-
+      <h6 className="text-start mx-2 mt-4">Có {fitResult}/{totalResult} kết quả phù hợp</h6>
       <table className="table table-bordered">
         <thead>
           <tr className="table-primary">
