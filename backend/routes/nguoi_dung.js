@@ -38,6 +38,14 @@ router.get("/", authentication, async function (req, res) {
 router.post("/them-nguoi-dung", upload.single("hinh_anh"), authentication, async function (req, res) {
   try {
     const { tai_khoan, mat_khau, ho_ten, ngay_bat_dau, so_dien_thoai, ngay_sinh, email, phan_quyen, gioi_tinh, trang_thai } = req.body;
+    const user = req.user;
+
+    if (phan_quyen > user.phan_quyen) {
+      return res.status(200).json({
+        response: "Không thể thêm người dùng",
+        status: false,
+      });
+    }
 
     const checkUser = await executeQuery("SELECT id FROM nguoi_dung WHERE tai_khoan = ?", [tai_khoan]);
 
@@ -65,19 +73,27 @@ router.post("/them-nguoi-dung", upload.single("hinh_anh"), authentication, async
       status: false,
     });
   }
-}
-);
+});
 
 router.post("/cap-nhat-nguoi-dung", upload.single("hinh_anh"), authentication, async function (req, res) {
   try {
-    const { id, ho_ten, ngay_bat_dau, so_dien_thoai, ngay_sinh, email, phan_quyen, gioi_tinh, trang_thai } = req.body;
-    console.log(req.body);
+    const { id, ho_ten, ngay_bat_dau, so_dien_thoai, ngay_sinh, email, phan_quyen, gioi_tinh, trang_thai, phan_quyen_old } = req.body;
+    const user = req.user;
+
+    if (parseInt(phan_quyen) >= user.phan_quyen ||
+      parseInt(phan_quyen_old) >= user.phan_quyen) {
+      return res.status(200).json({
+        response: "Không thể cập nhật",
+        status: false,
+      });
+    }
 
     const sql = `UPDATE nguoi_dung SET ho_ten = ? ,
       ngay_bat_dau = ?, gioi_tinh = ?,
       so_dien_thoai = ?, email = ?,
       ngay_sinh = ?, trang_thai = ?,
       phan_quyen = ? WHERE id = ?`;
+
     await executeQuery(sql, [ho_ten, ngay_bat_dau, gioi_tinh, so_dien_thoai, email, ngay_sinh, trang_thai, phan_quyen, id]);
     res.status(200).json({
       response: "Cập nhật người dùng thành công",
@@ -90,8 +106,7 @@ router.post("/cap-nhat-nguoi-dung", upload.single("hinh_anh"), authentication, a
       status: false,
     });
   }
-}
-);
+});
 
 router.post("/dang-nhap", async function (req, res) {
   try {

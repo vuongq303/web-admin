@@ -15,12 +15,10 @@ const indexRouter = require("./routes/index");
 
 var app = express();
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: config.client,
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: config.client,
+  credentials: true,
+}));
 
 app.set('views', join(__dirname, 'views'));
 app.set('view engine', 'ejs');

@@ -15,7 +15,12 @@ router.get("/admin", async function (req, res) {
     const sqlCount = "SELECT COUNT(id) FROM can_ho"
     var sqlCondition = "";
 
-    const { ten_du_an, ten_toa_nha, loai_noi_that, loai_can_ho, huong_can_ho, so_phong_ngu, truc_can_ho, loc_gia, gia_tu, gia_den } = req.query;
+    const { ten_du_an, ten_toa_nha, loai_noi_that, loai_can_ho, huong_can_ho, so_phong_ngu, truc_can_ho, loc_gia, gia_tu, gia_den, ma_tin } = req.query;
+
+    if (ma_tin !== "") {
+      condition.push("id = ?");
+      value.push(ma_tin);
+    }
 
     if (ten_du_an !== "") {
       condition.push("ten_du_an = ?");
@@ -130,7 +135,12 @@ router.get("/sale", authentication, async function (req, res) {
 
     const sqlCount = "SELECT COUNT(id) FROM can_ho WHERE trang_thai = '0'"
     var sqlCondition = "";
-    const { ten_du_an, ten_toa_nha, loai_noi_that, loai_can_ho, huong_can_ho, so_phong_ngu, truc_can_ho, loc_gia, gia_tu, gia_den } = req.query;
+    const { ten_du_an, ten_toa_nha, loai_noi_that, loai_can_ho, huong_can_ho, so_phong_ngu, truc_can_ho, loc_gia, gia_tu, gia_den, ma_tin } = req.query;
+
+    if (ma_tin !== "") {
+      condition.push("id = ?");
+      value.push(ma_tin);
+    }
 
     if (ten_du_an !== "") {
       condition.push("ten_du_an = ?");

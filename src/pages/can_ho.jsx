@@ -1,14 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Modal, Form } from "react-bootstrap";
 import * as xlsx from "xlsx";
-import { danhDauCanHo, dataSoPhongNgu, dateToText, locGiaCanHo } from "../services/utils";
+import { danhDauCanHo, dataSoPhongNgu, dateToText, decodeId, encodeId, locGiaCanHo } from "../services/utils";
 import PreviewImage from "./components/preview_image";
 import { toast, ToastContainer } from "react-toastify";
-import {
-  authentication,
-  downloadImages,
-  exportFileExcel,
-} from "./controllers/function";
+import { authentication, copyTextToClipBoard, downloadImages, exportFileExcel, typeId } from "./controllers/function";
 import { baseURL, dataCanHoDefault, excelImportFormat } from "../data/module";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
@@ -68,6 +64,7 @@ export default function CanHo() {
   const huongCanHoTimKiemRef = useRef(null);
   const soPhongNguTimKiemRef = useRef(null);
   const trucCanHoTimKiemRef = useRef(null);
+  const maTinTimKiemRef = useRef(null);
   const uploadFileExcelRef = useRef(null);
 
   function showImage(item) {
@@ -137,6 +134,7 @@ export default function CanHo() {
         so_phong_ngu: soPhongNguTimKiemRef.current.value,
         truc_can_ho: trucCanHoTimKiemRef.current.value,
         loc_gia: locGiaCanHoRef.current.value,
+        ma_tin: decodeId(maTinTimKiemRef.current.value.trim()),
         gia_tu: giaBanTuState.replace(/,/g, ""),
         gia_den: giaBanDenState.replace(/,/g, ""),
         limit: limitRow,
@@ -179,6 +177,7 @@ export default function CanHo() {
     soPhongNguTimKiemRef.current.value = "";
     trucCanHoTimKiemRef.current.value = "";
     locGiaCanHoRef.current.value = "";
+    maTinTimKiemRef.current.value = "";
     setGiaBanTuState("");
     setGiaBanDenState("");
     setDataToaNha([]);
@@ -876,7 +875,7 @@ export default function CanHo() {
             </Button>
           </Modal.Footer>
         </Modal>
-        {/*  */}
+
         <Modal
           show={showModalUpdate}
           backdrop="static"
@@ -1120,7 +1119,7 @@ export default function CanHo() {
             </Button>
           </Modal.Footer>
         </Modal>
-        {/*  */}
+
         <Modal
           className="modal-lg"
           show={showModalHinhAnh}
@@ -1170,6 +1169,16 @@ export default function CanHo() {
         </Modal>
       </div>
       <div className="d-flex flex-wrap gap-4 my-5 mx-2">
+        <div className="d-flex align-items-center">
+          <input
+            type="text"
+            ref={maTinTimKiemRef}
+            placeholder="Tìm mã tin"
+            className="form-control w-auto mx-1"
+            aria-label="Sizing example input"
+            aria-describedby="inputGroup-sizing-default"
+          />
+        </div>
         <select
           ref={tenDuAnTimKiemRef}
           className="form-select w-auto"
@@ -1325,7 +1334,7 @@ export default function CanHo() {
         </div>
       </div>
       <h6 className="text-start mx-2 mt-4">Có {fitResult}/{totalResult} kết quả phù hợp</h6>
-      <table className="table table-bordered">
+      <table className="table table-bordered table-hover">
         <thead>
           <tr className="table-primary">
             <th scope="col">
@@ -1341,7 +1350,7 @@ export default function CanHo() {
               />
             </th>
             <th scope="col">STT</th>
-            <th scope="col">Căn hộ</th>
+            <th scope="col">Căn hộ/Mã tin</th>
             <th scope="col">Chủ căn hộ</th>
             <th scope="col">Số điện thoại</th>
             <th scope="col">Giá bán</th>
@@ -1364,6 +1373,7 @@ export default function CanHo() {
                 fontSize: 12,
               },
               s_: { transform: "scale(1.3)" },
+              row: { cursor: 'pointer' }
             };
 
             let onChecked = itemChecked.includes(item);
@@ -1382,7 +1392,9 @@ export default function CanHo() {
             }
 
             return (
-              <tr key={index} className={onChecked ? "table-primary" : ""}>
+              <tr key={index} style={styles.row}
+                onClick={() => copyTextToClipBoard(encodeId(item.id), toast)}
+                className={onChecked ? "table-primary" : ""}>
                 <td className="align-middle">
                   <input
                     className="form-check-input"
@@ -1394,11 +1406,12 @@ export default function CanHo() {
                   />
                 </td>
                 <td className="align-middle">{index + 1}</td>
-                <td className="align-middle" style={styles.w_10}>
-                  <div style={styles.danh_dau}>
+                <td className="align-middle text-bold" style={styles.w_10}>
+                  <strong> <div style={styles.danh_dau}>
                     {item.ten_toa_nha}-{item.ma_can_ho ?? "x"}
                     {item.truc_can_ho}
-                  </div>
+                  </div></strong> <br />
+                  {encodeId(item.id)}
                 </td>
                 <td className="align-middle" style={styles.w_10}>
                   {item.chu_can_ho ?? "x"}
@@ -1481,6 +1494,6 @@ export default function CanHo() {
           <FontAwesomeIcon icon={faChevronDown} /> Xem thêm
         </button>
       </div>
-    </div>
+    </div >
   );
 }

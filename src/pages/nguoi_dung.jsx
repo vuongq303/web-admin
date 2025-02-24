@@ -125,8 +125,10 @@ export default function () {
         phan_quyen: viTriRef.current.value,
         gioi_tinh: gioiTinhRef.current.value,
         trang_thai: trangThaiRef.current.value,
+        phan_quyen_old: dataUpdate.phan_quyen,
         id: dataUpdate.id,
       };
+      console.log(dataUpdate.phan_quyen);
 
       const formData = new FormData();
       formData.append("id", dataPost.id);
@@ -139,6 +141,7 @@ export default function () {
       formData.append("phan_quyen", dataPost.phan_quyen);
       formData.append("gioi_tinh", dataPost.gioi_tinh);
       formData.append("trang_thai", dataPost.trang_thai);
+      formData.append("phan_quyen_old", dataPost.phan_quyen_old);
       formData.append("hinh_anh", hinhAnhRef.current.files[0]);
 
       if (
@@ -549,7 +552,7 @@ export default function () {
           </Modal.Footer>
         </Modal>
       </div>
-      <table className="table table-striped table-bordered">
+      <table className="table table-bordered table-hover">
         <thead>
           <tr className="table-primary">
             <th scope="col">STT</th>
@@ -561,7 +564,6 @@ export default function () {
             <th scope="col">Ngày sinh</th>
             <th scope="col">Trạng thái</th>
             <th scope="col">Vị trí</th>
-            <th scope="col">Hành động</th>
           </tr>
         </thead>
         <tbody>
@@ -573,10 +575,11 @@ export default function () {
                 padding: "1px 5px",
                 borderRadius: "5px",
               },
+              row: { cursor: "pointer" }
             };
 
             return (
-              <tr key={index}>
+              <tr key={index} style={styles.row} onClick={() => openModalUpdate(item)}>
                 <td className="align-middle">{index + 1}</td>
                 <td className="align-middle">
                   <div style={styles.danh_dau}>{item.ho_ten}</div>
@@ -590,15 +593,6 @@ export default function () {
                 <td className="align-middle">{dateToText(item.ngay_sinh)}</td>
                 <td className="align-middle">{trangThaiLamViec[item.trang_thai ?? 0]}</td>
                 <td className="align-middle">{dataPhanQuyen[item.phan_quyen ?? 0]}</td>
-                <td className="align-middle">
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => openModalUpdate(item)}
-                  >
-                    Chi tiết
-                  </button>
-                </td>
               </tr>
             );
           })}

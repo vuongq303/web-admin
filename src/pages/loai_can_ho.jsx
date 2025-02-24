@@ -189,30 +189,25 @@ export default function LoaiCanHo() {
         </Modal>
       </div>
       {/*  */}
-      <table className="table table-striped table-bordered">
+      <table className="table table-hover table-bordered">
         <thead>
           <tr className="table-primary">
             <th scope="col">STT</th>
             <th scope="col">Loại căn hộ</th>
-            <th scope="col">Hành động</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((item, index) => (
-            <tr key={index}>
-              <td>{index + 1}</td>
-              <td>{item.loai_can_ho}</td>
-              <td>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => openModalUpdate(item)}
-                >
-                  Chi tiết
-                </button>
-              </td>
-            </tr>
-          ))}
+          {data.map((item, index) => {
+            const styles = {
+              row: { cursor: "pointer" }
+            }
+            return (
+              <tr key={index} style={styles.row} onClick={() => openModalUpdate(item)}>
+                <td>{index + 1}</td>
+                <td>{item.loai_can_ho}</td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>

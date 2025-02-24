@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { trangThaiYeuCau } from "../services/utils";
+import { encodeId, trangThaiYeuCau } from "../services/utils";
 import Loading from "./components/loading";
 import { Button, Modal } from "react-bootstrap";
 import PreviewImage from "./components/preview_image";
-import { authentication, downloadImages } from "./controllers/function";
+import { authentication, copyTextToClipBoard, downloadImages } from "./controllers/function";
 import { toast, ToastContainer } from "react-toastify";
 import { baseURL } from "../data/module";
 import { REQUEST } from "../api/method";
@@ -129,7 +129,7 @@ export default function CanHoDaDuyet() {
             <label htmlFor="fileInput">Thêm ảnh mới</label>
           </div>
           <div className="form-floating image-container">
-            <PreviewImage props={showImageData} onRemoveImage={(i) => {}} />
+            <PreviewImage props={showImageData} onRemoveImage={(i) => { }} />
           </div>
         </Modal.Body>
         <Modal.Footer>
@@ -147,7 +147,7 @@ export default function CanHoDaDuyet() {
           </Button>
         </Modal.Footer>
       </Modal>
-      <table className="table table-bordered">
+      <table className="table table-bordered table-hover">
         <thead>
           <tr className="table-primary">
             <th scope="col">STT</th>
@@ -175,16 +175,19 @@ export default function CanHoDaDuyet() {
               w_5: { width: "5%" },
               f_: {
                 fontSize: 12,
-              },
+              }, row: { cursor: 'pointer' }
             };
             return (
-              <tr key={index}>
+              <tr key={index} style={styles.row}
+                onClick={() => copyTextToClipBoard(encodeId(item.id), toast)}>
                 <td className="align-middle">{index + 1}</td>
-                <td className="align-middle" style={styles.w_5}>
-                  <div style={styles.ma_can_ho}>
-                    {item.ten_toa_nha}-{item.ma_can_ho ?? "*"}
-                    {item.truc_can_ho}
-                  </div>
+                <td className="align-middle text-bold" style={styles.w_5}>
+                  <strong>
+                    <div style={styles.ma_can_ho}>
+                      {item.ten_toa_nha}-{item.ma_can_ho ?? "x"}{item.truc_can_ho}
+                    </div>
+                  </strong> <br />
+                  {encodeId(item.ma_can_ho)}
                 </td>
                 <td className="align-middle" style={styles.w_10}>
                   {item.chu_can_ho ?? "x"}
@@ -220,9 +223,8 @@ export default function CanHoDaDuyet() {
                     onClick={() => showImage(item)}
                     type="button"
                     style={styles.f_}
-                    className={`btn w-75 ${
-                      item.hinh_anh ? "btn-warning" : "btn-secondary"
-                    }`}
+                    className={`btn w-75 ${item.hinh_anh ? "btn-warning" : "btn-secondary"
+                      }`}
                   >
                     Hình ảnh
                   </button>

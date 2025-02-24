@@ -1,3 +1,4 @@
+import './css/css.css';
 import React, { useEffect, useState, useRef } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
@@ -317,7 +318,7 @@ export default function KhachHangNguon() {
           </Modal.Footer>
         </Modal>
       </div>
-      <table className="table table-striped table-bordered">
+      <table className="table table-bordered table-hover">
         <thead>
           <tr className="table-primary">
             <th scope="col">STT</th>
@@ -326,31 +327,26 @@ export default function KhachHangNguon() {
             <th scope="col">Khách hàng từ</th>
             <th scope="col">Ngày phát sinh</th>
             <th scope="col">Ghi chú</th>
-            <th scope="col">Hành động</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => (
-            <tr key={item.id}>
-              <td className="align-middle">{item.id}</td>
-              <td className="align-middle">{item.ten_khach_hang}</td>
-              <td className="align-middle"> {item.so_dien_thoai}</td>
-              <td className="align-middle">{item.khach_goi_tu}</td>
-              <td className="align-middle">
-                {dateToText(item.ngay_phat_sinh)}
-              </td>
-              <td className="w-25 align-middle">{item.ghi_chu}</td>
-              <td className="align-middle">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => openModalUpdate(item)}
-                >
-                  Chi tiết
-                </button>
-              </td>
-            </tr>
-          ))}
+          {data.map((item) => {
+            const styles = {
+              row: { cursor: "pointer" }
+            };
+            return (
+              <tr key={item.id} style={styles.row} onClick={() => openModalUpdate(item)}>
+                <td className="align-middle">{item.id}</td>
+                <td className="align-middle">{item.ten_khach_hang}</td>
+                <td className="align-middle"> {item.so_dien_thoai}</td>
+                <td className="align-middle">{item.khach_goi_tu}</td>
+                <td className="align-middle">
+                  {dateToText(item.ngay_phat_sinh)}
+                </td>
+                <td className="w-25 align-middle">{item.ghi_chu}</td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>

@@ -583,7 +583,7 @@ export default function KhachHang() {
           </button>
         </div>
       </div>
-      <table className="table table-striped table-bordered">
+      <table className="table table-bordered table-hover">
         <thead>
           <tr className="table-primary">
             <th scope="col">STT</th>
@@ -597,24 +597,23 @@ export default function KhachHang() {
             <th scope="col">Ngày sinh</th>
             <th scope="col">Phí môi giới</th>
             <th scope="col">Ghi chú</th>
-            <th scope="col">Hành động</th>
           </tr>
         </thead>
         <tbody>
           {data.map((item, index) => {
             const styles = {
-              w_10: { width: "10%", fontSize: 12 },
-              w_15: { width: "15%", fontSize: 12 },
-              w_5: { width: "5%", fontSize: 12 },
+              row: {
+                cursor: 'pointer'
+              }
             };
             return (
-              <tr key={index}>
+              <tr style={styles.row} key={index} onClick={() => openModalUpdate(item)}>
                 <td className="align-middle">{index + 1}</td>
-                <td className="align-middle" style={styles.w_5}>
+                <td className="align-middle">
                   {item.ma_can_ho}
                 </td>
                 <td className="align-middle">{item.ten_khach_hang}</td>
-                <td className="align-middle" style={styles.w_10}>
+                <td className="align-middle">
                   {item.so_dien_thoai}
                 </td>
                 <td className="align-middle">{item.loai_giao_dich}</td>
@@ -622,27 +621,17 @@ export default function KhachHang() {
                   {item.ngay_ki_hop_dong && dateToText(item.ngay_ki_hop_dong)}
                 </td>
                 <td className="align-middle">{item.ho_ten_chu_nha}</td>
-                <td className="align-middle" style={styles.w_10}>
+                <td className="align-middle" >
                   {item.so_dien_thoai_chu_nha}
                 </td>
-                <td className="align-middle" style={styles.w_10}>
+                <td className="align-middle" >
                   {item.ngay_sinh && dateToText(item.ngay_sinh)}
                 </td>
-                <td className="align-middle" style={styles.w_10}>
+                <td className="align-middle" >
                   {phiMoiGioi[item.phi_moi_gioi]}
                 </td>
-                <td className="align-middle" style={styles.w_15}>
-                  {item.ghi_chu}
-                </td>
                 <td className="align-middle">
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    style={{ fontSize: 10 }}
-                    onClick={() => openModalUpdate(item)}
-                  >
-                    Chi tiết
-                  </button>
+                  {item.ghi_chu}
                 </td>
               </tr>
             );

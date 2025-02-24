@@ -188,30 +188,25 @@ export default function DuAn() {
         </Modal>
       </div>
       {/*  */}
-      <table className="table table-striped table-bordered">
+      <table className="table table-hover table-bordered">
         <thead>
           <tr className="table-primary">
             <th scope="col">STT</th>
             <th scope="col">Tên dự án</th>
-            <th scope="col">Hành động</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((item, index) => (
-            <tr key={index}>
-              <td>{index + 1}</td>
-              <td>{item.ten_du_an}</td>
-              <td>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => openModalUpdate(item)}
-                >
-                  Chi tiết
-                </button>
-              </td>
-            </tr>
-          ))}
+          {data.map((item, index) => {
+            const styles = {
+              row: { cursor: "pointer" }
+            }
+            return (
+              <tr style={styles.row} key={index} onClick={() => openModalUpdate(item)}>
+                <td>{index + 1}</td>
+                <td>{item.ten_du_an}</td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>

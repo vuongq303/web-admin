@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { trangThaiYeuCau } from "../services/utils";
+import { encodeId, trangThaiYeuCau } from "../services/utils";
 import { toast, ToastContainer } from "react-toastify";
 import Loading from "./components/loading";
-import { authentication, downloadImages } from "./controllers/function";
+import { authentication, copyTextToClipBoard, downloadImages, typeId } from "./controllers/function";
 import PreviewImage from "./components/preview_image";
 import { Button, Modal } from "react-bootstrap";
 import { baseURL } from "../data/module";
@@ -212,7 +212,7 @@ export default function CanHoDaGui() {
           </Button>
         </Modal.Footer>
       </Modal>
-      <table className="table table-striped table-bordered">
+      <table className="table table-hover table-bordered">
         <thead>
           <tr className="table-primary">
             <th scope="col">STT</th>
@@ -239,15 +239,19 @@ export default function CanHoDaGui() {
               w_15: { width: "15%" },
               w_5: { width: "5%" },
               f_: { fontSize: 12 },
+              row: { cursor: 'pointer' }
             };
             return (
-              <tr key={item.id}>
+              <tr key={item.id} style={styles.row}
+                onClick={() => copyTextToClipBoard(encodeId(item.id), toast)}>
                 <td className="align-middle">{index + 1}</td>
-                <td className="align-middle" style={styles.w_5}>
-                  <div style={styles.ma_can_ho}>
-                    {item.ten_toa_nha}-{item.ma_can_ho ?? "x"}
-                    {item.truc_can_ho}
-                  </div>
+                <td className="align-middle text-bold" style={styles.w_5}>
+                  <strong>
+                    <div style={styles.ma_can_ho}>
+                      {item.ten_toa_nha}-{item.ma_can_ho ?? "x"}{item.truc_can_ho}
+                    </div>
+                  </strong> <br />
+                  {encodeId(item.ma_can_ho)}
                 </td>
                 <td className="align-middle" style={styles.w_10}>
                   {item.chu_can_ho ?? "x"}

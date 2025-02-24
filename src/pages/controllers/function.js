@@ -59,3 +59,14 @@ export function authentication(navigation, response, toast) {
     navigation("/dang-nhap", { replace: true });
   }, 1000);
 }
+
+export function copyTextToClipBoard(text, toast) {
+  if (!navigator.clipboard) {
+    toast.error("Trình duyệt không hỗ trợ")
+    return;
+  }
+  navigator.clipboard.writeText(text)
+    .then(() => toast.success("Đã sao chép mã tin"))
+    .catch(() => toast.error("Lỗi sao chép mã tin"));
+}
+
