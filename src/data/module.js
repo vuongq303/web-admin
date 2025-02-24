@@ -91,6 +91,6 @@ export const trangThaiLamViec = ["Đang làm việc", "Đã nghỉ làm"];
 
 export const dataDanhDau = ["", "gray", "yellow", "orange", "red"];
 
-export const dataPhanQuyen = ["Sale", "CSKH", "Quản lý", "Admin", "Quản trị"];
+export const dataPhanQuyen = ["QLNS", "Sale", "CSKH", "Quản lý", "Admin", "Quản trị"];
 
 export const baseURL = "http://192.168.22.2:8080";

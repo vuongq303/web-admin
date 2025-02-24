@@ -8,9 +8,10 @@ function authentication(req, res, next) {
   try {
     const decoded = jwt.verify(token, JWT_KEY);
     req.user = decoded;
-    req.isAdmin = [2, 3, 4].includes(decoded.phan_quyen);
-    req.isCskh = [1, 2, 3, 4].includes(decoded.phan_quyen);
-    req.isSale = [0, 2, 3, 4].includes(decoded.phan_quyen);
+    req.isAdmin = [3, 4, 5].includes(decoded.phan_quyen);
+    req.isCskh = [2, 3, 4, 5].includes(decoded.phan_quyen);
+    req.isSale = [1, 3, 4, 5].includes(decoded.phan_quyen);
+    req.Qlns = [0, 3, 4, 5].includes(decoded.phan_quyen);
     next();
   } catch (error) {
     console.error(error);

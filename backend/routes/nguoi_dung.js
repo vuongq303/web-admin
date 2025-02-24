@@ -8,8 +8,8 @@ const authentication = require("../middleware/authentication");
 
 router.get("/", authentication, async function (req, res) {
   try {
-    const isAdmin = req.isAdmin;
-    if (!isAdmin) {
+    const isQlns = req.Qlns;
+    if (!isQlns) {
       return res.status(401).json({
         status: false,
         response: "Không có quyền truy cập",

@@ -41,17 +41,22 @@ export default function DangNhap() {
       toast.success(response);
 
       if (status) {
-        if (phan_quyen === 2 || phan_quyen === 3 || phan_quyen === 4) {
+        if (phan_quyen === 3 || phan_quyen === 4 || phan_quyen === 5) {
           navigation("/nguoi-dung");
           return;
         }
 
         if (phan_quyen === 0) {
-          navigation("/can-ho");
+          navigation("/nguoi-dung");
           return;
         }
 
         if (phan_quyen === 1) {
+          navigation("/can-ho");
+          return;
+        }
+
+        if (phan_quyen === 2) {
           navigation("/cham-soc-khach-hang");
           return;
         }

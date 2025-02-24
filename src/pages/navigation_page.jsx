@@ -9,6 +9,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { REQUEST } from "../api/method";
+import { dataPhanQuyen } from "../data/module";
 
 export default function NavigationPage({ children }) {
   return (
@@ -61,6 +62,7 @@ function SizeBar() {
       overflow: "hidden",
       textOverflow: "ellipsis",
       marginTop: 15,
+      marginLeft: 10
     },
     container_manager: {
       display: "flex",
@@ -124,9 +126,10 @@ function SizeBar() {
         )}
       </div>
       <Menu>
-        {(phanQuyen === 2 ||
+        {(phanQuyen === 0 ||
           phanQuyen === 3 ||
-          phanQuyen === 4) &&
+          phanQuyen === 4 ||
+          phanQuyen === 5) &&
           (<MenuItem
             className="item-menu"
             icon={<FontAwesomeIcon icon={faPerson} />}
@@ -134,9 +137,9 @@ function SizeBar() {
           </MenuItem>
           )}
 
-        {(phanQuyen === 2 ||
-          phanQuyen === 3 ||
-          phanQuyen === 4) &&
+        {(phanQuyen === 3 ||
+          phanQuyen === 4 ||
+          phanQuyen === 5) &&
           (<MenuItem
             icon={<FontAwesomeIcon icon={faUser} />}
             className="item-menu"
@@ -144,10 +147,10 @@ function SizeBar() {
           </MenuItem>
           )}
 
-        {(phanQuyen === 1 ||
-          phanQuyen === 2 ||
+        {(phanQuyen === 2 ||
           phanQuyen === 3 ||
-          phanQuyen === 4) &&
+          phanQuyen === 4 ||
+          phanQuyen === 5) &&
           (<MenuItem
             icon={<FontAwesomeIcon icon={faUserTie} />}
             className="item-menu"
@@ -155,10 +158,10 @@ function SizeBar() {
           </MenuItem>
           )}
 
-        {(phanQuyen === 0 ||
-          phanQuyen === 2 ||
+        {(phanQuyen === 1 ||
           phanQuyen === 3 ||
-          phanQuyen === 4) &&
+          phanQuyen === 4 ||
+          phanQuyen === 5) &&
           (<SubMenu
             icon={<FontAwesomeIcon icon={faBuilding} />}
             label="Sale"
@@ -178,9 +181,9 @@ function SizeBar() {
           </SubMenu>
           )}
 
-        {(phanQuyen === 2 ||
-          phanQuyen === 3 ||
-          phanQuyen === 4) &&
+        {(phanQuyen === 3 ||
+          phanQuyen === 4 ||
+          phanQuyen === 5) &&
           (<SubMenu
             label="Dự án"
             className="item-menu"
