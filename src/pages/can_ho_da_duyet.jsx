@@ -178,16 +178,17 @@ export default function CanHoDaDuyet() {
               }, row: { cursor: 'pointer' }
             };
             return (
-              <tr key={index} style={styles.row}
-                onClick={() => copyTextToClipBoard(encodeId(item.id), toast)}>
+              <tr key={index} style={styles.row}>
                 <td className="align-middle">{index + 1}</td>
-                <td className="align-middle text-bold" style={styles.w_5}>
+                <td className="align-middle text-bold"
+                  onClick={() => copyTextToClipBoard(encodeId(item.id), toast)}
+                  style={styles.w_5}>
                   <strong>
                     <div style={styles.ma_can_ho}>
                       {item.ten_toa_nha}-{item.ma_can_ho ?? "x"}{item.truc_can_ho}
                     </div>
                   </strong> <br />
-                  {encodeId(item.ma_can_ho)}
+                  {encodeId(item.can_ho)}
                 </td>
                 <td className="align-middle" style={styles.w_10}>
                   {item.chu_can_ho ?? "x"}

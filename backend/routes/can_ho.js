@@ -306,9 +306,8 @@ router.post("/upload-excel", authentication, async (req, res) => {
       INSERT INTO can_ho (
         ten_du_an, ten_toa_nha, ma_can_ho, truc_can_ho, chu_can_ho, 
         so_dien_thoai, loai_can_ho, dien_tich, so_phong_ngu, so_phong_tam, 
-        gia_ban, gia_thue, noi_that, huong_can_ho, ghi_chu
-      ) VALUES ?
-      ON DUPLICATE KEY UPDATE
+        gia_ban, gia_thue, noi_that, huong_can_ho, ghi_chu) VALUES ?
+        ON DUPLICATE KEY UPDATE
         ten_du_an = COALESCE(NULLIF(VALUES(ten_du_an), ''), ten_du_an),
         chu_can_ho = COALESCE(NULLIF(VALUES(chu_can_ho), ''), chu_can_ho),
         so_dien_thoai = COALESCE(NULLIF(VALUES(so_dien_thoai), ''), so_dien_thoai),

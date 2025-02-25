@@ -35,14 +35,15 @@ export function dateToText(isoString) {
 }
 
 export function encodeId(number) {
-  const prefix = String(Math.floor(Math.random() * 100)).padStart(2, '0');
-  const suffix = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+  const prefix = String(Math.floor(Math.random() * 10));
+  const suffix = String(Math.floor(Math.random() * 10));
   const encodedNumber = prefix + String(number) + suffix;
   return encodedNumber;
 }
 
 export function decodeId(encodedNumber) {
   if (encodedNumber === "") return "";
-  const decodeNumber = encodedNumber.slice(2, -3);
+  const decodeNumber = encodedNumber.slice(1, -1);
   return decodeNumber;
 }
+

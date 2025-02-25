@@ -1393,7 +1393,6 @@ export default function CanHo() {
 
             return (
               <tr key={index} style={styles.row}
-                onClick={() => copyTextToClipBoard(encodeId(item.id), toast)}
                 className={onChecked ? "table-primary" : ""}>
                 <td className="align-middle">
                   <input
@@ -1406,7 +1405,8 @@ export default function CanHo() {
                   />
                 </td>
                 <td className="align-middle">{index + 1}</td>
-                <td className="align-middle text-bold" style={styles.w_10}>
+                <td onClick={() => copyTextToClipBoard(encodeId(item.id), toast)}
+                 className="align-middle text-bold" style={styles.w_10}>
                   <strong> <div style={styles.danh_dau}>
                     {item.ten_toa_nha}-{item.ma_can_ho ?? "x"}
                     {item.truc_can_ho}
