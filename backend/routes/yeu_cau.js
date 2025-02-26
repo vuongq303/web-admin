@@ -13,24 +13,19 @@ router.get("/danh-sach-gui-yeu-cau", authentication, async function (req, res) {
     const isAdmin = req.isAdmin;
 
     var sql = `SELECT can_ho.danh_dau,
-    can_ho.gia_ban, can_ho.gia_thue, can_ho.ten_du_an,
-    can_ho.dien_tich, can_ho.so_phong_ngu,
-    can_ho.so_phong_tam, can_ho.huong_can_ho,
-    can_ho.loai_can_ho, can_ho.noi_that,
-    can_ho.ghi_chu, can_ho.ten_toa_nha,
-    can_ho.truc_can_ho, can_ho.hinh_anh,
-    yeu_cau.* FROM can_ho JOIN yeu_cau
-    ON yeu_cau.can_ho = can_ho.id 
-    WHERE yeu_cau.trang_thai = '0' AND yeu_cau.nguoi_gui = '${data.tai_khoan}'`;
+    can_ho.gia_ban, can_ho.gia_thue, can_ho.ten_du_an, can_ho.dien_tich, can_ho.so_phong_ngu,
+    can_ho.so_phong_tam, can_ho.huong_can_ho, can_ho.loai_can_ho, can_ho.noi_that,
+    can_ho.ghi_chu, can_ho.ten_toa_nha, can_ho.truc_can_ho, can_ho.hinh_anh,
+    yeu_cau.*,SUBSTRING(ma_can_ho, 1, 1) AS so_tang FROM can_ho JOIN yeu_cau
+    ON yeu_cau.can_ho = can_ho.id WHERE yeu_cau.trang_thai = '0'
+    AND yeu_cau.nguoi_gui = '${data.tai_khoan}'`;
 
     if (isAdmin) {
       sql = `SELECT can_ho.danh_dau, can_ho.chu_can_ho,
-      can_ho.so_dien_thoai, can_ho.gia_ban, can_ho.gia_thue,
-      can_ho.ten_du_an, can_ho.dien_tich, can_ho.so_phong_ngu,
-      can_ho.so_phong_tam, can_ho.huong_can_ho,can_ho.loai_can_ho,
-      can_ho.noi_that, can_ho.ghi_chu, can_ho.ten_toa_nha, 
-      can_ho.truc_can_ho, can_ho.ma_can_ho, can_ho.hinh_anh,
-      yeu_cau.* FROM can_ho JOIN yeu_cau
+      can_ho.so_dien_thoai, can_ho.gia_ban, can_ho.gia_thue, can_ho.ten_du_an,
+      can_ho.dien_tich, can_ho.so_phong_ngu, can_ho.so_phong_tam, can_ho.huong_can_ho,
+      can_ho.loai_can_ho, can_ho.noi_that, can_ho.ghi_chu, can_ho.ten_toa_nha, 
+      can_ho.truc_can_ho, can_ho.ma_can_ho, can_ho.hinh_anh, yeu_cau.* FROM can_ho JOIN yeu_cau
       ON yeu_cau.can_ho = can_ho.id WHERE yeu_cau.trang_thai = '0'`;
     }
 
@@ -55,25 +50,20 @@ router.get("/danh-sach-duyet-yeu-cau", authentication, async function (req, res)
     const isAdmin = req.isAdmin;
 
     var sql = `SELECT can_ho.danh_dau,
-    can_ho.gia_ban, can_ho.gia_thue, can_ho.ten_du_an,
-    can_ho.dien_tich, can_ho.so_phong_ngu, can_ho.chu_can_ho,
-    can_ho.so_phong_tam, can_ho.huong_can_ho,can_ho.so_dien_thoai,
-    can_ho.loai_can_ho, can_ho.noi_that,can_ho.ma_can_ho,
-    can_ho.ghi_chu, can_ho.ten_toa_nha,
-    can_ho.truc_can_ho,can_ho.hinh_anh ,yeu_cau.* FROM can_ho
-    JOIN yeu_cau ON yeu_cau.can_ho = can_ho.id 
+    can_ho.gia_ban, can_ho.gia_thue, can_ho.ten_du_an, can_ho.dien_tich,
+    can_ho.so_phong_ngu, can_ho.chu_can_ho, can_ho.so_phong_tam, can_ho.huong_can_ho,
+    can_ho.so_dien_thoai, can_ho.loai_can_ho, can_ho.noi_that,can_ho.ma_can_ho,
+    can_ho.ghi_chu, can_ho.ten_toa_nha, can_ho.truc_can_ho,can_ho.hinh_anh ,yeu_cau.*
+    FROM can_ho JOIN yeu_cau ON yeu_cau.can_ho = can_ho.id 
     WHERE yeu_cau.trang_thai = '1' AND yeu_cau.nguoi_gui = '${data.tai_khoan}'`;
 
     if (isAdmin) {
       sql = `SELECT can_ho.danh_dau, can_ho.chu_can_ho,
-      can_ho.so_dien_thoai, can_ho.gia_ban, can_ho.gia_thue,
-      can_ho.ten_du_an, can_ho.dien_tich, can_ho.so_phong_ngu,
-      can_ho.so_phong_tam, can_ho.huong_can_ho,
-      can_ho.loai_can_ho, can_ho.noi_that,
-      can_ho.ghi_chu, can_ho.ten_toa_nha, can_ho.ma_can_ho,
-      can_ho.truc_can_ho, can_ho.hinh_anh ,yeu_cau.*
-      FROM can_ho JOIN yeu_cau ON yeu_cau.can_ho = can_ho.id 
-      WHERE yeu_cau.trang_thai = '1'`;
+      can_ho.so_dien_thoai, can_ho.gia_ban, can_ho.gia_thue, can_ho.ten_du_an,
+      can_ho.dien_tich, can_ho.so_phong_ngu, can_ho.so_phong_tam, can_ho.huong_can_ho,
+      can_ho.loai_can_ho, can_ho.noi_that, can_ho.ghi_chu, can_ho.ten_toa_nha, can_ho.ma_can_ho,
+      can_ho.truc_can_ho, can_ho.hinh_anh ,yeu_cau.* FROM can_ho JOIN yeu_cau
+      ON yeu_cau.can_ho = can_ho.id WHERE yeu_cau.trang_thai = '1'`;
     }
 
     const result = await executeQuery(sql);

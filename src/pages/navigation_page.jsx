@@ -110,7 +110,7 @@ function SizeBar() {
         <p style={styles.tai_khoan}>{hoTen}</p>
       </div>
       <div style={styles.container_manager}>
-        <p style={styles.item_manager}>Manager</p>
+        <p style={styles.item_manager}>{dataPhanQuyen[phanQuyen]}</p>
         {collapsed ? (
           <button style={styles.collapsed} onClick={() => setCollapsed(false)}>
             <FontAwesomeIcon

@@ -66,7 +66,7 @@ export function copyTextToClipBoard(text, toast) {
     return;
   }
   navigator.clipboard.writeText(text)
-    .then(() => toast.success("Đã sao chép mã tin"))
-    .catch(() => toast.error("Lỗi sao chép mã tin"));
+    .then(() => toast.success("Đã sao chép"))
+    .catch(() => toast.error("Lỗi sao chép"));
 }
 

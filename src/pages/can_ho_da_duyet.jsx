@@ -193,7 +193,8 @@ export default function CanHoDaDuyet() {
                 <td className="align-middle" style={styles.w_10}>
                   {item.chu_can_ho ?? "x"}
                 </td>
-                <td className="align-middle" style={styles.w_10}>
+                <td onClick={() => copyTextToClipBoard(item.so_dien_thoai, toast)}
+                  className="align-middle" style={styles.w_10}>
                   {item.so_dien_thoai ?? "x"}
                 </td>
                 <td className="align-middle" style={styles.w_10}>

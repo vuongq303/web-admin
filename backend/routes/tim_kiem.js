@@ -4,7 +4,7 @@ const executeQuery = require("../helper/sql_promise");
 const config = require("../config/config");
 const authentication = require("../middleware/authentication");
 
-router.get("/admin", async function (req, res) {
+router.get("/admin", authentication, async function (req, res) {
   try {
     var value = [];
     var condition = [];
@@ -131,7 +131,7 @@ router.get("/sale", authentication, async function (req, res) {
 
     const sql = `SELECT id, danh_dau, gia_ban, gia_thue, trang_thai, ten_du_an, dien_tich, ngay_cap_nhat,
     so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that, ghi_chu, nguoi_cap_nhat,
-    hinh_anh, ten_toa_nha, truc_can_ho FROM can_ho WHERE trang_thai = '0'`;
+    hinh_anh, ten_toa_nha, truc_can_ho, SUBSTRING(ma_can_ho, 1, 1) AS so_tang FROM can_ho WHERE trang_thai = '0'`;
 
     const sqlCount = "SELECT COUNT(id) FROM can_ho WHERE trang_thai = '0'"
     var sqlCondition = "";

@@ -34,16 +34,25 @@ export function dateToText(isoString) {
   return `${year}-${month}-${day}`;
 }
 
+const listAlphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'M', 'N'];
+
 export function encodeId(number) {
-  const prefix = String(Math.floor(Math.random() * 10));
-  const suffix = String(Math.floor(Math.random() * 10));
-  const encodedNumber = prefix + String(number) + suffix;
-  return encodedNumber;
+  const lastDigit = number % 10;
+  const char = listAlphabet[lastDigit] || '';
+  return number.toString() + char;
 }
 
 export function decodeId(encodedNumber) {
-  if (encodedNumber === "") return "";
-  const decodeNumber = encodedNumber.slice(1, -1);
-  return decodeNumber;
-}
+  if (!encodedNumber) return "";
 
+  const checkNumber = encodedNumber.slice(0, -1);
+  const lastDigit = checkNumber % 10;
+  const char = listAlphabet[lastDigit] || '';
+  const lastChar = encodedNumber.charAt(encodedNumber.length - 1);
+
+  if (char === lastChar) {
+    return checkNumber;
+  }
+
+  return 0;
+}

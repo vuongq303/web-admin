@@ -134,7 +134,7 @@ export default function CanHo() {
         so_phong_ngu: soPhongNguTimKiemRef.current.value,
         truc_can_ho: trucCanHoTimKiemRef.current.value,
         loc_gia: locGiaCanHoRef.current.value,
-        ma_tin: decodeId(maTinTimKiemRef.current.value.trim()),
+        ma_tin: decodeId(maTinTimKiemRef.current.value.trim() ?? 0),
         gia_tu: giaBanTuState.replace(/,/g, ""),
         gia_den: giaBanDenState.replace(/,/g, ""),
         limit: limitRow,
@@ -1406,12 +1406,12 @@ export default function CanHo() {
                 </td>
                 <td className="align-middle">{index + 1}</td>
                 <td onClick={() => copyTextToClipBoard(encodeId(item.id), toast)}
-                 className="align-middle text-bold" style={styles.w_10}>
+                  className="align-middle text-bold" style={styles.w_10}>
                   <strong> <div style={styles.danh_dau}>
-                    {item.ten_toa_nha}-{item.ma_can_ho ?? "x"}
+                    {item.ten_toa_nha}-{item.ma_can_ho ?? `${item.so_tang}x`}
                     {item.truc_can_ho}
                   </div></strong> <br />
-                  {encodeId(item.id)}
+                  {encodeId(item.id ?? 0)}
                 </td>
                 <td className="align-middle" style={styles.w_10}>
                   {item.chu_can_ho ?? "x"}
@@ -1489,8 +1489,7 @@ export default function CanHo() {
         <button
           onClick={loadMore}
           className="btn btn-warning"
-          disabled={loading || isDisableLoadMore}
-        >
+          disabled={loading || isDisableLoadMore}>
           <FontAwesomeIcon icon={faChevronDown} /> Xem thêm
         </button>
       </div>

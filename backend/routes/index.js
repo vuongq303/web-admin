@@ -1,7 +1,6 @@
 var express = require("express");
 const authentication = require("../middleware/authentication");
 const executeQuery = require("../helper/sql_promise");
-const config = require("../config/config");
 const jsonwebtoken = require("jsonwebtoken");
 const env = require("../config/env");
 var router = express.Router();
@@ -27,8 +26,8 @@ router.post('/auth', async function (req, res) {
   try {
     const { api_key } = req.body;
     const user = jsonwebtoken.verify(api_key, env.JWT_KEY);
-    const sql = "SELECT id FROM nguoi_dung WHERE tai_khoan = ? AND trang_thai = ?";
-    const result = await executeQuery(sql, [user.tai_khoan, config.dangLamViec]);
+    const sql = "SELECT id FROM nguoi_dung WHERE tai_khoan = ? AND trang_thai = '0'";
+    const result = await executeQuery(sql, [user.tai_khoan]);
 
     if (result.length > 0) {
       return res.status(200).json({

@@ -249,7 +249,7 @@ export default function CanHoDaGui() {
                   style={styles.w_5}>
                   <strong>
                     <div style={styles.ma_can_ho}>
-                      {item.ten_toa_nha}-{item.ma_can_ho ?? "x"}{item.truc_can_ho}
+                      {item.ten_toa_nha}-{item.ma_can_ho ?? `${item.so_tang}x`}{item.truc_can_ho}
                     </div>
                   </strong> <br />
                   {encodeId(item.can_ho)}

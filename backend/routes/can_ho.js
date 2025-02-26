@@ -14,20 +14,20 @@ router.get("/", authentication, async function (req, res) {
     const offset = parseInt(req.query.offset) || 0;
 
     let sql = `SELECT id, danh_dau, gia_ban, gia_thue, trang_thai, ten_du_an,
-               dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that,
-               ghi_chu, nguoi_cap_nhat, ngay_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho FROM can_ho`;
+              dien_tich, so_phong_ngu, so_phong_tam, huong_can_ho, loai_can_ho, noi_that,
+              ghi_chu, nguoi_cap_nhat, ngay_cap_nhat, hinh_anh, ten_toa_nha, truc_can_ho,
+              SUBSTRING(ma_can_ho, 1, 1) AS so_tang FROM can_ho`;
 
     let whereClause = "WHERE trang_thai = '0'";
     let orderByClause = "ORDER BY ngay_cap_nhat DESC";
 
     if (isAdmin) {
       whereClause = "";
-      sql = 'SELECT * FROM can_ho'
+      sql = 'SELECT * FROM can_ho';
       orderByClause = "ORDER BY trang_thai ASC";
     }
 
     const sqlWithLimitOffset = `${sql} ${whereClause} ${orderByClause} LIMIT ? OFFSET ?`;
-
     const sqlCount = `SELECT COUNT(id) FROM can_ho ${whereClause}`;
 
     const [resultCount, results] = await Promise.all([
