@@ -6,10 +6,7 @@ const env = require("../config/env");
 var router = express.Router();
 
 router.get("/", (_, res) => {
-  res.status(200).render('layout', {
-    title: 'Welcome',
-    content: 'Hello world'
-  });
+  res.status(200).render('index');
 });
 
 router.get("/phan-quyen", authentication, function (req, res) {

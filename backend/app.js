@@ -25,7 +25,7 @@ app.set('view engine', 'ejs');
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: false, limit: "50mb" }));
 app.use(express.static(join(__dirname, "uploads")));
-
+app.use(express.static(join(__dirname, "views")));
 app.use("/", indexRouter);
 app.use("/can-ho", canHoRouter);
 app.use("/thong-tin-du-an", thongTinDuAnRouter);

@@ -13,7 +13,7 @@ router.get("/", authentication, async function (req, res) {
       return res.status(401).json({
         status: false,
         response: "Không có quyền truy cập",
-      })
+      });
     }
 
     const sql = `SELECT id, ho_ten, ngay_bat_dau,
