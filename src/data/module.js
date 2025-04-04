@@ -93,4 +93,4 @@ export const dataDanhDau = ["", "gray", "yellow", "orange", "red"];
 
 export const dataPhanQuyen = ["QLNS", "Sale", "CSKH", "Quản lý", "Admin", "Quản trị"];
 
-export const baseURL = "http://192.168.22.2:8080";
+export const baseURL = "http://10.64.0.68:8080";
